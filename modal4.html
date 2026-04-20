@@ -1,0 +1,752 @@
+<!-- modal4.html — Страница "Управление". Содержит вкладки: Пользователи, Поставщики, Клиенты. -->
+<!-- Доступ: admin (все), management (без управления пользователями). -->
+
+<section id="m4" class="space-y-6">
+
+  <!-- Page header -->
+  <div class="flex items-center justify-between gap-4 flex-wrap">
+    <div>
+      <h1 class="text-2xl font-medium tracking-tight">Управление</h1>
+      <p class="text-sm text-fg-muted mt-1" id="m4-subtitle">—</p>
+    </div>
+    <div id="m4-chat-btn-wrap"></div>
+  </div>
+
+  <!-- Tabs -->
+  <div class="flex items-center gap-1 border-b border-line overflow-x-auto">
+    <button class="m4-tab px-4 py-3 text-sm text-fg-muted hover:text-fg transition-colors relative whitespace-nowrap" data-tab="members">
+      Пользователи
+      <span class="m4-tab-bar"></span>
+    </button>
+    <button class="m4-tab px-4 py-3 text-sm text-fg-muted hover:text-fg transition-colors relative whitespace-nowrap" data-tab="suppliers">
+      Поставщики
+      <span class="m4-tab-bar"></span>
+    </button>
+    <button class="m4-tab px-4 py-3 text-sm text-fg-muted hover:text-fg transition-colors relative whitespace-nowrap" data-tab="customers">
+      Клиенты
+      <span class="m4-tab-bar"></span>
+    </button>
+  </div>
+
+  <!-- Tab panels -->
+
+  <!-- =========================
+       MEMBERS
+  ========================== -->
+  <div class="m4-panel" data-panel="members">
+    <!-- Invite form (admin only) -->
+    <div id="m4-invite-form" class="hidden bg-surface rounded-2xl border border-line p-5 mb-5">
+      <h3 class="font-medium mb-4">Пригласить коллегу</h3>
+      <div class="flex flex-col md:flex-row gap-3 md:items-start">
+        <div class="flex-1 min-w-0">
+          <label class="block">
+            <span class="text-xs text-fg-muted block mb-1.5">Email (только @gmail.com / @googlemail.com)</span>
+            <div class="relative">
+              <input
+                id="m4-invite-email"
+                type="email"
+                autocomplete="off"
+                spellcheck="false"
+                class="w-full px-4 py-2.5 pr-20 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors"
+                placeholder="colleague@gmail.com">
+              <span id="m4-invite-chip" class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-md border">—</span>
+            </div>
+            <p id="m4-invite-email-error" class="hidden text-xs text-state-error mt-1.5"></p>
+          </label>
+        </div>
+        <div class="md:w-48">
+          <label class="block">
+            <span class="text-xs text-fg-muted block mb-1.5">Роль</span>
+            <select id="m4-invite-role" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors">
+              <option value="">Выберите…</option>
+              <option value="supply">Снабжение</option>
+              <option value="production">Производство</option>
+              <option value="sales">Продажи</option>
+              <option value="management">Управление</option>
+              <option value="admin">Администратор</option>
+            </select>
+          </label>
+        </div>
+        <div class="md:pt-[22px]">
+          <button id="m4-invite-submit" class="btn-primary w-full md:w-auto px-5 py-2.5 rounded-xl text-sm font-medium" disabled>
+            Пригласить
+          </button>
+        </div>
+      </div>
+      <p class="text-xs text-fg-muted mt-3 leading-relaxed">
+        Если пользователь уже есть в системе, он сразу получит доступ к группе. Если нет — ему уйдёт ссылка на вход; при первом входе через Google он присоединится автоматически.
+      </p>
+    </div>
+
+    <!-- Pending invitations -->
+    <div id="m4-invitations-block" class="hidden bg-surface rounded-2xl border border-line p-5 mb-5">
+      <h3 class="font-medium mb-3">Отправленные приглашения</h3>
+      <div id="m4-invitations-list" class="space-y-2"></div>
+    </div>
+
+    <!-- Members list -->
+    <div class="bg-surface rounded-2xl border border-line overflow-hidden">
+      <div class="px-5 py-4 border-b border-line flex items-center justify-between">
+        <h3 class="font-medium">Участники группы</h3>
+        <span id="m4-members-count" class="text-xs text-fg-muted">—</span>
+      </div>
+      <div id="m4-members-list" class="divide-y divide-line-light">
+        <div class="px-5 py-10 flex items-center justify-center">
+          <div class="w-6 h-6 loader"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================
+       SUPPLIERS
+  ========================== -->
+  <div class="m4-panel hidden" data-panel="suppliers">
+    <div id="m4-supplier-form" class="bg-surface rounded-2xl border border-line p-5 mb-5">
+      <h3 class="font-medium mb-4" id="m4-supplier-form-title">Новый поставщик</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <label class="block">
+          <span class="text-xs text-fg-muted block mb-1.5">Название *</span>
+          <input id="m4-supplier-name" type="text" maxlength="200" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors" placeholder="ООО «Сырьё»">
+        </label>
+        <label class="block">
+          <span class="text-xs text-fg-muted block mb-1.5">Контактное лицо</span>
+          <input id="m4-supplier-contact" type="text" maxlength="200" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors" placeholder="Иван Петров">
+        </label>
+        <label class="block">
+          <span class="text-xs text-fg-muted block mb-1.5">Телефон</span>
+          <input id="m4-supplier-phone" type="tel" maxlength="50" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors" placeholder="+7 999 123-45-67">
+        </label>
+        <label class="block">
+          <span class="text-xs text-fg-muted block mb-1.5">Email</span>
+          <input id="m4-supplier-email" type="email" maxlength="200" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors" placeholder="info@example.com">
+        </label>
+        <label class="block md:col-span-2">
+          <span class="text-xs text-fg-muted block mb-1.5">Комментарий</span>
+          <textarea id="m4-supplier-comment" rows="2" maxlength="1000" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors resize-none" placeholder="Условия оплаты, особенности доставки и т.п."></textarea>
+        </label>
+      </div>
+      <div class="flex items-center gap-2 mt-4">
+        <button id="m4-supplier-save" class="btn-primary px-5 py-2.5 rounded-xl text-sm font-medium" disabled>Добавить</button>
+        <button id="m4-supplier-cancel" class="hidden btn-secondary px-5 py-2.5 rounded-xl text-sm font-medium">Отмена</button>
+      </div>
+    </div>
+
+    <div class="bg-surface rounded-2xl border border-line overflow-hidden">
+      <div class="px-5 py-4 border-b border-line flex items-center justify-between gap-3 flex-wrap">
+        <h3 class="font-medium">Справочник поставщиков</h3>
+        <div class="flex items-center gap-3">
+          <input id="m4-supplier-search" type="search" placeholder="Поиск…" class="px-3 py-1.5 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm w-44">
+          <span id="m4-suppliers-count" class="text-xs text-fg-muted">—</span>
+        </div>
+      </div>
+      <div id="m4-suppliers-list" class="divide-y divide-line-light">
+        <div class="px-5 py-10 flex items-center justify-center">
+          <div class="w-6 h-6 loader"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- =========================
+       CUSTOMERS
+  ========================== -->
+  <div class="m4-panel hidden" data-panel="customers">
+    <div id="m4-customer-form" class="bg-surface rounded-2xl border border-line p-5 mb-5">
+      <h3 class="font-medium mb-4" id="m4-customer-form-title">Новый клиент</h3>
+      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
+        <label class="block">
+          <span class="text-xs text-fg-muted block mb-1.5">Название *</span>
+          <input id="m4-customer-name" type="text" maxlength="200" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors" placeholder="ООО «Заказчик»">
+        </label>
+        <label class="block">
+          <span class="text-xs text-fg-muted block mb-1.5">Контактное лицо</span>
+          <input id="m4-customer-contact" type="text" maxlength="200" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors" placeholder="Иван Петров">
+        </label>
+        <label class="block">
+          <span class="text-xs text-fg-muted block mb-1.5">Телефон</span>
+          <input id="m4-customer-phone" type="tel" maxlength="50" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors" placeholder="+7 999 123-45-67">
+        </label>
+        <label class="block">
+          <span class="text-xs text-fg-muted block mb-1.5">Email</span>
+          <input id="m4-customer-email" type="email" maxlength="200" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors" placeholder="info@example.com">
+        </label>
+        <label class="block md:col-span-2">
+          <span class="text-xs text-fg-muted block mb-1.5">Адрес</span>
+          <input id="m4-customer-address" type="text" maxlength="500" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors" placeholder="г. Москва, ул. Примерная, 1">
+        </label>
+        <label class="block md:col-span-2">
+          <span class="text-xs text-fg-muted block mb-1.5">Комментарий</span>
+          <textarea id="m4-customer-comment" rows="2" maxlength="1000" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors resize-none" placeholder="Условия сотрудничества, особенности и т.п."></textarea>
+        </label>
+      </div>
+      <div class="flex items-center gap-2 mt-4">
+        <button id="m4-customer-save" class="btn-primary px-5 py-2.5 rounded-xl text-sm font-medium" disabled>Добавить</button>
+        <button id="m4-customer-cancel" class="hidden btn-secondary px-5 py-2.5 rounded-xl text-sm font-medium">Отмена</button>
+      </div>
+    </div>
+
+    <div class="bg-surface rounded-2xl border border-line overflow-hidden">
+      <div class="px-5 py-4 border-b border-line flex items-center justify-between gap-3 flex-wrap">
+        <h3 class="font-medium">Справочник клиентов</h3>
+        <div class="flex items-center gap-3">
+          <input id="m4-customer-search" type="search" placeholder="Поиск…" class="px-3 py-1.5 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm w-44">
+          <span id="m4-customers-count" class="text-xs text-fg-muted">—</span>
+        </div>
+      </div>
+      <div id="m4-customers-list" class="divide-y divide-line-light">
+        <div class="px-5 py-10 flex items-center justify-center">
+          <div class="w-6 h-6 loader"></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<style>
+  .m4-tab .m4-tab-bar {
+    content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 1px;
+    background: var(--fg); transform: scaleX(0); transform-origin: center;
+    transition: transform .2s ease;
+  }
+  .m4-tab.active { color: var(--fg); }
+  .m4-tab.active .m4-tab-bar { transform: scaleX(1); }
+</style>
+
+<script type="module">
+  // ================================================================
+  // modal4.html — inline script, выполняется при загрузке страницы
+  // Использует глобальный window.RIVA (state, sb) из app.js
+  // ================================================================
+
+  const { sb, state } = window.RIVA;
+  const utils = window.RIVA_UTILS;           // { toast, esc, formatDate, formatDateTime, formatMoney, formatNumber }
+  const { toast, esc, formatDate, formatDateTime } = utils;
+
+  const $ = (id) => document.getElementById(id);
+
+  // Текущая роль пользователя в этой группе
+  const myRole = state.currentGroup?.role;
+  const isAdmin = myRole === 'admin';
+  const isManagement = myRole === 'management';
+  const groupName = state.currentGroup?.group_name || '';
+
+  // Подзаголовок
+  $('m4-subtitle').textContent = groupName
+    ? `Группа «${groupName}» · ${isAdmin ? 'Администратор' : isManagement ? 'Управление' : myRole}`
+    : '';
+
+  // Показываем форму приглашения только админу
+  if (isAdmin) $('m4-invite-form')?.classList.remove('hidden');
+
+  // ---------- TABS ----------
+  function switchTab(name) {
+    document.querySelectorAll('.m4-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+    document.querySelectorAll('.m4-panel').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== name));
+    if (name === 'members')   loadMembersTab();
+    if (name === 'suppliers') loadSuppliersTab();
+    if (name === 'customers') loadCustomersTab();
+  }
+  document.querySelectorAll('.m4-tab').forEach(t => {
+    t.addEventListener('click', () => switchTab(t.dataset.tab));
+  });
+
+  // ========================================================
+  // MEMBERS TAB
+  // ========================================================
+
+  // -- email → provider chip
+  const EMAIL_DOMAIN_RE = /^[^\s@]+@([^\s@]+\.[^\s@]+)$/;
+  const GOOGLE_DOMAINS = new Set(['gmail.com','googlemail.com']);
+
+  function detectProvider(email) {
+    const m = email.trim().toLowerCase().match(EMAIL_DOMAIN_RE);
+    if (!m) return null;
+    const domain = m[1];
+    if (GOOGLE_DOMAINS.has(domain)) return 'google';
+    return 'unsupported';
+  }
+
+  function updateInviteButton() {
+    const email = $('m4-invite-email').value.trim();
+    const role = $('m4-invite-role').value;
+    const chip = $('m4-invite-chip');
+    const errEl = $('m4-invite-email-error');
+    let valid = false;
+
+    if (email === '') {
+      chip.classList.add('hidden');
+      errEl.classList.add('hidden');
+    } else {
+      const prov = detectProvider(email);
+      if (prov === 'google') {
+        chip.className = 'absolute right-2 top-1/2 -translate-y-1/2 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-md border border-line-light bg-surface-alt text-fg-secondary';
+        chip.textContent = 'Google';
+        chip.classList.remove('hidden');
+        errEl.classList.add('hidden');
+        valid = true;
+      } else if (prov === 'unsupported') {
+        chip.classList.add('hidden');
+        errEl.textContent = 'Разрешены только @gmail.com и @googlemail.com';
+        errEl.classList.remove('hidden');
+      } else {
+        chip.classList.add('hidden');
+        errEl.classList.add('hidden');
+      }
+    }
+
+    $('m4-invite-submit').disabled = !(valid && role !== '');
+  }
+
+  $('m4-invite-email')?.addEventListener('input', updateInviteButton);
+  $('m4-invite-role')?.addEventListener('change', updateInviteButton);
+
+  $('m4-invite-submit')?.addEventListener('click', async () => {
+    const email = $('m4-invite-email').value.trim();
+    const role = $('m4-invite-role').value;
+    const btn = $('m4-invite-submit');
+    btn.disabled = true;
+    btn.textContent = 'Обработка…';
+
+    try {
+      // 1. Создаём запись в invitations / membership через RPC
+      const { data, error } = await sb.rpc('invite_member', { p_email: email, p_role: role });
+      if (error) throw error;
+      if (!data?.ok) {
+        const map = {
+          INVALID_EMAIL:     'Некорректный email',
+          DOMAIN_NOT_ALLOWED:'Разрешены только Gmail-адреса',
+          INVALID_ROLE:      'Неверная роль',
+          NOT_ADMIN:         'Только администратор может приглашать',
+          NO_CURRENT_GROUP:  'Группа не выбрана'
+        };
+        throw new Error(map[data?.error] || data?.error || 'UNKNOWN');
+      }
+
+      // 2. Реакция по результату
+      if (data.mode === 'invited') {
+        // 2a. Пользователя нет в системе — отправляем magic-link через Supabase Auth
+        const redirectTo = window.location.origin + window.location.pathname;
+        const { error: mlErr } = await sb.auth.signInWithOtp({
+          email: email,
+          options: { shouldCreateUser: true, emailRedirectTo: redirectTo }
+        });
+        if (mlErr) {
+          // Если magic-link не отправился, invitation всё равно уже создан.
+          // Пользователь сможет войти через Google — при первом входе триггер примет приглашение.
+          toast('Приглашение создано, но magic-link не отправлен: ' + mlErr.message, 'warning');
+        } else {
+          toast('Приглашение отправлено на ' + email, 'success');
+        }
+      } else if (data.mode === 'added_existing') {
+        toast('Пользователь добавлен в группу', 'success');
+      } else if (data.mode === 'reactivated') {
+        toast('Членство обновлено', 'success');
+      }
+
+      $('m4-invite-email').value = '';
+      $('m4-invite-role').value = '';
+      updateInviteButton();
+      await loadMembersTab();
+    } catch (e) {
+      toast('Ошибка: ' + e.message, 'error');
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Пригласить';
+      updateInviteButton();
+    }
+  });
+
+  const ROLE_LABEL = {
+    admin: 'Администратор',
+    supply: 'Снабжение',
+    production: 'Производство',
+    sales: 'Продажи',
+    management: 'Управление'
+  };
+
+  async function loadMembersTab() {
+    // Members
+    const { data: members, error: mErr } = await sb.rpc('list_group_members');
+    if (mErr) {
+      $('m4-members-list').innerHTML = `<div class="px-5 py-6 text-sm text-state-error">${esc(mErr.message)}</div>`;
+      return;
+    }
+    renderMembers(members || []);
+
+    // Invitations (только админ видит)
+    if (isAdmin) {
+      const { data: invites } = await sb.rpc('list_pending_invitations');
+      renderInvitations(invites || []);
+    }
+  }
+
+  function renderMembers(members) {
+    $('m4-members-count').textContent = members.length + ' ' + pluralize(members.length, ['участник','участника','участников']);
+    const myId = state.authUser.id;
+
+    $('m4-members-list').innerHTML = members.map(m => {
+      const name = esc(m.name || m.email);
+      const avatar = m.avatar_url
+        ? `<img src="${esc(m.avatar_url)}" alt="" class="w-full h-full object-cover" referrerpolicy="no-referrer">`
+        : `<svg class="w-5 h-5 text-fg-muted" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
+
+      let status = '';
+      if (!m.is_active) status = '<span class="text-xs px-2 py-0.5 rounded-md bg-state-error/10 text-state-error">Заблокирован</span>';
+      else if (m.session_active) status = '<span class="text-xs px-2 py-0.5 rounded-md bg-state-success/10 text-state-success">В сети</span>';
+
+      const ownerBadge = m.is_owner ? '<span class="text-xs px-2 py-0.5 rounded-md bg-surface-alt border border-line text-fg-secondary">Владелец</span>' : '';
+      const meBadge = m.is_me ? '<span class="text-xs px-2 py-0.5 rounded-md bg-surface-alt border border-line text-fg-secondary">Вы</span>' : '';
+
+      const lastLogin = m.last_login_at
+        ? `Последний вход: ${formatDateTime(new Date(m.last_login_at))}`
+        : 'Ещё не входил';
+
+      // Actions: только админ + не сам себе + не владелец
+      const showActions = isAdmin && !m.is_me && !m.is_owner;
+      const actionsHtml = showActions ? `
+        <div class="relative m4-member-actions" data-uid="${esc(m.user_id)}">
+          <button class="p-2 rounded-lg hover:bg-surface-alt transition-colors m4-actions-btn" title="Действия">
+            <svg class="w-5 h-5 text-fg-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/>
+            </svg>
+          </button>
+          <div class="m4-actions-menu hidden absolute right-0 top-full mt-1 w-48 bg-surface rounded-xl border border-line shadow-lg shadow-black/5 py-1.5 z-10">
+            <div class="px-3 pt-1.5 pb-1 text-[11px] uppercase tracking-wider text-fg-muted">Сменить роль</div>
+            ${['supply','production','sales','management','admin']
+              .filter(r => r !== m.role)
+              .map(r => `<button class="w-full text-left px-4 py-2 text-sm hover:bg-surface-alt" data-action="role" data-role="${r}">${ROLE_LABEL[r]}</button>`).join('')}
+            <div class="border-t border-line-light my-1"></div>
+            ${m.is_active
+              ? `<button class="w-full text-left px-4 py-2 text-sm text-state-warning hover:bg-surface-alt" data-action="block">Заблокировать</button>`
+              : `<button class="w-full text-left px-4 py-2 text-sm text-state-success hover:bg-surface-alt" data-action="unblock">Разблокировать</button>`}
+            <button class="w-full text-left px-4 py-2 text-sm text-state-error hover:bg-surface-alt" data-action="remove">Удалить из группы</button>
+          </div>
+        </div>
+      ` : '';
+
+      return `
+        <div class="px-5 py-4 flex items-center gap-4">
+          <div class="w-10 h-10 rounded-xl overflow-hidden bg-surface-alt flex items-center justify-center flex-shrink-0">${avatar}</div>
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-2 flex-wrap">
+              <span class="font-medium truncate">${name}</span>
+              ${ownerBadge}
+              ${meBadge}
+              ${status}
+            </div>
+            <div class="text-xs text-fg-muted truncate mt-0.5">${esc(m.email)}</div>
+            <div class="text-xs text-fg-muted mt-0.5">${lastLogin}</div>
+          </div>
+          <div class="flex items-center gap-3 flex-shrink-0">
+            <span class="text-sm text-fg-secondary whitespace-nowrap">${esc(ROLE_LABEL[m.role] || m.role)}</span>
+            ${actionsHtml}
+          </div>
+        </div>
+      `;
+    }).join('');
+
+    // Навешиваем меню действий
+    document.querySelectorAll('.m4-member-actions').forEach(wrap => {
+      const btn = wrap.querySelector('.m4-actions-btn');
+      const menu = wrap.querySelector('.m4-actions-menu');
+      const userId = wrap.dataset.uid;
+
+      btn.addEventListener('click', (e) => {
+        e.stopPropagation();
+        document.querySelectorAll('.m4-actions-menu').forEach(m => { if (m !== menu) m.classList.add('hidden'); });
+        menu.classList.toggle('hidden');
+      });
+
+      menu.querySelectorAll('[data-action]').forEach(item => {
+        item.addEventListener('click', async (e) => {
+          e.stopPropagation();
+          menu.classList.add('hidden');
+          const action = item.dataset.action;
+          try {
+            if (action === 'role') {
+              const role = item.dataset.role;
+              const { data, error } = await sb.rpc('update_member_role', { p_user_id: userId, p_role: role });
+              if (error) throw error;
+              if (!data?.ok) throw new Error(data?.error);
+              toast('Роль обновлена', 'success');
+            } else if (action === 'block') {
+              if (!confirm('Заблокировать пользователя в этой группе? Он не сможет работать с её данными.')) return;
+              const { data, error } = await sb.rpc('set_member_active', { p_user_id: userId, p_is_active: false });
+              if (error) throw error;
+              if (!data?.ok) throw new Error(data?.error);
+              toast('Пользователь заблокирован', 'success');
+            } else if (action === 'unblock') {
+              const { data, error } = await sb.rpc('set_member_active', { p_user_id: userId, p_is_active: true });
+              if (error) throw error;
+              if (!data?.ok) throw new Error(data?.error);
+              toast('Пользователь разблокирован', 'success');
+            } else if (action === 'remove') {
+              if (!confirm('Удалить пользователя из группы? Это действие нельзя отменить.')) return;
+              const { data, error } = await sb.rpc('remove_member', { p_user_id: userId });
+              if (error) throw error;
+              if (!data?.ok) throw new Error(data?.error);
+              toast('Пользователь удалён из группы', 'success');
+            }
+            await loadMembersTab();
+          } catch (err) {
+            toast('Ошибка: ' + err.message, 'error');
+          }
+        });
+      });
+    });
+  }
+
+  // Закрыть все action-меню при клике вне
+  document.addEventListener('click', () => {
+    document.querySelectorAll('#m4 .m4-actions-menu').forEach(m => m.classList.add('hidden'));
+  });
+
+  function renderInvitations(invites) {
+    const block = $('m4-invitations-block');
+    if (invites.length === 0) { block.classList.add('hidden'); return; }
+    block.classList.remove('hidden');
+
+    $('m4-invitations-list').innerHTML = invites.map(i => `
+      <div class="flex items-center gap-3 py-2">
+        <div class="w-8 h-8 rounded-lg bg-surface-alt flex items-center justify-center flex-shrink-0">
+          <svg class="w-4 h-4 text-fg-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+            <path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/>
+            <polyline points="22,6 12,13 2,6"/>
+          </svg>
+        </div>
+        <div class="min-w-0 flex-1">
+          <div class="text-sm truncate">${esc(i.email)}</div>
+          <div class="text-xs text-fg-muted">
+            ${esc(ROLE_LABEL[i.role] || i.role)} · отправлено ${formatDate(new Date(i.created_at))}
+          </div>
+        </div>
+        <button class="text-xs text-state-error hover:underline flex-shrink-0" data-revoke="${esc(i.id)}">
+          Отозвать
+        </button>
+      </div>
+    `).join('');
+
+    document.querySelectorAll('[data-revoke]').forEach(btn => {
+      btn.addEventListener('click', async () => {
+        if (!confirm('Отозвать приглашение?')) return;
+        try {
+          const { data, error } = await sb.rpc('revoke_invitation', { p_invitation_id: btn.dataset.revoke });
+          if (error) throw error;
+          if (!data?.ok) throw new Error(data?.error);
+          toast('Приглашение отозвано', 'success');
+          await loadMembersTab();
+        } catch (e) {
+          toast('Ошибка: ' + e.message, 'error');
+        }
+      });
+    });
+  }
+
+  // ========================================================
+  // SUPPLIERS / CUSTOMERS — общая логика
+  // ========================================================
+
+  function makeDirectoryController(kind) {
+    // kind = 'supplier' | 'customer'
+    const cfg = kind === 'supplier'
+      ? {
+          table: 'suppliers',
+          fields: ['name','contact','phone','email','comment'],
+          labelOne: 'поставщика',
+          listId: 'm4-suppliers-list',
+          countId: 'm4-suppliers-count',
+          searchId: 'm4-supplier-search',
+          titleId: 'm4-supplier-form-title',
+          saveBtn: 'm4-supplier-save',
+          cancelBtn: 'm4-supplier-cancel',
+          fieldIds: { name: 'm4-supplier-name', contact: 'm4-supplier-contact', phone: 'm4-supplier-phone', email: 'm4-supplier-email', comment: 'm4-supplier-comment' },
+          plural: ['поставщик','поставщика','поставщиков']
+        }
+      : {
+          table: 'customers',
+          fields: ['name','contact','phone','email','address','comment'],
+          labelOne: 'клиента',
+          listId: 'm4-customers-list',
+          countId: 'm4-customers-count',
+          searchId: 'm4-customer-search',
+          titleId: 'm4-customer-form-title',
+          saveBtn: 'm4-customer-save',
+          cancelBtn: 'm4-customer-cancel',
+          fieldIds: { name: 'm4-customer-name', contact: 'm4-customer-contact', phone: 'm4-customer-phone', email: 'm4-customer-email', address: 'm4-customer-address', comment: 'm4-customer-comment' },
+          plural: ['клиент','клиента','клиентов']
+        };
+
+    let editingId = null;
+    let cached = [];
+    let searchTerm = '';
+
+    function getFormValues() {
+      const v = {};
+      for (const f of cfg.fields) v[f] = ($(cfg.fieldIds[f]).value || '').trim() || null;
+      return v;
+    }
+    function setFormValues(values) {
+      for (const f of cfg.fields) $(cfg.fieldIds[f]).value = values[f] || '';
+    }
+    function clearForm() {
+      setFormValues({});
+      editingId = null;
+      $(cfg.titleId).textContent = kind === 'supplier' ? 'Новый поставщик' : 'Новый клиент';
+      $(cfg.saveBtn).textContent = 'Добавить';
+      $(cfg.cancelBtn).classList.add('hidden');
+      updateSaveState();
+    }
+    function updateSaveState() {
+      $(cfg.saveBtn).disabled = !$(cfg.fieldIds.name).value.trim();
+    }
+
+    // Подписываемся на input для валидации
+    Object.values(cfg.fieldIds).forEach(id => {
+      $(id)?.addEventListener('input', updateSaveState);
+    });
+
+    $(cfg.saveBtn).addEventListener('click', async () => {
+      const btn = $(cfg.saveBtn);
+      const values = getFormValues();
+      if (!values.name) return;
+      btn.disabled = true;
+      const originalText = btn.textContent;
+      btn.textContent = 'Сохраняем…';
+      try {
+        if (editingId) {
+          const { error } = await sb.from(cfg.table).update(values).eq('id', editingId);
+          if (error) throw error;
+          toast(kind === 'supplier' ? 'Поставщик обновлён' : 'Клиент обновлён', 'success');
+        } else {
+          const payload = { ...values, group_id: state.currentGroup.group_id };
+          const { error } = await sb.from(cfg.table).insert(payload);
+          if (error) throw error;
+          toast(kind === 'supplier' ? 'Поставщик добавлен' : 'Клиент добавлен', 'success');
+        }
+        clearForm();
+        await load();
+      } catch (e) {
+        toast('Ошибка: ' + e.message, 'error');
+        btn.textContent = originalText;
+        btn.disabled = false;
+      }
+    });
+
+    $(cfg.cancelBtn).addEventListener('click', clearForm);
+
+    $(cfg.searchId).addEventListener('input', (e) => {
+      searchTerm = e.target.value.toLowerCase().trim();
+      render();
+    });
+
+    async function load() {
+      const { data, error } = await sb.from(cfg.table).select('*').order('name');
+      if (error) {
+        $(cfg.listId).innerHTML = `<div class="px-5 py-6 text-sm text-state-error">${esc(error.message)}</div>`;
+        return;
+      }
+      cached = data || [];
+      render();
+    }
+
+    function render() {
+      const list = searchTerm
+        ? cached.filter(r => Object.values(r).some(v => v && String(v).toLowerCase().includes(searchTerm)))
+        : cached;
+
+      $(cfg.countId).textContent = list.length + ' ' + pluralize(list.length, cfg.plural);
+
+      if (list.length === 0) {
+        $(cfg.listId).innerHTML = `<div class="px-5 py-10 text-sm text-fg-muted text-center">${searchTerm ? 'Ничего не найдено' : 'Пока пусто. Добавьте первого.'}</div>`;
+        return;
+      }
+
+      $(cfg.listId).innerHTML = list.map(r => {
+        const lines = [];
+        if (r.contact) lines.push(esc(r.contact));
+        if (r.phone) lines.push(esc(r.phone));
+        if (r.email) lines.push(esc(r.email));
+        if (r.address) lines.push(esc(r.address));
+        const meta = lines.length ? `<div class="text-xs text-fg-muted mt-0.5">${lines.join(' · ')}</div>` : '';
+        const comment = r.comment ? `<div class="text-xs text-fg-muted mt-1 italic">${esc(r.comment)}</div>` : '';
+        return `
+          <div class="px-5 py-4 flex items-start gap-3">
+            <div class="min-w-0 flex-1">
+              <div class="font-medium truncate">${esc(r.name)}</div>
+              ${meta}
+              ${comment}
+            </div>
+            <div class="flex items-center gap-1 flex-shrink-0">
+              <button class="p-2 rounded-lg hover:bg-surface-alt transition-colors" data-edit="${esc(r.id)}" title="Редактировать">
+                <svg class="w-4 h-4 text-fg-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/>
+                  <path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/>
+                </svg>
+              </button>
+              <button class="p-2 rounded-lg hover:bg-surface-alt transition-colors" data-delete="${esc(r.id)}" title="Удалить">
+                <svg class="w-4 h-4 text-state-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <polyline points="3 6 5 6 21 6"/>
+                  <path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.querySelectorAll(`#${cfg.listId} [data-edit]`).forEach(btn => {
+        btn.addEventListener('click', () => {
+          const row = cached.find(x => x.id === btn.dataset.edit);
+          if (!row) return;
+          editingId = row.id;
+          setFormValues(row);
+          $(cfg.titleId).textContent = kind === 'supplier' ? 'Редактирование поставщика' : 'Редактирование клиента';
+          $(cfg.saveBtn).textContent = 'Сохранить';
+          $(cfg.cancelBtn).classList.remove('hidden');
+          updateSaveState();
+          $(cfg.fieldIds.name).focus();
+          window.scrollTo({ top: 0, behavior: 'smooth' });
+        });
+      });
+
+      document.querySelectorAll(`#${cfg.listId} [data-delete]`).forEach(btn => {
+        btn.addEventListener('click', async () => {
+          if (!confirm(`Удалить ${cfg.labelOne}?`)) return;
+          try {
+            const { error } = await sb.from(cfg.table).delete().eq('id', btn.dataset.delete);
+            if (error) throw error;
+            toast('Удалено', 'success');
+            if (editingId === btn.dataset.delete) clearForm();
+            await load();
+          } catch (e) {
+            toast('Ошибка: ' + e.message, 'error');
+          }
+        });
+      });
+    }
+
+    return { load };
+  }
+
+  const suppliersCtl = makeDirectoryController('supplier');
+  const customersCtl = makeDirectoryController('customer');
+
+  async function loadSuppliersTab() { await suppliersCtl.load(); }
+  async function loadCustomersTab() { await customersCtl.load(); }
+
+  function pluralize(n, forms) {
+    const mod100 = Math.abs(n) % 100;
+    const mod10 = mod100 % 10;
+    if (mod100 >= 11 && mod100 <= 19) return forms[2];
+    if (mod10 === 1) return forms[0];
+    if (mod10 >= 2 && mod10 <= 4) return forms[1];
+    return forms[2];
+  }
+
+  // ========================================================
+  // Initial: open members tab
+  // ========================================================
+  switchTab('members');
+</script>
