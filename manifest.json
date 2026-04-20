@@ -1,0 +1,27 @@
+{
+  "name": "RIVA — производственное приложение",
+  "short_name": "RIVA",
+  "description": "Веб-приложение для малого производственного бизнеса: снабжение, производство, продажи, управление.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#FFFFFF",
+  "theme_color": "#FFFFFF",
+  "lang": "ru",
+  "dir": "ltr",
+  "icons": [
+    {
+      "src": "./assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any"
+    },
+    {
+      "src": "./assets/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "maskable"
+    }
+  ]
+}
