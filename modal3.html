@@ -1,0 +1,881 @@
+<!-- modal3.html — Страница "Продажи". Подстраницы: Активные, Завершённые. -->
+<!-- Доступ: admin, sales, management. -->
+
+<section id="m3" class="space-y-6">
+
+  <div class="flex items-center justify-between gap-4 flex-wrap">
+    <div>
+      <h1 class="text-2xl font-medium tracking-tight">Продажи</h1>
+      <p class="text-sm text-fg-muted mt-1" id="m3-subtitle">—</p>
+    </div>
+    <div id="m3-chat-btn-wrap"></div>
+  </div>
+
+  <div class="flex items-center gap-1 border-b border-line overflow-x-auto">
+    <button class="m3-tab px-4 py-3 text-sm text-fg-muted hover:text-fg transition-colors relative whitespace-nowrap" data-tab="active">
+      Активные продажи
+      <span class="m3-tab-bar"></span>
+    </button>
+    <button class="m3-tab px-4 py-3 text-sm text-fg-muted hover:text-fg transition-colors relative whitespace-nowrap" data-tab="completed">
+      Завершённые заказы
+      <span class="m3-tab-bar"></span>
+    </button>
+  </div>
+
+  <!-- =========================
+       ACTIVE
+  ========================== -->
+  <div class="m3-panel" data-panel="active">
+    <div class="bg-surface rounded-2xl border border-line p-4 mb-5 flex flex-wrap items-center gap-3">
+      <input id="m3-act-search" type="search" placeholder="Поиск по номеру или клиенту…"
+        class="flex-1 min-w-[180px] px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+      <select id="m3-act-status-filter" class="px-3 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+        <option value="all">Все статусы</option>
+        <option value="draft">Черновик</option>
+        <option value="confirmed">Подтверждён</option>
+        <option value="shipped">Отгружен</option>
+        <option value="cancelled">Отменён</option>
+      </select>
+      <button id="m3-order-new" class="btn-primary px-4 py-2.5 rounded-xl text-sm font-medium ml-auto">
+        + Новый заказ
+      </button>
+    </div>
+    <div id="m3-act-list" class="space-y-3">
+      <div class="flex items-center justify-center py-16"><div class="w-6 h-6 loader"></div></div>
+    </div>
+  </div>
+
+  <!-- =========================
+       COMPLETED
+  ========================== -->
+  <div class="m3-panel hidden" data-panel="completed">
+    <div class="bg-surface rounded-2xl border border-line p-4 mb-5 flex flex-wrap items-center gap-3">
+      <input id="m3-cmp-search" type="search" placeholder="Поиск по номеру или клиенту…"
+        class="flex-1 min-w-[180px] px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+      <span id="m3-cmp-count" class="text-xs text-fg-muted ml-auto">—</span>
+    </div>
+    <div id="m3-cmp-list" class="space-y-3">
+      <div class="flex items-center justify-center py-16"><div class="w-6 h-6 loader"></div></div>
+    </div>
+  </div>
+</section>
+
+<!-- =========================
+     MODAL: редактор заказа продажи
+========================== -->
+<div id="m3-order-modal" class="hidden fixed inset-0 z-40 bg-black/30 flex items-start justify-center px-4 py-8 overflow-y-auto">
+  <div class="bg-surface rounded-2xl border border-line w-full max-w-3xl">
+    <div class="px-5 py-4 border-b border-line flex items-center justify-between">
+      <div>
+        <h3 class="font-medium" id="m3-order-modal-title">Новый заказ</h3>
+        <p class="text-xs text-fg-muted mt-0.5" id="m3-order-modal-sub"></p>
+      </div>
+      <button class="m3-order-close p-1 rounded-lg hover:bg-surface-alt">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="p-5 space-y-4">
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <label class="block md:col-span-2">
+          <span class="text-xs text-fg-muted block mb-1.5">Клиент</span>
+          <input id="m3-order-f-customer" list="m3-customers-dl" type="text" maxlength="200"
+            placeholder="Начните вводить или выберите…"
+            class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+          <datalist id="m3-customers-dl"></datalist>
+        </label>
+        <label class="block">
+          <span class="text-xs text-fg-muted block mb-1.5">Статус оплаты</span>
+          <select id="m3-order-f-payment" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+            <option value="unpaid">Не оплачено</option>
+            <option value="partial">Частично оплачено</option>
+            <option value="paid">Оплачено</option>
+          </select>
+        </label>
+      </div>
+
+      <!-- Статус заказа -->
+      <div id="m3-order-status-row" class="hidden">
+        <span class="text-xs text-fg-muted block mb-2">Статус заказа</span>
+        <div id="m3-order-status-badges" class="flex items-center gap-1 flex-wrap"></div>
+      </div>
+
+      <!-- Позиции -->
+      <div class="border border-line rounded-xl overflow-hidden">
+        <div class="px-4 py-3 bg-surface-alt border-b border-line flex items-center justify-between">
+          <span class="text-sm font-medium">Позиции заказа</span>
+          <span id="m3-order-total" class="text-sm text-fg-muted">Итого: 0,00 ₽</span>
+        </div>
+        <div id="m3-order-items" class="divide-y divide-line-light"></div>
+        <div class="px-4 py-3 border-t border-line">
+          <button id="m3-order-add-item" class="text-sm text-fg-muted hover:text-fg transition-colors">
+            + Добавить позицию
+          </button>
+        </div>
+      </div>
+
+      <!-- Вложения -->
+      <div class="border border-line rounded-xl overflow-hidden">
+        <div class="px-4 py-3 bg-surface-alt border-b border-line flex items-center justify-between">
+          <span class="text-sm font-medium">Документы</span>
+          <label class="text-sm text-fg-muted hover:text-fg transition-colors cursor-pointer">
+            + Загрузить
+            <input id="m3-order-file-input" type="file" class="hidden" multiple>
+          </label>
+        </div>
+        <div id="m3-order-attachments" class="divide-y divide-line-light">
+          <div class="px-4 py-3 text-xs text-fg-muted">Нет вложений</div>
+        </div>
+      </div>
+
+      <div id="m3-order-deficit" class="hidden border border-state-error/30 bg-state-error/5 rounded-xl p-4">
+        <div class="text-sm font-medium text-state-error mb-2">Недостаточно продукции на складе</div>
+        <div id="m3-order-deficit-list" class="text-sm space-y-1"></div>
+      </div>
+
+    </div>
+
+    <div class="px-5 py-4 border-t border-line flex items-center justify-between gap-2 flex-wrap">
+      <button id="m3-order-delete" class="hidden px-4 py-2 rounded-lg text-sm text-state-error hover:bg-surface-alt transition-colors">Удалить</button>
+      <div class="flex items-center gap-2 ml-auto flex-wrap">
+        <div id="m3-order-actions" class="flex items-center gap-2 flex-wrap"></div>
+        <button class="m3-order-close btn-secondary px-4 py-2 rounded-lg text-sm">Закрыть</button>
+        <button id="m3-order-save" class="btn-primary px-4 py-2 rounded-lg text-sm" disabled>Сохранить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .m3-tab .m3-tab-bar {
+    content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 1px;
+    background: var(--fg); transform: scaleX(0); transform-origin: center;
+    transition: transform .2s ease;
+  }
+  .m3-tab.active { color: var(--fg); }
+  .m3-tab.active .m3-tab-bar { transform: scaleX(1); }
+
+  .m3-order-card {
+    border: 1px solid var(--line);
+    background: var(--bg);
+    transition: all .15s ease;
+    cursor: pointer;
+  }
+  .m3-order-card:hover { border-color: var(--fg-muted); }
+
+  .m3-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; line-height: 1.4; white-space: nowrap; }
+  .m3-badge-draft      { background: #F5F5F5; color: #525252; }
+  .m3-badge-confirmed  { background: #DBEAFE; color: #1D4ED8; }
+  .m3-badge-shipped    { background: #FEF3C7; color: #92400E; }
+  .m3-badge-completed  { background: #DCFCE7; color: #15803D; }
+  .m3-badge-cancelled  { background: #FEE2E2; color: #B91C1C; }
+  .m3-badge-paid       { background: #DCFCE7; color: #15803D; }
+  .m3-badge-partial    { background: #FEF3C7; color: #92400E; }
+  .m3-badge-unpaid     { background: #FEE2E2; color: #B91C1C; }
+</style>
+
+<script type="module">
+// ================================================================
+// modal3.html — Продажи
+// ================================================================
+
+const { sb, state } = window.RIVA;
+const { toast, esc, formatDate, formatDateTime, formatMoney, formatNumber } = window.RIVA_UTILS;
+const $ = (id) => document.getElementById(id);
+
+const myRole = state.currentGroup?.role;
+const canWrite = ['admin','sales','management'].includes(myRole);
+const groupId = state.currentGroup.group_id;
+
+$('m3-subtitle').textContent = `Группа «${state.currentGroup.group_name}»`;
+if (!canWrite) {
+  $('m3-order-new')?.setAttribute('disabled', 'disabled');
+}
+
+function switchTab(name) {
+  document.querySelectorAll('.m3-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('.m3-panel').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== name));
+  if (name === 'active') loadActive();
+  if (name === 'completed') loadCompleted();
+}
+document.querySelectorAll('.m3-tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
+
+// ---- Кэш справочников ----
+const cache = {
+  products: [],       // warehouse_items type='product'
+  customers: []
+};
+
+async function refreshCache() {
+  const [wh, cus] = await Promise.all([
+    sb.from('warehouse_items').select('id, article, name, unit, type, quantity, price').eq('type', 'product').order('name'),
+    sb.from('customers').select('id, name').order('name')
+  ]);
+  cache.products = wh.data || [];
+  cache.customers = cus.data || [];
+  $('m3-customers-dl').innerHTML = cache.customers.map(c => `<option value="${esc(c.name)}"></option>`).join('');
+}
+
+// ================================================================
+// ACTIVE
+// ================================================================
+
+const active = {
+  cached: [],
+  search: '',
+  statusFilter: 'all'
+};
+
+$('m3-act-search').addEventListener('input', (e) => { active.search = e.target.value.trim().toLowerCase(); renderActive(); });
+$('m3-act-status-filter').addEventListener('change', (e) => { active.statusFilter = e.target.value; renderActive(); });
+
+async function loadActive() {
+  await refreshCache();
+
+  const { data, error } = await sb
+    .from('sales_orders')
+    .select(`
+      id, order_number, status, payment_status,
+      shipped_at, completed_at, created_at, updated_at,
+      customer_id,
+      customers ( id, name ),
+      sales_order_items ( id, warehouse_item_id, quantity, price )
+    `)
+    .neq('status', 'completed')
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    $('m3-act-list').innerHTML = `<div class="text-sm text-state-error p-6">${esc(error.message)}</div>`;
+    return;
+  }
+  active.cached = data || [];
+  renderActive();
+}
+
+function orderTotal(o) {
+  return (o.sales_order_items || []).reduce((sum, it) => sum + Number(it.quantity || 0) * Number(it.price || 0), 0);
+}
+
+const STATUS_LABEL = {
+  draft: 'Черновик',
+  confirmed: 'Подтверждён',
+  shipped: 'Отгружен',
+  completed: 'Завершён',
+  cancelled: 'Отменён'
+};
+const PAYMENT_LABEL = { unpaid: 'Не оплачено', partial: 'Частично', paid: 'Оплачено' };
+
+function renderActive() {
+  let list = active.cached;
+  if (active.statusFilter !== 'all') list = list.filter(x => x.status === active.statusFilter);
+  if (active.search) list = list.filter(x =>
+    (x.order_number || '').toLowerCase().includes(active.search) ||
+    (x.customers?.name || '').toLowerCase().includes(active.search)
+  );
+
+  if (list.length === 0) {
+    $('m3-act-list').innerHTML = `
+      <div class="text-center py-16 text-sm text-fg-muted">
+        ${active.search || active.statusFilter !== 'all' ? 'Ничего не найдено' : 'Пока нет активных заказов. Создайте первый.'}
+      </div>`;
+    return;
+  }
+
+  $('m3-act-list').innerHTML = list.map(o => renderOrderCard(o, false)).join('');
+  document.querySelectorAll('#m3-act-list .m3-order-card').forEach(c =>
+    c.addEventListener('click', () => openOrderEditor(c.dataset.ordId)));
+}
+
+function renderOrderCard(o, readOnly) {
+  const itemsCount = o.sales_order_items?.length || 0;
+  const total = orderTotal(o);
+  const dateLine = o.completed_at
+    ? `Завершён ${formatDate(new Date(o.completed_at))}`
+    : o.shipped_at
+      ? `Отгружен ${formatDate(new Date(o.shipped_at))}`
+      : `Создан ${formatDate(new Date(o.created_at))}`;
+
+  return `
+    <div class="m3-order-card rounded-xl p-4" data-ord-id="${esc(o.id)}">
+      <div class="flex items-start justify-between gap-3 flex-wrap">
+        <div class="min-w-0 flex-1">
+          <div class="flex items-center gap-2 flex-wrap mb-1">
+            <span class="font-medium">${esc(o.order_number || '—')}</span>
+            <span class="m3-badge m3-badge-${o.status}">${esc(STATUS_LABEL[o.status] || o.status)}</span>
+            <span class="m3-badge m3-badge-${o.payment_status}">${esc(PAYMENT_LABEL[o.payment_status] || o.payment_status)}</span>
+          </div>
+          <div class="text-sm text-fg-secondary">${esc(o.customers?.name || 'Клиент не указан')}</div>
+          <div class="text-xs text-fg-muted mt-1">${esc(dateLine)} · ${itemsCount} ${pluralize(itemsCount, ['позиция','позиции','позиций'])}</div>
+        </div>
+        <div class="text-right">
+          <div class="font-medium">${esc(formatMoney(total))}</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+// ================================================================
+// COMPLETED
+// ================================================================
+
+const completed = { cached: [], search: '' };
+
+$('m3-cmp-search').addEventListener('input', (e) => { completed.search = e.target.value.trim().toLowerCase(); renderCompleted(); });
+
+async function loadCompleted() {
+  await refreshCache();
+
+  const { data, error } = await sb
+    .from('sales_orders')
+    .select(`
+      id, order_number, status, payment_status,
+      shipped_at, completed_at, created_at,
+      customers ( id, name ),
+      sales_order_items ( id, warehouse_item_id, quantity, price )
+    `)
+    .eq('status', 'completed')
+    .order('completed_at', { ascending: false });
+
+  if (error) {
+    $('m3-cmp-list').innerHTML = `<div class="text-sm text-state-error p-6">${esc(error.message)}</div>`;
+    return;
+  }
+  completed.cached = data || [];
+  renderCompleted();
+}
+
+function renderCompleted() {
+  let list = completed.cached;
+  if (completed.search) list = list.filter(x =>
+    (x.order_number || '').toLowerCase().includes(completed.search) ||
+    (x.customers?.name || '').toLowerCase().includes(completed.search)
+  );
+
+  $('m3-cmp-count').textContent = list.length + ' ' + pluralize(list.length, ['заказ','заказа','заказов']);
+
+  if (list.length === 0) {
+    $('m3-cmp-list').innerHTML = `<div class="text-center py-16 text-sm text-fg-muted">${completed.search ? 'Ничего не найдено' : 'Пока нет завершённых заказов.'}</div>`;
+    return;
+  }
+
+  $('m3-cmp-list').innerHTML = list.map(o => renderOrderCard(o, true)).join('');
+  document.querySelectorAll('#m3-cmp-list .m3-order-card').forEach(c =>
+    c.addEventListener('click', () => openOrderEditor(c.dataset.ordId)));
+}
+
+// ================================================================
+// ORDER EDITOR
+// ================================================================
+
+const ord = {
+  editing: null,
+  current: null,   // полный объект заказа из БД
+  items: [],
+  attachments: []
+};
+
+document.querySelectorAll('.m3-order-close').forEach(b => b.addEventListener('click', () => $('m3-order-modal').classList.add('hidden')));
+$('m3-order-new').addEventListener('click', () => openOrderEditor(null));
+
+async function openOrderEditor(id) {
+  if (!canWrite && !id) return;
+  await refreshCache();
+
+  ord.editing = id;
+  ord.items = [];
+  ord.attachments = [];
+  ord.current = null;
+
+  $('m3-order-deficit').classList.add('hidden');
+
+  let order = null;
+  if (id) {
+    // Берём из кэша любой подстраницы, иначе подгружаем
+    order = active.cached.find(x => x.id === id) || completed.cached.find(x => x.id === id);
+    if (!order) {
+      const { data } = await sb.from('sales_orders').select(`
+        *, customers(id, name), sales_order_items(*)
+      `).eq('id', id).maybeSingle();
+      order = data;
+    } else if (!order.sales_order_items || typeof order.sales_order_items[0] === 'undefined' || !('warehouse_item_id' in (order.sales_order_items[0] || {warehouse_item_id: null}))) {
+      // Проверка на случай, если у нас неполные поля в уже кэшированном объекте
+      const { data } = await sb.from('sales_orders').select(`*, customers(id, name), sales_order_items(*)`).eq('id', id).maybeSingle();
+      order = data;
+    }
+  }
+  ord.current = order;
+
+  $('m3-order-modal-title').textContent = order ? `Заказ ${order.order_number}` : 'Новый заказ';
+  $('m3-order-modal-sub').textContent = order
+    ? `Создан ${formatDateTime(new Date(order.created_at))}${order.updated_at && order.updated_at !== order.created_at ? ' · изменён ' + formatDateTime(new Date(order.updated_at)) : ''}`
+    : '';
+
+  $('m3-order-f-customer').value = order?.customers?.name || '';
+  $('m3-order-f-payment').value = order?.payment_status || 'unpaid';
+
+  // Read-only состояние для отменённых и завершённых заказов
+  const readOnly = order && ['completed','cancelled'].includes(order.status);
+  $('m3-order-f-customer').disabled = readOnly;
+  $('m3-order-f-payment').disabled = readOnly && order?.status === 'cancelled';  // при completed оплата уже paid, менять незачем, но не блокируем для истории
+
+  if (order) {
+    $('m3-order-status-row').classList.remove('hidden');
+    renderOrderStatusBadges(order.status);
+    ord.items = (order.sales_order_items || []).map(i => ({ ...i }));
+    await loadAttachments(id);
+    $('m3-order-delete').classList.toggle('hidden', order.status !== 'draft');
+  } else {
+    $('m3-order-status-row').classList.add('hidden');
+    $('m3-order-delete').classList.add('hidden');
+  }
+
+  renderOrderItems();
+  renderAttachments();
+  renderOrderActions();
+  validateOrderForm();
+
+  $('m3-order-modal').classList.remove('hidden');
+}
+
+function renderOrderStatusBadges(current) {
+  const flow = ['draft','confirmed','shipped','completed'];
+  let html;
+  if (current === 'cancelled') {
+    html = `<span class="m3-badge m3-badge-cancelled">${esc(STATUS_LABEL.cancelled)}</span>`;
+  } else {
+    const idx = flow.indexOf(current);
+    html = flow.map((s, i) => `
+      <span class="m3-badge ${i <= idx ? 'm3-badge-' + s : ''}" style="${i > idx ? 'background:#F5F5F5;color:#A3A3A3;' : ''}">${esc(STATUS_LABEL[s])}</span>
+      ${i < flow.length - 1 ? '<span class="text-fg-muted text-xs">→</span>' : ''}
+    `).join('');
+  }
+  $('m3-order-status-badges').innerHTML = html;
+}
+
+// ---- Items editor ----
+function renderOrderItems() {
+  const el = $('m3-order-items');
+  const readOnly = ord.current && ['shipped','completed','cancelled'].includes(ord.current.status);
+
+  if (ord.items.length === 0) {
+    el.innerHTML = '<div class="px-4 py-3 text-xs text-fg-muted">Добавьте позиции заказа</div>';
+    updateOrderTotal();
+    return;
+  }
+
+  el.innerHTML = ord.items.map((it, i) => {
+    const p = cache.products.find(x => x.id === it.warehouse_item_id);
+    const unit = p?.unit || '';
+    const stock = p?.quantity ?? null;
+    const enoughClass = (readOnly || !Number(it.quantity)) ? ''
+      : (stock === null ? 'text-state-error'
+        : Number(it.quantity) > stock ? 'text-state-error' : 'text-fg-muted');
+
+    return `
+      <div class="px-4 py-3 grid grid-cols-12 gap-2 items-start" data-item-index="${i}">
+        <div class="col-span-5">
+          ${readOnly
+            ? `<div class="px-2 py-1.5 text-sm">${esc(p?.name || '(удалено)')}</div>`
+            : `<select class="w-full px-2 py-1.5 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm" data-field="warehouse_item_id">
+                <option value="">— выберите продукцию —</option>
+                ${cache.products.map(prod =>
+                  `<option value="${esc(prod.id)}" ${prod.id === it.warehouse_item_id ? 'selected' : ''}>${esc(prod.name)}${prod.article ? ' ('+esc(prod.article)+')' : ''}</option>`
+                ).join('')}
+              </select>`}
+          ${p ? `<div class="text-xs ${enoughClass} mt-1 px-2">Остаток: ${formatNumber(stock || 0)} ${esc(unit)}</div>` : ''}
+        </div>
+        <div class="col-span-2">
+          <div class="relative">
+            <input type="number" step="0.001" min="0" placeholder="Кол-во" ${readOnly ? 'disabled' : ''}
+              class="w-full px-2 py-1.5 pr-8 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm text-right"
+              data-field="quantity" value="${it.quantity ?? ''}">
+            <span class="absolute right-2 top-1/2 -translate-y-1/2 text-xs text-fg-muted">${esc(unit)}</span>
+          </div>
+        </div>
+        <div class="col-span-2">
+          <input type="number" step="0.01" min="0" placeholder="Цена" ${readOnly ? 'disabled' : ''}
+            class="w-full px-2 py-1.5 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm text-right"
+            data-field="price" value="${it.price ?? ''}">
+        </div>
+        <div class="col-span-2 text-sm text-right pt-1.5" data-item-sum>
+          ${esc(formatMoney(Number(it.quantity || 0) * Number(it.price || 0)))}
+        </div>
+        <div class="col-span-1 flex justify-end">
+          ${readOnly ? '' : `
+            <button class="p-1.5 rounded-lg hover:bg-surface-alt transition-colors" data-remove-item>
+              <svg class="w-4 h-4 text-state-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+            </button>
+          `}
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  el.querySelectorAll('[data-item-index]').forEach(row => {
+    const idx = Number(row.dataset.itemIndex);
+    row.querySelectorAll('[data-field]').forEach(input => {
+      input.addEventListener('input', () => {
+        const field = input.dataset.field;
+        let val = input.value;
+        if (field === 'quantity' || field === 'price') val = val === '' ? null : Number(val);
+        if (field === 'warehouse_item_id') {
+          ord.items[idx].warehouse_item_id = val || null;
+          // Автоподстановка цены из склада, если цена ещё пустая
+          const prod = cache.products.find(p => p.id === val);
+          if (prod && !ord.items[idx].price) {
+            ord.items[idx].price = prod.price;
+          }
+          renderOrderItems();
+          updateOrderTotal();
+          return;
+        }
+        ord.items[idx][field] = val;
+        const sum = Number(ord.items[idx].quantity || 0) * Number(ord.items[idx].price || 0);
+        row.querySelector('[data-item-sum]').textContent = formatMoney(sum);
+        updateOrderTotal();
+      });
+    });
+    row.querySelector('[data-remove-item]')?.addEventListener('click', () => {
+      ord.items.splice(idx, 1);
+      renderOrderItems();
+    });
+  });
+  updateOrderTotal();
+}
+
+function updateOrderTotal() {
+  const total = ord.items.reduce((s, it) => s + Number(it.quantity || 0) * Number(it.price || 0), 0);
+  $('m3-order-total').textContent = 'Итого: ' + formatMoney(total);
+}
+
+$('m3-order-add-item').addEventListener('click', () => {
+  if (cache.products.length === 0) {
+    toast('Сначала добавьте готовую продукцию на Склад', 'warning');
+    return;
+  }
+  ord.items.push({ warehouse_item_id: null, quantity: null, price: null });
+  renderOrderItems();
+});
+
+// ---- Attachments ----
+async function loadAttachments(orderId) {
+  const { data } = await sb.from('attachments')
+    .select('*')
+    .eq('entity_type', 'sales_order')
+    .eq('entity_id', orderId)
+    .order('uploaded_at', { ascending: false });
+  ord.attachments = data || [];
+}
+
+function renderAttachments() {
+  const el = $('m3-order-attachments');
+  if (ord.attachments.length === 0) {
+    el.innerHTML = '<div class="px-4 py-3 text-xs text-fg-muted">Нет вложений</div>';
+    return;
+  }
+  el.innerHTML = ord.attachments.map(a => `
+    <div class="px-4 py-3 flex items-center gap-3">
+      <svg class="w-5 h-5 text-fg-muted flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+      </svg>
+      <div class="min-w-0 flex-1">
+        <div class="text-sm truncate">${esc(a.file_name)}</div>
+        <div class="text-xs text-fg-muted">${esc(humanFileSize(a.file_size))} · ${esc(formatDate(new Date(a.uploaded_at)))}</div>
+      </div>
+      <a href="#" class="text-xs text-fg-muted hover:text-fg" data-download="${esc(a.storage_path)}">Скачать</a>
+      <button class="text-xs text-state-error hover:underline" data-del-att="${esc(a.id)}" data-path="${esc(a.storage_path)}">Удалить</button>
+    </div>
+  `).join('');
+
+  el.querySelectorAll('[data-download]').forEach(a => {
+    a.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        const { data, error } = await sb.storage.from('attachments').createSignedUrl(a.dataset.download, 60);
+        if (error) throw error;
+        window.open(data.signedUrl, '_blank');
+      } catch (err) { toast('Ошибка: ' + err.message, 'error'); }
+    });
+  });
+
+  el.querySelectorAll('[data-del-att]').forEach(b => {
+    b.addEventListener('click', async () => {
+      if (!confirm('Удалить вложение?')) return;
+      try {
+        await sb.storage.from('attachments').remove([b.dataset.path]);
+        await sb.from('attachments').delete().eq('id', b.dataset.delAtt);
+        ord.attachments = ord.attachments.filter(x => x.id !== b.dataset.delAtt);
+        renderAttachments();
+        toast('Вложение удалено', 'success');
+      } catch (err) { toast('Ошибка: ' + err.message, 'error'); }
+    });
+  });
+}
+
+$('m3-order-file-input').addEventListener('change', async (e) => {
+  const files = Array.from(e.target.files || []);
+  e.target.value = '';
+  if (files.length === 0) return;
+
+  if (!ord.editing) {
+    toast('Сначала сохраните заказ, затем прикрепите файлы', 'warning');
+    return;
+  }
+
+  const maxSize = 49 * 1024 * 1024;
+  for (const f of files) {
+    if (f.size > maxSize) {
+      toast(`"${f.name}" больше 49 МБ, пропущен`, 'error');
+      continue;
+    }
+    try {
+      const path = `${groupId}/sales_order/${ord.editing}/${Date.now()}_${f.name}`;
+      const { error: upErr } = await sb.storage.from('attachments').upload(path, f, { contentType: f.type || 'application/octet-stream' });
+      if (upErr) throw upErr;
+
+      const { data: row, error: insErr } = await sb.from('attachments').insert({
+        group_id: groupId,
+        entity_type: 'sales_order',
+        entity_id: ord.editing,
+        file_name: f.name,
+        file_size: f.size,
+        storage_path: path,
+        uploaded_by: state.authUser.id
+      }).select().single();
+      if (insErr) throw insErr;
+
+      ord.attachments.unshift(row);
+      renderAttachments();
+      toast(`"${f.name}" загружен`, 'success');
+    } catch (err) { toast(`Ошибка загрузки "${f.name}": ` + err.message, 'error'); }
+  }
+});
+
+// ---- Actions ----
+function renderOrderActions() {
+  const el = $('m3-order-actions');
+  const o = ord.current;
+  if (!o || !canWrite) { el.innerHTML = ''; return; }
+
+  const buttons = [];
+
+  // Переход черновик → подтверждён
+  if (o.status === 'draft') {
+    buttons.push(`<button id="m3-btn-confirm" class="btn-secondary px-4 py-2 rounded-lg text-sm">Подтвердить</button>`);
+  }
+
+  // Подтверждён или черновик → можно отгружать
+  if (['draft','confirmed'].includes(o.status)) {
+    buttons.push(`<button id="m3-btn-ship" class="btn-primary px-4 py-2 rounded-lg text-sm">Отгрузить</button>`);
+  }
+
+  // Отгружен + оплачено → завершить
+  if (o.status === 'shipped') {
+    const disabled = o.payment_status !== 'paid';
+    buttons.push(`<button id="m3-btn-complete" class="btn-primary px-4 py-2 rounded-lg text-sm" ${disabled ? 'disabled title="Сначала отметьте оплату"' : ''}>Закрыть заказ</button>`);
+  }
+
+  // Отмена: для всего, кроме completed и cancelled
+  if (!['completed','cancelled'].includes(o.status)) {
+    const label = o.status === 'shipped' ? 'Отменить (вернуть на склад)' : 'Отменить';
+    buttons.push(`<button id="m3-btn-cancel" class="btn-secondary px-4 py-2 rounded-lg text-sm">${label}</button>`);
+  }
+
+  el.innerHTML = buttons.join('');
+
+  $('m3-btn-confirm')?.addEventListener('click', confirmOrder);
+  $('m3-btn-ship')?.addEventListener('click', shipOrder);
+  $('m3-btn-complete')?.addEventListener('click', completeOrder);
+  $('m3-btn-cancel')?.addEventListener('click', cancelOrder);
+}
+
+function validateOrderForm() {
+  const readOnly = ord.current && ['completed','cancelled'].includes(ord.current.status);
+  if (readOnly && ord.current.status === 'completed') {
+    $('m3-order-save').disabled = true;
+    return;
+  }
+  // Для сохранения достаточно хотя бы наличия клиента или позиций, но ок и без всего — разрешаем драфт
+  $('m3-order-save').disabled = false;
+}
+
+// ---- Save ----
+async function resolveCustomerId() {
+  const name = $('m3-order-f-customer').value.trim();
+  if (!name) return null;
+  const match = cache.customers.find(c => c.name.toLowerCase() === name.toLowerCase());
+  if (match) return match.id;
+  // Создаём нового
+  const { data, error } = await sb.from('customers').insert({ group_id: groupId, name }).select().single();
+  if (error) throw error;
+  cache.customers.push({ id: data.id, name: data.name });
+  return data.id;
+}
+
+async function persistOrder(afterStatus) {
+  const customerId = await resolveCustomerId();
+  const payment = $('m3-order-f-payment').value;
+
+  let orderId = ord.editing;
+
+  if (orderId) {
+    const patch = { customer_id: customerId, payment_status: payment };
+    const { error } = await sb.from('sales_orders').update(patch).eq('id', orderId);
+    if (error) throw error;
+  } else {
+    const { data, error } = await sb.from('sales_orders').insert({
+      group_id: groupId, customer_id: customerId, status: 'draft', payment_status: payment
+    }).select().single();
+    if (error) throw error;
+    orderId = data.id;
+    ord.editing = orderId;
+  }
+
+  // Синхронизируем позиции
+  await sb.from('sales_order_items').delete().eq('order_id', orderId);
+  const payload = ord.items
+    .filter(it => it.warehouse_item_id && Number(it.quantity) > 0)
+    .map(it => ({
+      order_id: orderId,
+      warehouse_item_id: it.warehouse_item_id,
+      quantity: Number(it.quantity),
+      price: it.price === null || it.price === '' ? null : Number(it.price)
+    }));
+  if (payload.length) {
+    const { error } = await sb.from('sales_order_items').insert(payload);
+    if (error) throw error;
+  }
+
+  return orderId;
+}
+
+$('m3-order-save').addEventListener('click', async () => {
+  const btn = $('m3-order-save');
+  btn.disabled = true;
+  btn.textContent = 'Сохраняем…';
+  try {
+    await persistOrder();
+    toast('Заказ сохранён', 'success');
+    $('m3-order-modal').classList.add('hidden');
+    await loadActive();
+  } catch (e) {
+    toast('Ошибка: ' + e.message, 'error');
+  } finally {
+    btn.textContent = 'Сохранить';
+    validateOrderForm();
+  }
+});
+
+$('m3-order-delete').addEventListener('click', async () => {
+  if (!ord.editing) return;
+  if (!confirm('Удалить заказ? Все позиции и вложения будут удалены.')) return;
+  try {
+    if (ord.attachments.length) {
+      await sb.storage.from('attachments').remove(ord.attachments.map(a => a.storage_path));
+    }
+    await sb.from('attachments').delete().eq('entity_type', 'sales_order').eq('entity_id', ord.editing);
+    const { error } = await sb.from('sales_orders').delete().eq('id', ord.editing);
+    if (error) throw error;
+    toast('Заказ удалён', 'success');
+    $('m3-order-modal').classList.add('hidden');
+    await loadActive();
+  } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
+});
+
+// Подтвердить
+async function confirmOrder() {
+  try {
+    await persistOrder();
+    const { error } = await sb.from('sales_orders').update({ status: 'confirmed' }).eq('id', ord.editing);
+    if (error) throw error;
+    toast('Заказ подтверждён', 'success');
+    $('m3-order-modal').classList.add('hidden');
+    await loadActive();
+  } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
+}
+
+// Отгрузить
+async function shipOrder() {
+  try {
+    $('m3-order-deficit').classList.add('hidden');
+    // Сохраняем актуальное состояние (позиции могли измениться)
+    await persistOrder();
+    const { data, error } = await sb.rpc('ship_sales_order', { p_order_id: ord.editing });
+    if (error) throw error;
+    if (!data?.ok) {
+      if (data?.error === 'INSUFFICIENT_STOCK' && Array.isArray(data.deficit)) {
+        $('m3-order-deficit').classList.remove('hidden');
+        $('m3-order-deficit-list').innerHTML = data.deficit.map(d =>
+          `<div>• ${esc(d.name)}: не хватает ${formatNumber(d.missing)} ${esc(d.unit || '')} (нужно ${formatNumber(d.need)}, есть ${formatNumber(d.have)})</div>`
+        ).join('');
+        toast('Недостаточно продукции на складе', 'error');
+        return;
+      }
+      if (data?.error === 'NO_ITEMS') throw new Error('В заказе нет позиций');
+      if (data?.error === 'ITEM_NOT_LINKED') throw new Error('Одна из позиций не привязана к складу');
+      if (data?.error === 'INVALID_QUANTITY') throw new Error('Неверное количество в позиции');
+      throw new Error(data?.error || 'UNKNOWN');
+    }
+    toast('Заказ отгружен, товар списан со склада', 'success');
+    $('m3-order-modal').classList.add('hidden');
+    await loadActive();
+  } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
+}
+
+// Завершить
+async function completeOrder() {
+  try {
+    // Сохраняем текущий статус оплаты, если пользователь только что отметил paid
+    await sb.from('sales_orders').update({ payment_status: $('m3-order-f-payment').value }).eq('id', ord.editing);
+    const { data, error } = await sb.rpc('complete_sales_order', { p_order_id: ord.editing });
+    if (error) throw error;
+    if (!data?.ok) {
+      if (data?.error === 'NOT_PAID') throw new Error('Нельзя закрыть неоплаченный заказ');
+      throw new Error(data?.error || 'UNKNOWN');
+    }
+    toast('Заказ закрыт', 'success');
+    $('m3-order-modal').classList.add('hidden');
+    await loadActive();
+  } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
+}
+
+// Отменить
+async function cancelOrder() {
+  const wasShipped = ord.current?.status === 'shipped';
+  const msg = wasShipped
+    ? 'Отменить заказ? Товар будет возвращён на склад.'
+    : 'Отменить заказ?';
+  if (!confirm(msg)) return;
+  try {
+    const { data, error } = await sb.rpc('cancel_sales_order', { p_order_id: ord.editing });
+    if (error) throw error;
+    if (!data?.ok) throw new Error(data?.error || 'UNKNOWN');
+    toast('Заказ отменён', 'success');
+    $('m3-order-modal').classList.add('hidden');
+    await loadActive();
+  } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
+}
+
+// ---- helpers ----
+function pluralize(n, forms) {
+  const mod100 = Math.abs(n) % 100;
+  const mod10 = mod100 % 10;
+  if (mod100 >= 11 && mod100 <= 19) return forms[2];
+  if (mod10 === 1) return forms[0];
+  if (mod10 >= 2 && mod10 <= 4) return forms[1];
+  return forms[2];
+}
+function humanFileSize(bytes) {
+  if (!bytes && bytes !== 0) return '';
+  const units = ['Б','КБ','МБ','ГБ'];
+  let i = 0; let n = Number(bytes);
+  while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
+  return `${n.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+}
+
+// ---- init ----
+switchTab('active');
+</script>
