@@ -1,0 +1,940 @@
+<!-- modal1.html — Страница "Снабжение". Подстраницы: Склад, Заказы снабжения. -->
+<!-- Доступ: admin, supply, management. -->
+
+<section id="m1" class="space-y-6">
+
+  <div class="flex items-center justify-between gap-4 flex-wrap">
+    <div>
+      <h1 class="text-2xl font-medium tracking-tight">Снабжение</h1>
+      <p class="text-sm text-fg-muted mt-1" id="m1-subtitle">—</p>
+    </div>
+    <div id="m1-chat-btn-wrap"></div>
+  </div>
+
+  <div class="flex items-center gap-1 border-b border-line overflow-x-auto">
+    <button class="m1-tab px-4 py-3 text-sm text-fg-muted hover:text-fg transition-colors relative whitespace-nowrap" data-tab="warehouse">
+      Склад
+      <span class="m1-tab-bar"></span>
+    </button>
+    <button class="m1-tab px-4 py-3 text-sm text-fg-muted hover:text-fg transition-colors relative whitespace-nowrap" data-tab="orders">
+      Заказы снабжения
+      <span class="m1-tab-bar"></span>
+    </button>
+  </div>
+
+  <!-- =========================
+       WAREHOUSE
+  ========================== -->
+  <div class="m1-panel" data-panel="warehouse">
+
+    <!-- Toolbar -->
+    <div class="bg-surface rounded-2xl border border-line p-4 mb-5 flex flex-wrap items-center gap-3">
+      <div class="flex-1 min-w-[180px]">
+        <input id="m1-wh-search" type="search" placeholder="Поиск по артикулу или названию…"
+          class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors text-sm">
+      </div>
+      <div class="flex items-center gap-1 rounded-xl bg-surface-alt p-1 border border-line">
+        <button class="m1-wh-filter px-3 py-1.5 text-xs rounded-lg transition-colors" data-type="all">Все</button>
+        <button class="m1-wh-filter px-3 py-1.5 text-xs rounded-lg transition-colors" data-type="material">Материалы</button>
+        <button class="m1-wh-filter px-3 py-1.5 text-xs rounded-lg transition-colors" data-type="product">Продукция</button>
+      </div>
+      <label class="flex items-center gap-2 text-xs text-fg-secondary cursor-pointer select-none">
+        <input type="checkbox" id="m1-wh-only-in-stock" class="rounded border-line">
+        <span>Только с остатком</span>
+      </label>
+      <button id="m1-wh-add" class="btn-primary px-4 py-2.5 rounded-xl text-sm font-medium ml-auto">
+        + Добавить позицию
+      </button>
+    </div>
+
+    <div id="m1-wh-grid" class="space-y-3">
+      <div class="flex items-center justify-center py-16">
+        <div class="w-6 h-6 loader"></div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- =========================
+       ORDERS
+  ========================== -->
+  <div class="m1-panel hidden" data-panel="orders">
+
+    <div class="bg-surface rounded-2xl border border-line p-4 mb-5 flex flex-wrap items-center gap-3">
+      <div class="flex-1 min-w-[180px]">
+        <input id="m1-ord-search" type="search" placeholder="Поиск по номеру или поставщику…"
+          class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors text-sm">
+      </div>
+      <select id="m1-ord-status-filter" class="px-3 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+        <option value="all">Все статусы</option>
+        <option value="draft">В работе</option>
+        <option value="placed">Заказ размещён</option>
+        <option value="in_transit">Товар в пути</option>
+        <option value="received">На складе</option>
+      </select>
+      <button id="m1-ord-new" class="btn-primary px-4 py-2.5 rounded-xl text-sm font-medium ml-auto">
+        + Новый заказ
+      </button>
+    </div>
+
+    <div id="m1-ord-list" class="space-y-3">
+      <div class="flex items-center justify-center py-16">
+        <div class="w-6 h-6 loader"></div>
+      </div>
+    </div>
+  </div>
+
+</section>
+
+<!-- =========================
+     MODAL: редактор позиции склада
+========================== -->
+<div id="m1-wh-modal" class="hidden fixed inset-0 z-40 bg-black/30 flex items-center justify-center px-4 py-8 overflow-y-auto">
+  <div class="bg-surface rounded-2xl border border-line w-full max-w-lg my-auto">
+    <div class="px-5 py-4 border-b border-line flex items-center justify-between">
+      <h3 class="font-medium" id="m1-wh-modal-title">Новая позиция</h3>
+      <button class="m1-wh-close p-1 rounded-lg hover:bg-surface-alt">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div class="p-5 space-y-3">
+      <div class="grid grid-cols-2 gap-3">
+        <label class="block">
+          <span class="text-xs text-fg-muted block mb-1.5">Артикул</span>
+          <input id="m1-wh-f-article" type="text" maxlength="100" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+        </label>
+        <label class="block">
+          <span class="text-xs text-fg-muted block mb-1.5">Тип *</span>
+          <select id="m1-wh-f-type" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+            <option value="material">Материал</option>
+            <option value="product">Готовая продукция</option>
+          </select>
+        </label>
+      </div>
+      <label class="block">
+        <span class="text-xs text-fg-muted block mb-1.5">Название *</span>
+        <input id="m1-wh-f-name" type="text" maxlength="300" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+      </label>
+      <div class="grid grid-cols-3 gap-3">
+        <label class="block">
+          <span class="text-xs text-fg-muted block mb-1.5">Ед. изм. *</span>
+          <input id="m1-wh-f-unit" type="text" maxlength="20" placeholder="шт / кг / л" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+        </label>
+        <label class="block">
+          <span class="text-xs text-fg-muted block mb-1.5">Количество</span>
+          <input id="m1-wh-f-qty" type="number" step="0.001" min="0" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+        </label>
+        <label class="block">
+          <span class="text-xs text-fg-muted block mb-1.5">Цена, ₽</span>
+          <input id="m1-wh-f-price" type="number" step="0.01" min="0" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+        </label>
+      </div>
+      <label class="block">
+        <span class="text-xs text-fg-muted block mb-1.5">Комментарий</span>
+        <textarea id="m1-wh-f-comment" rows="2" maxlength="1000" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm resize-none"></textarea>
+      </label>
+    </div>
+    <div class="px-5 py-4 border-t border-line flex items-center justify-between gap-2">
+      <button id="m1-wh-delete" class="hidden px-4 py-2 rounded-lg text-sm text-state-error hover:bg-surface-alt transition-colors">Удалить</button>
+      <div class="flex items-center gap-2 ml-auto">
+        <button class="m1-wh-close btn-secondary px-4 py-2 rounded-lg text-sm">Отмена</button>
+        <button id="m1-wh-save" class="btn-primary px-4 py-2 rounded-lg text-sm" disabled>Сохранить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- =========================
+     MODAL: редактор заказа снабжения
+========================== -->
+<div id="m1-ord-modal" class="hidden fixed inset-0 z-40 bg-black/30 flex items-start justify-center px-4 py-8 overflow-y-auto">
+  <div class="bg-surface rounded-2xl border border-line w-full max-w-3xl">
+    <div class="px-5 py-4 border-b border-line flex items-center justify-between">
+      <div>
+        <h3 class="font-medium" id="m1-ord-modal-title">Новый заказ</h3>
+        <p class="text-xs text-fg-muted mt-0.5" id="m1-ord-modal-sub"></p>
+      </div>
+      <button class="m1-ord-close p-1 rounded-lg hover:bg-surface-alt">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="p-5 space-y-4">
+
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+        <label class="block md:col-span-2">
+          <span class="text-xs text-fg-muted block mb-1.5">Поставщик</span>
+          <input id="m1-ord-f-supplier" list="m1-suppliers-dl" type="text" maxlength="200"
+            placeholder="Начните вводить или выберите…"
+            class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+          <datalist id="m1-suppliers-dl"></datalist>
+        </label>
+        <label class="block">
+          <span class="text-xs text-fg-muted block mb-1.5">Статус оплаты</span>
+          <select id="m1-ord-f-payment" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+            <option value="unpaid">Не оплачено</option>
+            <option value="paid">Оплачено</option>
+          </select>
+        </label>
+      </div>
+
+      <!-- Статус заказа (если редактирование) -->
+      <div id="m1-ord-status-row" class="hidden">
+        <span class="text-xs text-fg-muted block mb-2">Статус заказа</span>
+        <div class="flex items-center gap-2 flex-wrap">
+          <div id="m1-ord-status-badges" class="flex items-center gap-1"></div>
+          <div class="text-fg-muted">→</div>
+          <select id="m1-ord-f-status" class="px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+            <option value="draft">В работе</option>
+            <option value="placed">Заказ размещён</option>
+            <option value="in_transit">Товар в пути</option>
+            <option value="received">На складе</option>
+          </select>
+        </div>
+        <p class="text-xs text-fg-muted mt-2">
+          При переходе в «На складе» содержимое заказа автоматически придёт на склад.
+        </p>
+      </div>
+
+      <!-- Позиции -->
+      <div class="border border-line rounded-xl overflow-hidden">
+        <div class="px-4 py-3 bg-surface-alt border-b border-line flex items-center justify-between">
+          <span class="text-sm font-medium">Позиции заказа</span>
+          <span id="m1-ord-total" class="text-sm text-fg-muted">Итого: 0,00 ₽</span>
+        </div>
+        <div id="m1-ord-items" class="divide-y divide-line-light">
+          <!-- позиции подставляются динамически -->
+        </div>
+        <div class="px-4 py-3 border-t border-line">
+          <button id="m1-ord-add-item" class="text-sm text-fg-muted hover:text-fg transition-colors">
+            + Добавить позицию
+          </button>
+        </div>
+      </div>
+
+      <!-- Вложения -->
+      <div class="border border-line rounded-xl overflow-hidden">
+        <div class="px-4 py-3 bg-surface-alt border-b border-line flex items-center justify-between">
+          <span class="text-sm font-medium">Документы</span>
+          <label class="text-sm text-fg-muted hover:text-fg transition-colors cursor-pointer">
+            + Загрузить
+            <input id="m1-ord-file-input" type="file" class="hidden" multiple>
+          </label>
+        </div>
+        <div id="m1-ord-attachments" class="divide-y divide-line-light">
+          <div class="px-4 py-3 text-xs text-fg-muted">Нет вложений</div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="px-5 py-4 border-t border-line flex items-center justify-between gap-2">
+      <button id="m1-ord-delete" class="hidden px-4 py-2 rounded-lg text-sm text-state-error hover:bg-surface-alt transition-colors">Удалить заказ</button>
+      <div class="flex items-center gap-2 ml-auto">
+        <button class="m1-ord-close btn-secondary px-4 py-2 rounded-lg text-sm">Отмена</button>
+        <button id="m1-ord-save" class="btn-primary px-4 py-2 rounded-lg text-sm">Сохранить</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<style>
+  .m1-tab .m1-tab-bar {
+    content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 1px;
+    background: var(--fg); transform: scaleX(0); transform-origin: center;
+    transition: transform .2s ease;
+  }
+  .m1-tab.active { color: var(--fg); }
+  .m1-tab.active .m1-tab-bar { transform: scaleX(1); }
+
+  .m1-wh-filter.active { background: var(--bg); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,.04); }
+  .m1-wh-filter:not(.active) { color: var(--fg-muted); }
+  .m1-wh-filter:not(.active):hover { color: var(--fg); }
+
+  .m1-wh-card.empty { opacity: 0.45; }
+  .m1-wh-card {
+    border: 1px solid var(--line);
+    background: var(--bg);
+    transition: all .15s ease;
+  }
+  .m1-wh-card:hover { border-color: var(--fg-muted); cursor: pointer; }
+
+  .m1-ord-card {
+    border: 1px solid var(--line);
+    background: var(--bg);
+    transition: all .15s ease;
+  }
+  .m1-ord-card:hover { border-color: var(--fg-muted); }
+
+  .m1-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; line-height: 1.4; white-space: nowrap; }
+  .m1-badge-draft       { background: #F5F5F5; color: #525252; }
+  .m1-badge-placed      { background: #DBEAFE; color: #1D4ED8; }
+  .m1-badge-in_transit  { background: #FEF3C7; color: #92400E; }
+  .m1-badge-received    { background: #DCFCE7; color: #15803D; }
+  .m1-badge-paid        { background: #DCFCE7; color: #15803D; }
+  .m1-badge-unpaid      { background: #FEE2E2; color: #B91C1C; }
+</style>
+
+<script type="module">
+// ================================================================
+// modal1.html — Снабжение
+// ================================================================
+
+const { sb, state } = window.RIVA;
+const { toast, esc, formatDate, formatDateTime, formatMoney, formatNumber, formatQuantity } = window.RIVA_UTILS;
+const $ = (id) => document.getElementById(id);
+
+const myRole = state.currentGroup?.role;
+const canWrite = ['admin','supply','management'].includes(myRole);
+const groupId = state.currentGroup.group_id;
+
+$('m1-subtitle').textContent = `Группа «${state.currentGroup.group_name}»`;
+
+// ---------- tabs ----------
+function switchTab(name) {
+  document.querySelectorAll('.m1-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
+  document.querySelectorAll('.m1-panel').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== name));
+  if (name === 'warehouse') loadWarehouse();
+  if (name === 'orders') loadOrders();
+}
+document.querySelectorAll('.m1-tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
+
+// Скрываем write-кнопки, если у пользователя нет прав
+if (!canWrite) {
+  $('m1-wh-add')?.setAttribute('disabled', 'disabled');
+  $('m1-ord-new')?.setAttribute('disabled', 'disabled');
+}
+
+// ================================================================
+// WAREHOUSE
+// ================================================================
+
+const wh = {
+  cached: [],
+  search: '',
+  typeFilter: 'all',
+  onlyInStock: false,
+  editing: null  // id редактируемой позиции
+};
+
+$('m1-wh-search').addEventListener('input', (e) => { wh.search = e.target.value.trim().toLowerCase(); renderWarehouse(); });
+$('m1-wh-only-in-stock').addEventListener('change', (e) => { wh.onlyInStock = e.target.checked; renderWarehouse(); });
+document.querySelectorAll('.m1-wh-filter').forEach(btn => {
+  btn.addEventListener('click', () => {
+    document.querySelectorAll('.m1-wh-filter').forEach(b => b.classList.toggle('active', b === btn));
+    wh.typeFilter = btn.dataset.type;
+    renderWarehouse();
+  });
+});
+// Активируем "Все" по умолчанию
+document.querySelector('.m1-wh-filter[data-type="all"]').classList.add('active');
+
+async function loadWarehouse() {
+  const { data, error } = await sb.from('warehouse_items').select('*').order('name');
+  if (error) {
+    $('m1-wh-grid').innerHTML = `<div class="col-span-full text-sm text-state-error p-6">${esc(error.message)}</div>`;
+    return;
+  }
+  wh.cached = data || [];
+  renderWarehouse();
+}
+
+function renderWarehouse() {
+  let list = wh.cached;
+  if (wh.typeFilter !== 'all') list = list.filter(x => x.type === wh.typeFilter);
+  if (wh.onlyInStock) list = list.filter(x => Number(x.quantity) > 0);
+  if (wh.search) list = list.filter(x =>
+    (x.name || '').toLowerCase().includes(wh.search) ||
+    (x.article || '').toLowerCase().includes(wh.search)
+  );
+
+  if (list.length === 0) {
+    $('m1-wh-grid').innerHTML = `
+      <div class="text-center py-16 text-sm text-fg-muted">
+        ${wh.search || wh.typeFilter !== 'all' || wh.onlyInStock ? 'Ничего не найдено' : 'Склад пуст. Добавьте первую позицию.'}
+      </div>
+    `;
+    return;
+  }
+
+  $('m1-wh-grid').innerHTML = list.map(x => {
+    const qty = Number(x.quantity || 0);
+    const price = Number(x.price || 0);
+    const sum = qty * price;
+    const empty = qty === 0;
+    const typeLabel = x.type === 'material' ? 'материал' : 'продукция';
+    const dateStr = formatDate(new Date(x.updated_at || x.created_at));
+    const commentText = x.comment || '';
+
+    return `
+      <div class="m1-wh-card ${empty ? 'empty' : ''} rounded-xl px-4 py-3" data-wh-id="${esc(x.id)}">
+        <div class="flex items-center gap-4 flex-wrap md:flex-nowrap">
+
+          <!-- Левая зона: тип + артикул, название -->
+          <div class="min-w-0 flex-1 md:basis-1/3 md:flex-grow-0">
+            <div class="text-[10px] uppercase tracking-wider text-fg-muted mb-0.5">${esc(typeLabel)}${x.article ? ' · ' + esc(x.article) : ''}</div>
+            <div class="font-medium truncate" title="${esc(x.name)}">${esc(x.name)}</div>
+          </div>
+
+          <!-- Центр: три пары (подпись / значение) -->
+          <div class="flex items-stretch gap-6 flex-shrink-0">
+            <div>
+              <div class="text-[11px] text-fg-muted">Остаток</div>
+              <div class="font-medium text-sm">${esc(formatQuantity(qty, x.unit))}</div>
+            </div>
+            <div>
+              <div class="text-[11px] text-fg-muted">Цена</div>
+              <div class="font-medium text-sm">${esc(formatMoney(price))}</div>
+            </div>
+            <div>
+              <div class="text-[11px] text-fg-muted">Сумма</div>
+              <div class="font-medium text-sm">${esc(formatMoney(sum))}</div>
+            </div>
+          </div>
+
+          <!-- Правая зона: комментарий (1 строка + тултип) + дата -->
+          <div class="min-w-0 flex-1 md:ml-auto md:text-right">
+            ${commentText
+              ? `<div class="m1-wh-comment text-xs text-fg-muted italic truncate" title="${esc(commentText)}">${esc(commentText)}</div>`
+              : `<div class="text-xs text-fg-muted italic">&nbsp;</div>`}
+            <div class="text-[11px] text-fg-muted mt-0.5">${esc(dateStr)}</div>
+          </div>
+
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  document.querySelectorAll('.m1-wh-card').forEach(card => {
+    card.addEventListener('click', () => openWarehouseEditor(card.dataset.whId));
+  });
+}
+
+// ---- Warehouse editor modal ----
+function openWarehouseEditor(id) {
+  if (!canWrite) return;
+  wh.editing = id;
+  const item = id ? wh.cached.find(x => x.id === id) : null;
+  $('m1-wh-modal-title').textContent = item ? 'Редактирование позиции' : 'Новая позиция';
+  $('m1-wh-f-article').value = item?.article || '';
+  $('m1-wh-f-type').value = item?.type || 'material';
+  $('m1-wh-f-name').value = item?.name || '';
+  $('m1-wh-f-unit').value = item?.unit || 'шт';
+  $('m1-wh-f-qty').value = item?.quantity ?? '';
+  $('m1-wh-f-price').value = item?.price ?? '';
+  $('m1-wh-f-comment').value = item?.comment || '';
+  $('m1-wh-delete').classList.toggle('hidden', !id);
+  validateWhForm();
+  $('m1-wh-modal').classList.remove('hidden');
+  setTimeout(() => $('m1-wh-f-name').focus(), 50);
+}
+
+$('m1-wh-add').addEventListener('click', () => openWarehouseEditor(null));
+document.querySelectorAll('.m1-wh-close').forEach(b => b.addEventListener('click', () => $('m1-wh-modal').classList.add('hidden')));
+
+function validateWhForm() {
+  const ok = $('m1-wh-f-name').value.trim() && $('m1-wh-f-unit').value.trim();
+  $('m1-wh-save').disabled = !ok;
+}
+['m1-wh-f-name','m1-wh-f-unit'].forEach(id => $(id).addEventListener('input', validateWhForm));
+
+$('m1-wh-save').addEventListener('click', async () => {
+  const btn = $('m1-wh-save');
+  btn.disabled = true;
+  btn.textContent = 'Сохраняем…';
+  try {
+    const payload = {
+      article: $('m1-wh-f-article').value.trim() || null,
+      type: $('m1-wh-f-type').value,
+      name: $('m1-wh-f-name').value.trim(),
+      unit: $('m1-wh-f-unit').value.trim(),
+      quantity: Number($('m1-wh-f-qty').value || 0),
+      price: $('m1-wh-f-price').value === '' ? null : Number($('m1-wh-f-price').value),
+      comment: $('m1-wh-f-comment').value.trim() || null
+    };
+
+    if (wh.editing) {
+      const { error } = await sb.from('warehouse_items').update(payload).eq('id', wh.editing);
+      if (error) throw error;
+      toast('Позиция обновлена', 'success');
+    } else {
+      const { error } = await sb.from('warehouse_items').insert({ ...payload, group_id: groupId });
+      if (error) throw error;
+      toast('Позиция добавлена', 'success');
+    }
+    $('m1-wh-modal').classList.add('hidden');
+    await loadWarehouse();
+  } catch (e) {
+    toast('Ошибка: ' + e.message, 'error');
+  } finally {
+    btn.textContent = 'Сохранить';
+    validateWhForm();
+  }
+});
+
+$('m1-wh-delete').addEventListener('click', async () => {
+  if (!wh.editing) return;
+  if (!confirm('Удалить позицию со склада?')) return;
+  try {
+    const { error } = await sb.from('warehouse_items').delete().eq('id', wh.editing);
+    if (error) throw error;
+    toast('Удалено', 'success');
+    $('m1-wh-modal').classList.add('hidden');
+    await loadWarehouse();
+  } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
+});
+
+// ================================================================
+// ORDERS
+// ================================================================
+
+const ord = {
+  cached: [],
+  search: '',
+  statusFilter: 'all',
+  editing: null,       // id редактируемого заказа или null (новый)
+  items: [],           // локально — позиции текущего открытого заказа
+  attachments: [],     // локально — вложения текущего заказа
+  pendingFiles: [],    // файлы, которые только что загрузили в новый заказ (до первого сохранения)
+  suppliersCache: []
+};
+
+const STATUS_LABEL = { draft: 'В работе', placed: 'Заказ размещён', in_transit: 'Товар в пути', received: 'На складе' };
+const PAYMENT_LABEL = { unpaid: 'Не оплачено', paid: 'Оплачено' };
+
+$('m1-ord-search').addEventListener('input', (e) => { ord.search = e.target.value.trim().toLowerCase(); renderOrders(); });
+$('m1-ord-status-filter').addEventListener('change', (e) => { ord.statusFilter = e.target.value; renderOrders(); });
+
+async function loadSuppliersCache() {
+  const { data } = await sb.from('suppliers').select('id, name').order('name');
+  ord.suppliersCache = data || [];
+  // Наполняем datalist
+  $('m1-suppliers-dl').innerHTML = ord.suppliersCache.map(s => `<option value="${esc(s.name)}"></option>`).join('');
+}
+
+async function loadOrders() {
+  await loadSuppliersCache();
+
+  const { data, error } = await sb
+    .from('supply_orders')
+    .select(`
+      id, order_number, status, payment_status, placed_at, received_at, created_at, updated_at,
+      supplier_id,
+      suppliers ( id, name ),
+      supply_order_items ( id, warehouse_item_id, name, article, unit, quantity, price )
+    `)
+    .order('created_at', { ascending: false });
+
+  if (error) {
+    $('m1-ord-list').innerHTML = `<div class="text-sm text-state-error p-6">${esc(error.message)}</div>`;
+    return;
+  }
+  ord.cached = data || [];
+  renderOrders();
+}
+
+function orderTotal(o) {
+  return (o.supply_order_items || []).reduce((sum, it) => sum + Number(it.quantity || 0) * Number(it.price || 0), 0);
+}
+
+function renderOrders() {
+  let list = ord.cached;
+  if (ord.statusFilter !== 'all') list = list.filter(x => x.status === ord.statusFilter);
+  if (ord.search) list = list.filter(x =>
+    (x.order_number || '').toLowerCase().includes(ord.search) ||
+    (x.suppliers?.name || '').toLowerCase().includes(ord.search)
+  );
+
+  if (list.length === 0) {
+    $('m1-ord-list').innerHTML = `
+      <div class="text-center py-16 text-sm text-fg-muted">
+        ${ord.search || ord.statusFilter !== 'all' ? 'Ничего не найдено' : 'Пока нет заказов. Создайте первый.'}
+      </div>
+    `;
+    return;
+  }
+
+  $('m1-ord-list').innerHTML = list.map(o => {
+    const itemsCount = o.supply_order_items?.length || 0;
+    const total = orderTotal(o);
+    const dateLine = o.placed_at
+      ? `Размещён ${formatDate(new Date(o.placed_at))}`
+      : `Создан ${formatDate(new Date(o.created_at))}`;
+
+    return `
+      <div class="m1-ord-card rounded-xl p-4 cursor-pointer" data-ord-id="${esc(o.id)}">
+        <div class="flex items-start justify-between gap-3 flex-wrap">
+          <div class="min-w-0 flex-1">
+            <div class="flex items-center gap-2 flex-wrap mb-1">
+              <span class="font-medium">${esc(o.order_number || '—')}</span>
+              <span class="m1-badge m1-badge-${o.status}">${esc(STATUS_LABEL[o.status] || o.status)}</span>
+              <span class="m1-badge m1-badge-${o.payment_status}">${esc(PAYMENT_LABEL[o.payment_status] || o.payment_status)}</span>
+            </div>
+            <div class="text-sm text-fg-secondary">${esc(o.suppliers?.name || 'Поставщик не указан')}</div>
+            <div class="text-xs text-fg-muted mt-1">${esc(dateLine)} · ${itemsCount} ${pluralize(itemsCount, ['позиция','позиции','позиций'])}</div>
+          </div>
+          <div class="text-right">
+            <div class="font-medium">${esc(formatMoney(total))}</div>
+          </div>
+        </div>
+      </div>
+    `;
+  }).join('');
+
+  document.querySelectorAll('.m1-ord-card').forEach(card => {
+    card.addEventListener('click', () => openOrderEditor(card.dataset.ordId));
+  });
+}
+
+// ---- Order editor ----
+async function openOrderEditor(id) {
+  if (!canWrite) return;
+  ord.editing = id;
+  ord.items = [];
+  ord.attachments = [];
+  ord.pendingFiles = [];
+
+  const order = id ? ord.cached.find(x => x.id === id) : null;
+  $('m1-ord-modal-title').textContent = order ? `Заказ ${order.order_number}` : 'Новый заказ';
+  $('m1-ord-modal-sub').textContent = order
+    ? `Создан ${formatDateTime(new Date(order.created_at))}${order.updated_at && order.updated_at !== order.created_at ? ' · изменён ' + formatDateTime(new Date(order.updated_at)) : ''}`
+    : '';
+
+  $('m1-ord-f-supplier').value = order?.suppliers?.name || '';
+  $('m1-ord-f-payment').value = order?.payment_status || 'unpaid';
+
+  if (order) {
+    $('m1-ord-status-row').classList.remove('hidden');
+    $('m1-ord-f-status').value = order.status;
+    renderOrderStatusBadges(order.status);
+    ord.items = [...(order.supply_order_items || [])];
+    await loadAttachments(id);
+    $('m1-ord-delete').classList.remove('hidden');
+  } else {
+    $('m1-ord-status-row').classList.add('hidden');
+    $('m1-ord-delete').classList.add('hidden');
+  }
+
+  renderOrderItems();
+  renderAttachments();
+
+  $('m1-ord-modal').classList.remove('hidden');
+}
+
+document.querySelectorAll('.m1-ord-close').forEach(b => b.addEventListener('click', () => $('m1-ord-modal').classList.add('hidden')));
+$('m1-ord-new').addEventListener('click', () => openOrderEditor(null));
+
+function renderOrderStatusBadges(current) {
+  const flow = ['draft','placed','in_transit','received'];
+  const idx = flow.indexOf(current);
+  $('m1-ord-status-badges').innerHTML = flow.map((s, i) => `
+    <span class="m1-badge ${i <= idx ? 'm1-badge-' + s : ''}" style="${i > idx ? 'background:#F5F5F5;color:#A3A3A3;' : ''}">${esc(STATUS_LABEL[s])}</span>
+    ${i < flow.length - 1 ? '<span class="text-fg-muted text-xs">→</span>' : ''}
+  `).join('');
+}
+
+$('m1-ord-f-status').addEventListener('change', (e) => renderOrderStatusBadges(e.target.value));
+
+// ---- Items editor ----
+function renderOrderItems() {
+  const el = $('m1-ord-items');
+  if (ord.items.length === 0) {
+    el.innerHTML = '<div class="px-4 py-3 text-xs text-fg-muted">Добавьте позиции заказа</div>';
+    updateOrderTotal();
+    return;
+  }
+  el.innerHTML = ord.items.map((it, i) => `
+    <div class="px-4 py-3 grid grid-cols-12 gap-2 items-start" data-item-index="${i}">
+      <div class="col-span-5">
+        <input type="text" placeholder="Название позиции" maxlength="300"
+          class="w-full px-2 py-1.5 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm"
+          data-field="name" value="${esc(it.name || '')}">
+        <div class="mt-1 flex gap-1">
+          <input type="text" placeholder="Артикул" maxlength="100"
+            class="flex-1 px-2 py-1 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-xs text-fg-muted"
+            data-field="article" value="${esc(it.article || '')}">
+          <input type="text" placeholder="ед." maxlength="20"
+            class="w-16 px-2 py-1 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-xs text-fg-muted"
+            data-field="unit" value="${esc(it.unit || '')}">
+        </div>
+      </div>
+      <div class="col-span-2">
+        <input type="number" step="0.001" min="0" placeholder="Кол-во"
+          class="w-full px-2 py-1.5 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm text-right"
+          data-field="quantity" value="${it.quantity ?? ''}">
+      </div>
+      <div class="col-span-2">
+        <input type="number" step="0.01" min="0" placeholder="Цена"
+          class="w-full px-2 py-1.5 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm text-right"
+          data-field="price" value="${it.price ?? ''}">
+      </div>
+      <div class="col-span-2 text-sm text-right pt-1.5" data-item-sum>
+        ${esc(formatMoney(Number(it.quantity || 0) * Number(it.price || 0)))}
+      </div>
+      <div class="col-span-1 flex justify-end">
+        <button class="p-1.5 rounded-lg hover:bg-surface-alt transition-colors" data-remove-item>
+          <svg class="w-4 h-4 text-state-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+        </button>
+      </div>
+    </div>
+  `).join('');
+
+  el.querySelectorAll('[data-item-index]').forEach(row => {
+    const idx = Number(row.dataset.itemIndex);
+    row.querySelectorAll('[data-field]').forEach(input => {
+      input.addEventListener('input', () => {
+        const field = input.dataset.field;
+        let val = input.value;
+        if (field === 'quantity' || field === 'price') val = val === '' ? null : Number(val);
+        ord.items[idx][field] = val;
+        // Обновить сумму в строке
+        const sum = Number(ord.items[idx].quantity || 0) * Number(ord.items[idx].price || 0);
+        row.querySelector('[data-item-sum]').textContent = formatMoney(sum);
+        updateOrderTotal();
+      });
+    });
+    row.querySelector('[data-remove-item]').addEventListener('click', () => {
+      ord.items.splice(idx, 1);
+      renderOrderItems();
+    });
+  });
+  updateOrderTotal();
+}
+
+function updateOrderTotal() {
+  const total = ord.items.reduce((s, it) => s + Number(it.quantity || 0) * Number(it.price || 0), 0);
+  $('m1-ord-total').textContent = 'Итого: ' + formatMoney(total);
+}
+
+$('m1-ord-add-item').addEventListener('click', () => {
+  ord.items.push({ name: '', article: null, unit: 'шт', quantity: null, price: null, warehouse_item_id: null });
+  renderOrderItems();
+});
+
+// ---- Attachments ----
+async function loadAttachments(orderId) {
+  const { data } = await sb.from('attachments')
+    .select('*')
+    .eq('entity_type', 'supply_order')
+    .eq('entity_id', orderId)
+    .order('uploaded_at', { ascending: false });
+  ord.attachments = data || [];
+}
+
+function renderAttachments() {
+  const el = $('m1-ord-attachments');
+  const all = [...ord.attachments];
+  if (all.length === 0) {
+    el.innerHTML = '<div class="px-4 py-3 text-xs text-fg-muted">Нет вложений</div>';
+    return;
+  }
+  el.innerHTML = all.map(a => `
+    <div class="px-4 py-3 flex items-center gap-3">
+      <svg class="w-5 h-5 text-fg-muted flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
+        <polyline points="14 2 14 8 20 8"/>
+      </svg>
+      <div class="min-w-0 flex-1">
+        <div class="text-sm truncate">${esc(a.file_name)}</div>
+        <div class="text-xs text-fg-muted">${esc(humanFileSize(a.file_size))} · ${esc(formatDate(new Date(a.uploaded_at)))}</div>
+      </div>
+      <a href="#" class="text-xs text-fg-muted hover:text-fg" data-download="${esc(a.storage_path)}" data-filename="${esc(a.file_name)}">Скачать</a>
+      <button class="text-xs text-state-error hover:underline" data-del-att="${esc(a.id)}" data-path="${esc(a.storage_path)}">Удалить</button>
+    </div>
+  `).join('');
+
+  el.querySelectorAll('[data-download]').forEach(a => {
+    a.addEventListener('click', async (e) => {
+      e.preventDefault();
+      try {
+        const { data, error } = await sb.storage.from('attachments').createSignedUrl(a.dataset.download, 60);
+        if (error) throw error;
+        window.open(data.signedUrl, '_blank');
+      } catch (err) { toast('Ошибка: ' + err.message, 'error'); }
+    });
+  });
+
+  el.querySelectorAll('[data-del-att]').forEach(b => {
+    b.addEventListener('click', async () => {
+      if (!confirm('Удалить вложение?')) return;
+      try {
+        await sb.storage.from('attachments').remove([b.dataset.path]);
+        await sb.from('attachments').delete().eq('id', b.dataset.delAtt);
+        ord.attachments = ord.attachments.filter(x => x.id !== b.dataset.delAtt);
+        renderAttachments();
+        toast('Вложение удалено', 'success');
+      } catch (err) { toast('Ошибка: ' + err.message, 'error'); }
+    });
+  });
+}
+
+$('m1-ord-file-input').addEventListener('change', async (e) => {
+  const files = Array.from(e.target.files || []);
+  e.target.value = '';
+  if (files.length === 0) return;
+
+  // Если заказа ещё нет — сохраним заказ, а потом загрузим
+  if (!ord.editing) {
+    toast('Сначала сохраните заказ, затем прикрепите файлы', 'warning');
+    return;
+  }
+
+  const maxSize = 49 * 1024 * 1024;
+  for (const f of files) {
+    if (f.size > maxSize) {
+      toast(`"${f.name}" больше 49 МБ, пропущен`, 'error');
+      continue;
+    }
+    try {
+      const path = `${groupId}/supply_order/${ord.editing}/${Date.now()}_${f.name}`;
+      const { error: upErr } = await sb.storage.from('attachments').upload(path, f, { contentType: f.type || 'application/octet-stream' });
+      if (upErr) throw upErr;
+
+      const { data: row, error: insErr } = await sb.from('attachments').insert({
+        group_id: groupId,
+        entity_type: 'supply_order',
+        entity_id: ord.editing,
+        file_name: f.name,
+        file_size: f.size,
+        storage_path: path,
+        uploaded_by: state.authUser.id
+      }).select().single();
+      if (insErr) throw insErr;
+
+      ord.attachments.unshift(row);
+      renderAttachments();
+      toast(`"${f.name}" загружен`, 'success');
+    } catch (err) { toast(`Ошибка загрузки "${f.name}": ` + err.message, 'error'); }
+  }
+});
+
+// ---- Save order ----
+$('m1-ord-save').addEventListener('click', async () => {
+  const btn = $('m1-ord-save');
+  btn.disabled = true;
+  btn.textContent = 'Сохраняем…';
+  try {
+    const supplierName = $('m1-ord-f-supplier').value.trim();
+    let supplierId = null;
+    if (supplierName) {
+      // Ищем по имени в кэше
+      const match = ord.suppliersCache.find(s => s.name.toLowerCase() === supplierName.toLowerCase());
+      if (match) supplierId = match.id;
+      else {
+        // Создаём нового
+        const { data: newSup, error: supErr } = await sb.from('suppliers').insert({
+          group_id: groupId, name: supplierName
+        }).select().single();
+        if (supErr) throw supErr;
+        supplierId = newSup.id;
+        ord.suppliersCache.push({ id: newSup.id, name: newSup.name });
+      }
+    }
+
+    const payment = $('m1-ord-f-payment').value;
+    const desiredStatus = ord.editing ? $('m1-ord-f-status').value : 'draft';
+
+    // Выбрасываем статус 'received' — переход в него идёт через отдельную функцию
+    const safeStatus = desiredStatus === 'received' ? null : desiredStatus;
+
+    let orderId = ord.editing;
+    const wasReceived = ord.editing ? ord.cached.find(o => o.id === ord.editing)?.status === 'received' : false;
+
+    if (ord.editing) {
+      const patch = { supplier_id: supplierId, payment_status: payment };
+      if (safeStatus !== null) {
+        patch.status = safeStatus;
+        if (safeStatus === 'placed') patch.placed_at = new Date().toISOString();
+      }
+      const { error } = await sb.from('supply_orders').update(patch).eq('id', ord.editing);
+      if (error) throw error;
+    } else {
+      // Создаём новый заказ
+      const { data: newOrd, error } = await sb.from('supply_orders').insert({
+        group_id: groupId, supplier_id: supplierId, status: 'draft', payment_status: payment
+      }).select().single();
+      if (error) throw error;
+      orderId = newOrd.id;
+    }
+
+    // Синхронизируем позиции: удаляем все и заново вставляем
+    await sb.from('supply_order_items').delete().eq('order_id', orderId);
+    const itemsPayload = ord.items
+      .filter(it => (it.name || '').trim())
+      .map(it => ({
+        order_id: orderId,
+        warehouse_item_id: it.warehouse_item_id || null,
+        name: it.name.trim(),
+        article: it.article || null,
+        unit: it.unit || null,
+        quantity: it.quantity === null || it.quantity === '' ? null : Number(it.quantity),
+        price: it.price === null || it.price === '' ? null : Number(it.price)
+      }));
+    if (itemsPayload.length) {
+      const { error: iErr } = await sb.from('supply_order_items').insert(itemsPayload);
+      if (iErr) throw iErr;
+    }
+
+    // Если статус сменили на 'received' и он не был таким до — вызываем RPC
+    if (desiredStatus === 'received' && !wasReceived) {
+      if (itemsPayload.length === 0) {
+        toast('Нельзя оприходовать пустой заказ', 'warning');
+      } else {
+        const { data, error } = await sb.rpc('receive_supply_order', { p_order_id: orderId });
+        if (error) throw error;
+        if (!data?.ok) throw new Error(data?.error || 'Не удалось оприходовать');
+        toast('Заказ оприходован на склад', 'success');
+      }
+    } else {
+      toast('Заказ сохранён', 'success');
+    }
+
+    $('m1-ord-modal').classList.add('hidden');
+    await loadOrders();
+  } catch (e) {
+    toast('Ошибка: ' + e.message, 'error');
+  } finally {
+    btn.textContent = 'Сохранить';
+    btn.disabled = false;
+  }
+});
+
+$('m1-ord-delete').addEventListener('click', async () => {
+  if (!ord.editing) return;
+  if (!confirm('Удалить заказ? Все позиции и вложения будут удалены.')) return;
+  try {
+    // Удаляем файлы из storage
+    if (ord.attachments.length) {
+      await sb.storage.from('attachments').remove(ord.attachments.map(a => a.storage_path));
+    }
+    // Каскадом удалятся позиции; attachments удаляем отдельно
+    await sb.from('attachments').delete().eq('entity_type', 'supply_order').eq('entity_id', ord.editing);
+    const { error } = await sb.from('supply_orders').delete().eq('id', ord.editing);
+    if (error) throw error;
+    toast('Заказ удалён', 'success');
+    $('m1-ord-modal').classList.add('hidden');
+    await loadOrders();
+  } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
+});
+
+// ---- helpers ----
+function pluralize(n, forms) {
+  const mod100 = Math.abs(n) % 100;
+  const mod10 = mod100 % 10;
+  if (mod100 >= 11 && mod100 <= 19) return forms[2];
+  if (mod10 === 1) return forms[0];
+  if (mod10 >= 2 && mod10 <= 4) return forms[1];
+  return forms[2];
+}
+
+function humanFileSize(bytes) {
+  if (!bytes && bytes !== 0) return '';
+  const units = ['Б','КБ','МБ','ГБ'];
+  let i = 0; let n = Number(bytes);
+  while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
+  return `${n.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
+}
+
+// ---- init ----
+switchTab('warehouse');
+</script>
