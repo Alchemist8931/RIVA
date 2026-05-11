@@ -1,0 +1,578 @@
+<!-- modal5.html — Страница "Биллинг". -->
+<!-- Доступ: только admin. -->
+
+<section id="m5" class="space-y-6">
+
+  <div class="flex items-center justify-between gap-4 flex-wrap">
+    <div>
+      <h1 class="text-2xl font-medium tracking-tight">Биллинг</h1>
+      <p class="text-sm text-fg-muted mt-1" id="m5-subtitle">—</p>
+    </div>
+  </div>
+
+  <!-- KPI ROW -->
+  <div id="m5-kpi" class="grid grid-cols-1 md:grid-cols-3 gap-3">
+    <div class="bg-surface rounded-2xl border border-line p-5">
+      <div class="text-xs text-fg-muted">Баланс группы</div>
+      <div id="m5-balance" class="text-3xl font-medium mt-2">—</div>
+      <div id="m5-balance-status" class="text-xs text-fg-muted mt-1">—</div>
+    </div>
+    <div class="bg-surface rounded-2xl border border-line p-5">
+      <div class="text-xs text-fg-muted">Следующее списание</div>
+      <div id="m5-next-charge" class="text-3xl font-medium mt-2">—</div>
+      <div id="m5-next-charge-details" class="text-xs text-fg-muted mt-1">—</div>
+    </div>
+    <div class="bg-surface rounded-2xl border border-line p-5 flex items-center">
+      <div class="flex-1">
+        <div class="text-xs text-fg-muted">Действия</div>
+        <button id="m5-topup-btn" class="btn-primary w-full mt-3 py-3 rounded-xl text-sm font-medium">
+          Пополнить баланс
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="bg-surface rounded-2xl border border-line overflow-hidden">
+    <div class="px-5 py-4 border-b border-line flex items-center justify-between">
+      <h3 class="font-medium">Движения по балансу</h3>
+      <span id="m5-history-count" class="text-xs text-fg-muted">—</span>
+    </div>
+    <div id="m5-history" class="divide-y divide-line-light">
+      <div class="px-5 py-10 flex items-center justify-center"><div class="w-6 h-6 loader"></div></div>
+    </div>
+  </div>
+
+</section>
+
+<!-- =========================
+     MODAL: выбор способа оплаты + сумма
+========================== -->
+<div id="m5-topup-modal" class="hidden fixed inset-0 z-40 bg-black/30 flex items-start justify-center px-4 py-8 overflow-y-auto">
+  <div class="bg-surface rounded-2xl border border-line w-full max-w-xl">
+    <div class="px-5 py-4 border-b border-line flex items-center justify-between">
+      <h3 class="font-medium">Пополнить баланс</h3>
+      <button class="m5-topup-close p-1 rounded-lg hover:bg-surface-alt">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+
+    <div class="p-5 space-y-5">
+      <!-- Amount picker -->
+      <div>
+        <div class="text-xs text-fg-muted mb-2">Сумма пополнения, ₽</div>
+        <div class="grid grid-cols-4 gap-2 mb-2">
+          <button class="m5-amount-btn px-3 py-2 rounded-lg border border-line text-sm hover:border-fg" data-amount="1000">1 000</button>
+          <button class="m5-amount-btn px-3 py-2 rounded-lg border border-line text-sm hover:border-fg" data-amount="3000">3 000</button>
+          <button class="m5-amount-btn px-3 py-2 rounded-lg border border-line text-sm hover:border-fg" data-amount="6000">6 000</button>
+          <button class="m5-amount-btn px-3 py-2 rounded-lg border border-line text-sm hover:border-fg" data-amount="12000">12 000</button>
+        </div>
+        <input id="m5-amount-input" type="number" min="100" step="100" placeholder="Или введите свою сумму…"
+          class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+        <div id="m5-amount-info" class="text-xs text-fg-muted mt-2">—</div>
+      </div>
+
+      <!-- Method picker -->
+      <div>
+        <div class="text-xs text-fg-muted mb-2">Способ оплаты</div>
+        <div id="m5-methods" class="space-y-2">
+          <!-- заполняется динамически в зависимости от platform_settings -->
+        </div>
+      </div>
+    </div>
+
+    <div class="px-5 py-4 border-t border-line flex items-center justify-end gap-2">
+      <button class="m5-topup-close btn-secondary px-4 py-2 rounded-lg text-sm">Отмена</button>
+    </div>
+  </div>
+</div>
+
+<!-- =========================
+     MODAL: оплата по счёту — реквизиты
+========================== -->
+<div id="m5-invoice-modal" class="hidden fixed inset-0 z-40 bg-black/30 flex items-start justify-center px-4 py-8 overflow-y-auto">
+  <div class="bg-surface rounded-2xl border border-line w-full max-w-2xl">
+    <div class="px-5 py-4 border-b border-line flex items-center justify-between">
+      <div>
+        <h3 class="font-medium">Счёт на оплату</h3>
+        <p class="text-xs text-fg-muted mt-0.5" id="m5-invoice-sub">—</p>
+      </div>
+      <button class="m5-invoice-close p-1 rounded-lg hover:bg-surface-alt">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div id="m5-invoice-body" class="p-5 space-y-4">
+      <div class="flex items-center justify-center py-10"><div class="w-6 h-6 loader"></div></div>
+    </div>
+    <div class="px-5 py-4 border-t border-line flex items-center justify-end gap-2 flex-wrap">
+      <button id="m5-invoice-print" class="btn-secondary px-4 py-2 rounded-lg text-sm">Распечатать / Сохранить PDF</button>
+      <button class="m5-invoice-close btn-primary px-4 py-2 rounded-lg text-sm">Готово</button>
+    </div>
+  </div>
+</div>
+
+<!-- =========================
+     MODAL: оплата через Telegram Stars / CryptoBot
+========================== -->
+<div id="m5-paylink-modal" class="hidden fixed inset-0 z-40 bg-black/30 flex items-center justify-center px-4 py-8 overflow-y-auto">
+  <div class="bg-surface rounded-2xl border border-line w-full max-w-md">
+    <div class="px-5 py-4 border-b border-line flex items-center justify-between">
+      <h3 class="font-medium" id="m5-paylink-title">Оплата</h3>
+      <button class="m5-paylink-close p-1 rounded-lg hover:bg-surface-alt">
+        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
+    </div>
+    <div id="m5-paylink-body" class="p-5 space-y-4 text-center">
+      <div class="flex items-center justify-center py-10"><div class="w-6 h-6 loader"></div></div>
+    </div>
+    <div class="px-5 py-4 border-t border-line flex items-center justify-end gap-2 text-xs text-fg-muted">
+      <span>Окно можно закрыть — баланс пополнится автоматически после оплаты</span>
+    </div>
+  </div>
+</div>
+
+<style>
+  .m5-amount-btn.active { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+
+  .m5-method {
+    border: 1px solid var(--line); border-radius: 12px; padding: 14px;
+    cursor: pointer; transition: all .15s ease;
+    display: flex; align-items: center; gap: 12px;
+  }
+  .m5-method:hover { border-color: var(--fg); }
+  .m5-method.disabled { opacity: .4; cursor: not-allowed; }
+  .m5-method-icon {
+    width: 40px; height: 40px; border-radius: 10px;
+    display: flex; align-items: center; justify-content: center;
+    background: var(--bg-alt); flex-shrink: 0;
+  }
+
+  .m5-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; line-height: 1.4; white-space: nowrap; }
+  .m5-badge-pending   { background: #FEF3C7; color: #92400E; }
+  .m5-badge-completed { background: #DCFCE7; color: #15803D; }
+  .m5-badge-failed    { background: #FEE2E2; color: #B91C1C; }
+  .m5-badge-cancelled { background: #F5F5F5; color: #525252; }
+
+  .m5-invoice-doc { font-size: 13px; }
+  .m5-invoice-doc table { width: 100%; border-collapse: collapse; }
+  .m5-invoice-doc td { padding: 6px 8px; border-bottom: 1px solid var(--line-light); vertical-align: top; }
+  .m5-invoice-doc td:first-child { color: var(--fg-muted); width: 40%; }
+
+  @media print {
+    body * { visibility: hidden !important; }
+    #m5-invoice-body, #m5-invoice-body * { visibility: visible !important; }
+    #m5-invoice-body { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; }
+  }
+</style>
+
+<script type="module">
+// ================================================================
+// modal5.html — Биллинг
+// ================================================================
+
+const { sb, state } = window.RIVA;
+const { toast, esc, formatDate, formatDateTime, formatMoney, formatNumber } = window.RIVA_UTILS;
+const $ = (id) => document.getElementById(id);
+
+const myRole = state.currentGroup?.role;
+const isAdmin = myRole === 'admin';
+const groupId = state.currentGroup.group_id;
+
+if (!isAdmin) {
+  $('m5').innerHTML = '<div class="bg-surface rounded-2xl border border-line p-8 text-center text-fg-muted">Раздел доступен только администратору группы.</div>';
+  throw new Error('m5: not admin');
+}
+
+$('m5-subtitle').textContent = `Группа «${state.currentGroup.group_name}»`;
+
+const billing = {
+  balance: 0,
+  nextCharge: 0,
+  members: 0,
+  trialEndsAt: null,
+  isTrialActive: false,
+  methods: null,
+  amount: 0,
+  selectedMethod: null
+};
+
+// ---------- BOOT ----------
+async function loadBillingState() {
+  const { data, error } = await sb.rpc('get_billing_state');
+  if (error) { toast('Ошибка биллинга: ' + error.message, 'error'); return; }
+  if (!data?.ok) { toast('Биллинг недоступен: ' + (data?.error || 'unknown'), 'error'); return; }
+
+  billing.balance = Number(data.balance);
+  billing.nextCharge = Number(data.next_charge_estimate);
+  billing.members = data.active_members;
+  billing.trialEndsAt = data.trial_ends_at ? new Date(data.trial_ends_at) : null;
+  billing.isTrialActive = data.is_trial_active;
+  billing.methods = data.payment_methods;
+
+  $('m5-balance').textContent = formatMoney(billing.balance);
+  $('m5-balance').className = 'text-3xl font-medium mt-2 ' + (billing.balance < 0 ? 'text-state-error' : '');
+
+  let statusLine;
+  if (billing.isTrialActive) {
+    const daysLeft = Math.ceil((billing.trialEndsAt - new Date()) / 86400000);
+    statusLine = `Триал: осталось ${daysLeft} ${pluralize(daysLeft, ['день','дня','дней'])}`;
+  } else if (billing.balance >= billing.nextCharge) {
+    statusLine = 'Хватает на следующее списание';
+  } else if (billing.balance > 0) {
+    statusLine = 'Недостаточно для следующего списания';
+  } else {
+    statusLine = 'Требуется пополнение';
+  }
+  $('m5-balance-status').textContent = statusLine;
+
+  $('m5-next-charge').textContent = formatMoney(billing.nextCharge);
+  $('m5-next-charge-details').textContent =
+    `${billing.members} × ${formatMoney(Number(data.price_per_member))} · 1-го числа месяца`;
+}
+
+async function loadHistory() {
+  const { data, error } = await sb.rpc('list_billing_records', { p_limit: 100 });
+  if (error) { $('m5-history').innerHTML = `<div class="px-5 py-6 text-sm text-state-error">${esc(error.message)}</div>`; return; }
+  renderHistory(data || []);
+}
+
+function renderHistory(rows) {
+  $('m5-history-count').textContent = rows.length + ' ' + pluralize(rows.length, ['запись','записи','записей']);
+  if (rows.length === 0) {
+    $('m5-history').innerHTML = '<div class="px-5 py-10 text-sm text-fg-muted text-center">Движений пока не было</div>';
+    return;
+  }
+
+  const METHOD_LABEL = {
+    invoice:        'По счёту',
+    telegram_stars: 'Telegram Stars',
+    cryptobot:      'CryptoBot',
+    manual:         'Вручную'
+  };
+  const STATUS_LABEL = {
+    pending: 'Ожидает оплаты', completed: 'Завершено', failed: 'Ошибка', cancelled: 'Отменено'
+  };
+
+  $('m5-history').innerHTML = rows.map(r => {
+    const isCharge = r.type === 'charge';
+    const sign = Number(r.amount) >= 0 ? '+' : '';
+    const amountClass = Number(r.amount) >= 0 ? 'text-state-success' : 'text-fg';
+    const methodLabel = r.payment_method ? esc(METHOD_LABEL[r.payment_method] || r.payment_method) : '';
+    const showCancel = r.payment_status === 'pending';
+
+    return `
+      <div class="px-5 py-3 flex items-center gap-3">
+        <div class="min-w-0 flex-1">
+          <div class="text-sm">${esc(r.description || '—')}</div>
+          <div class="text-xs text-fg-muted mt-0.5">
+            ${esc(formatDateTime(new Date(r.created_at)))}
+            ${methodLabel ? '· ' + methodLabel : ''}
+            ${r.confirmed_at ? '· оплачено ' + esc(formatDateTime(new Date(r.confirmed_at))) : ''}
+          </div>
+        </div>
+        ${r.payment_status !== 'completed'
+          ? `<span class="m5-badge m5-badge-${r.payment_status}">${esc(STATUS_LABEL[r.payment_status] || r.payment_status)}</span>`
+          : ''}
+        <div class="text-right">
+          <div class="font-medium ${amountClass} whitespace-nowrap">${sign}${esc(formatMoney(Number(r.amount)))}</div>
+          ${r.balance_after !== null ? `<div class="text-xs text-fg-muted">Баланс: ${esc(formatMoney(Number(r.balance_after)))}</div>` : ''}
+        </div>
+        ${showCancel
+          ? `<button data-cancel-payment="${esc(r.id)}" class="text-xs text-state-error hover:underline whitespace-nowrap">Отменить</button>`
+          : ''}
+      </div>
+    `;
+  }).join('');
+
+  document.querySelectorAll('[data-cancel-payment]').forEach(b => {
+    b.addEventListener('click', async () => {
+      if (!confirm('Отменить ожидающий платёж?')) return;
+      try {
+        const { data, error } = await sb.rpc('cancel_pending_payment', { p_payment_id: b.dataset.cancelPayment });
+        if (error) throw error;
+        if (!data?.ok) throw new Error(data?.error);
+        toast('Платёж отменён', 'success');
+        await loadHistory();
+      } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
+    });
+  });
+}
+
+// ---------- TOPUP modal ----------
+$('m5-topup-btn').addEventListener('click', openTopup);
+document.querySelectorAll('.m5-topup-close').forEach(b => b.addEventListener('click', () => $('m5-topup-modal').classList.add('hidden')));
+
+function openTopup() {
+  billing.amount = 0;
+  billing.selectedMethod = null;
+  $('m5-amount-input').value = '';
+  $('m5-amount-info').textContent = '—';
+  document.querySelectorAll('.m5-amount-btn').forEach(b => b.classList.remove('active'));
+  renderMethods();
+  $('m5-topup-modal').classList.remove('hidden');
+}
+
+document.querySelectorAll('.m5-amount-btn').forEach(b => {
+  b.addEventListener('click', () => {
+    document.querySelectorAll('.m5-amount-btn').forEach(x => x.classList.remove('active'));
+    b.classList.add('active');
+    $('m5-amount-input').value = b.dataset.amount;
+    setAmount(Number(b.dataset.amount));
+  });
+});
+
+$('m5-amount-input').addEventListener('input', (e) => {
+  document.querySelectorAll('.m5-amount-btn').forEach(b => b.classList.remove('active'));
+  setAmount(Number(e.target.value || 0));
+});
+
+function setAmount(v) {
+  billing.amount = v;
+  const months = billing.nextCharge > 0 ? (v / billing.nextCharge).toFixed(1) : '∞';
+  $('m5-amount-info').textContent = v > 0
+    ? `Хватит на ~${months} ${pluralize(Math.round(months), ['месяц','месяца','месяцев'])} при текущем составе группы`
+    : 'Минимальная сумма зависит от способа оплаты';
+  renderMethods();
+}
+
+function renderMethods() {
+  const methods = billing.methods || {};
+  const items = [
+    { key: 'invoice',        title: 'По счёту',         desc: 'Банковский перевод по реквизитам', icon: bankIcon() },
+    { key: 'telegram_stars', title: 'Telegram Stars',   desc: 'Оплата звёздами в Telegram',       icon: starsIcon() },
+    { key: 'cryptobot',      title: 'Криптовалюта',     desc: 'TON / USDT через CryptoBot',        icon: cryptoIcon() }
+  ];
+
+  $('m5-methods').innerHTML = items.map(m => {
+    const cfg = methods[m.key] || {};
+    const enabled = cfg.enabled === true;
+    const minAmount = Number(cfg.min_amount || 0);
+    const amountOk = billing.amount >= minAmount && billing.amount > 0;
+    const canClick = enabled && amountOk;
+    const hint = !enabled
+      ? '<span class="text-xs text-fg-muted">Не настроено</span>'
+      : !amountOk
+        ? `<span class="text-xs text-fg-muted">от ${formatMoney(minAmount)}</span>`
+        : '<span class="text-xs text-fg-muted">→</span>';
+    return `
+      <div class="m5-method ${canClick ? '' : 'disabled'}" data-method="${m.key}">
+        <div class="m5-method-icon">${m.icon}</div>
+        <div class="flex-1 min-w-0">
+          <div class="text-sm font-medium">${esc(m.title)}</div>
+          <div class="text-xs text-fg-muted">${esc(m.desc)}</div>
+        </div>
+        <div>${hint}</div>
+      </div>
+    `;
+  }).join('');
+
+  document.querySelectorAll('.m5-method').forEach(el => {
+    el.addEventListener('click', () => {
+      if (el.classList.contains('disabled')) return;
+      handleMethodSelect(el.dataset.method);
+    });
+  });
+}
+
+function bankIcon() {
+  return `<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+    <path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></svg>`;
+}
+function starsIcon() {
+  return `<svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.39 7.36H22l-6.19 4.5L18.18 22 12 17.31 5.82 22l2.37-8.14L2 9.36h7.61z"/></svg>`;
+}
+function cryptoIcon() {
+  return `<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+    <circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg>`;
+}
+
+// ---------- Method handlers ----------
+async function handleMethodSelect(method) {
+  if (!billing.amount || billing.amount <= 0) return;
+
+  const { data, error } = await sb.rpc('create_payment_request', {
+    p_method: method,
+    p_amount: billing.amount,
+    p_metadata: {}
+  });
+  if (error) { toast('Ошибка: ' + error.message, 'error'); return; }
+  if (!data?.ok) {
+    const map = {
+      ADMIN_ONLY: 'Доступно только администратору',
+      METHOD_DISABLED: 'Этот способ оплаты ещё не настроен',
+      AMOUNT_BELOW_MIN: `Минимальная сумма для этого способа: ${formatMoney(data.min_amount)}`,
+      INVALID_AMOUNT: 'Неверная сумма',
+      INVALID_METHOD: 'Неверный способ'
+    };
+    toast(map[data?.error] || data?.error || 'UNKNOWN', 'error');
+    return;
+  }
+
+  $('m5-topup-modal').classList.add('hidden');
+
+  if (method === 'invoice')        await openInvoice(data.payment_id);
+  if (method === 'telegram_stars') await openPaymentLink('telegram_stars', data.payment_id);
+  if (method === 'cryptobot')      await openPaymentLink('cryptobot', data.payment_id);
+
+  await loadHistory();
+}
+
+// ---------- INVOICE flow ----------
+document.querySelectorAll('.m5-invoice-close').forEach(b => b.addEventListener('click', () => $('m5-invoice-modal').classList.add('hidden')));
+$('m5-invoice-print').addEventListener('click', () => window.print());
+
+async function openInvoice(paymentId) {
+  $('m5-invoice-modal').classList.remove('hidden');
+  $('m5-invoice-body').innerHTML = `<div class="flex items-center justify-center py-10"><div class="w-6 h-6 loader"></div></div>`;
+
+  // Берём реквизиты получателя и группы
+  const [{ data: recipientResp }, { data: groupRow }] = await Promise.all([
+    sb.rpc('get_recipient_details'),
+    sb.from('groups').select('*').eq('id', groupId).maybeSingle()
+  ]);
+
+  const recipient = recipientResp?.details || {};
+  const payer = groupRow?.company_details || {};
+  const groupName = groupRow?.name || '';
+  const amount = billing.amount;
+  const invoiceNumber = `RIVA-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${paymentId.slice(0,4).toUpperCase()}`;
+
+  $('m5-invoice-sub').textContent = `№ ${invoiceNumber} от ${formatDate(new Date())}`;
+
+  $('m5-invoice-body').innerHTML = `
+    <div class="m5-invoice-doc">
+      <div class="text-base font-medium mb-1">Счёт на оплату № ${esc(invoiceNumber)}</div>
+      <div class="text-fg-muted mb-4">от ${esc(formatDate(new Date()))}</div>
+
+      <div class="mb-5">
+        <div class="text-xs uppercase tracking-wider text-fg-muted mb-2">Получатель</div>
+        <table>
+          <tr><td>Наименование</td><td>${esc(recipient.legal_name || '—')}</td></tr>
+          <tr><td>ИНН</td><td>${esc(recipient.inn || '—')}</td></tr>
+          ${recipient.kpp ? `<tr><td>КПП</td><td>${esc(recipient.kpp)}</td></tr>` : ''}
+          ${recipient.ogrn ? `<tr><td>ОГРН</td><td>${esc(recipient.ogrn)}</td></tr>` : ''}
+          ${recipient.address ? `<tr><td>Адрес</td><td>${esc(recipient.address)}</td></tr>` : ''}
+          <tr><td>Банк</td><td>${esc(recipient.bank_name || '—')}</td></tr>
+          <tr><td>Р/счёт</td><td><code>${esc(recipient.bank_account || '—')}</code></td></tr>
+          <tr><td>БИК</td><td><code>${esc(recipient.bank_bik || '—')}</code></td></tr>
+          ${recipient.correspondent_account ? `<tr><td>К/счёт</td><td><code>${esc(recipient.correspondent_account)}</code></td></tr>` : ''}
+        </table>
+      </div>
+
+      <div class="mb-5">
+        <div class="text-xs uppercase tracking-wider text-fg-muted mb-2">Плательщик</div>
+        <table>
+          <tr><td>Группа</td><td>${esc(groupName)}</td></tr>
+          ${payer.legal_name ? `<tr><td>Наименование</td><td>${esc(payer.legal_name)}</td></tr>` : ''}
+          ${payer.inn ? `<tr><td>ИНН</td><td>${esc(payer.inn)}</td></tr>` : ''}
+          ${payer.kpp ? `<tr><td>КПП</td><td>${esc(payer.kpp)}</td></tr>` : ''}
+          ${payer.address ? `<tr><td>Адрес</td><td>${esc(payer.address)}</td></tr>` : ''}
+        </table>
+        ${(!payer.legal_name && !payer.inn) ? `
+          <div class="text-xs text-state-warning mt-2">
+            ⚠ Реквизиты плательщика не заполнены. Откройте «Управление → Настройки» и укажите данные группы.
+          </div>` : ''}
+      </div>
+
+      <div class="mb-5">
+        <div class="text-xs uppercase tracking-wider text-fg-muted mb-2">Назначение платежа</div>
+        <div class="px-3 py-2 bg-surface-alt rounded-lg">
+          Пополнение баланса группы «${esc(groupName)}» в сервисе RIVA. Внутренний ID: ${esc(paymentId)}
+        </div>
+      </div>
+
+      <div class="flex items-baseline justify-between border-t border-line pt-4">
+        <div class="text-sm text-fg-muted">Сумма к оплате</div>
+        <div class="text-2xl font-medium">${esc(formatMoney(amount))}</div>
+      </div>
+
+      <div class="text-xs text-fg-muted mt-4 leading-relaxed">
+        После поступления денег на расчётный счёт получателя баланс группы будет пополнен в течение 1 рабочего дня.
+        Платёж учитывается по внутреннему ID, указанному в назначении.
+      </div>
+    </div>
+  `;
+}
+
+// ---------- PAYMENT LINK flow (Telegram Stars + CryptoBot) ----------
+document.querySelectorAll('.m5-paylink-close').forEach(b => b.addEventListener('click', () => $('m5-paylink-modal').classList.add('hidden')));
+
+async function openPaymentLink(method, paymentId) {
+  $('m5-paylink-title').textContent = method === 'telegram_stars' ? 'Оплата Telegram Stars' : 'Оплата криптовалютой';
+  $('m5-paylink-body').innerHTML = `<div class="flex items-center justify-center py-10"><div class="w-6 h-6 loader"></div></div>`;
+  $('m5-paylink-modal').classList.remove('hidden');
+
+  // Вызов Edge Function: на сервере создастся реальная платёжная ссылка
+  try {
+    const { data, error } = await sb.functions.invoke('create-payment-link', {
+      body: { payment_id: paymentId, method }
+    });
+    if (error) throw error;
+    if (!data?.ok) throw new Error(data?.error || 'UNKNOWN');
+
+    renderPaymentLink(method, data);
+  } catch (e) {
+    $('m5-paylink-body').innerHTML = `
+      <div class="text-state-error text-sm mb-3">Не удалось получить платёжную ссылку</div>
+      <div class="text-xs text-fg-muted mb-4">${esc(e.message || e)}</div>
+      <div class="text-xs text-fg-muted">
+        Скорее всего, Edge Function <code>create-payment-link</code> ещё не задеплоена
+        либо не настроены токены провайдера.
+        Откройте инструкцию <code>PAYMENT_SETUP.md</code>.
+      </div>
+    `;
+  }
+}
+
+function renderPaymentLink(method, data) {
+  const html = method === 'telegram_stars'
+    ? `
+      <p class="text-sm text-fg-muted">Нажмите кнопку ниже и подтвердите оплату в Telegram.</p>
+      <a href="${esc(data.url)}" target="_blank" rel="noopener" class="btn-primary inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm font-medium">
+        Открыть в Telegram
+      </a>
+      <div class="text-xs text-fg-muted">К оплате: ~${esc(formatNumber(data.stars))} ⭐ Stars</div>
+    `
+    : `
+      <p class="text-sm text-fg-muted">Откройте CryptoBot и подтвердите оплату.</p>
+      <a href="${esc(data.url)}" target="_blank" rel="noopener" class="btn-primary inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm font-medium">
+        Открыть CryptoBot
+      </a>
+      ${data.asset ? `<div class="text-xs text-fg-muted">К оплате: ${esc(data.amount_crypto)} ${esc(data.asset)}</div>` : ''}
+    `;
+  $('m5-paylink-body').innerHTML = html;
+}
+
+// ---------- Realtime для мгновенного обновления при подтверждении платежа ----------
+sb.channel('billing:' + groupId)
+  .on('postgres_changes',
+      { event: 'UPDATE', schema: 'public', table: 'billing_records', filter: `group_id=eq.${groupId}` },
+      async (payload) => {
+        const r = payload.new;
+        if (r.payment_status === 'completed' && payload.old?.payment_status !== 'completed') {
+          toast(`Баланс пополнен на ${formatMoney(r.amount)} ₽`, 'success');
+          $('m5-paylink-modal').classList.add('hidden');
+          $('m5-invoice-modal').classList.add('hidden');
+        }
+        await loadBillingState();
+        await loadHistory();
+      })
+  .on('postgres_changes',
+      { event: 'INSERT', schema: 'public', table: 'billing_records', filter: `group_id=eq.${groupId}` },
+      async () => { await loadBillingState(); await loadHistory(); })
+  .subscribe();
+
+// ---------- Helpers ----------
+function pluralize(n, forms) {
+  const mod100 = Math.abs(n) % 100;
+  const mod10 = mod100 % 10;
+  if (mod100 >= 11 && mod100 <= 19) return forms[2];
+  if (mod10 === 1) return forms[0];
+  if (mod10 >= 2 && mod10 <= 4) return forms[1];
+  return forms[2];
+}
+
+// ---------- init ----------
+loadBillingState();
+loadHistory();
+</script>
