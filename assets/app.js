@@ -415,7 +415,7 @@ function renderShell() {
   const availablePages = Object.entries(PAGES).filter(([, cfg]) => cfg.roles.includes(role));
 
   $('top-nav').innerHTML = availablePages.map(([key, cfg]) =>
-    `<a href="#" class="nav-item text-sm" data-page="${key}">${esc(cfg.label)}</a>`
+    `<a href="#" class="nav-item" data-page="${key}">${esc(cfg.label)}</a>`
   ).join('');
 
   $('side-nav').innerHTML = availablePages.map(([key, cfg]) =>
