@@ -20,14 +20,26 @@
   <link href="https://fonts.googleapis.com/css2?family=SN+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
 
   <script>
+    // Tailwind theme: themed-цвета через CSS-переменные, state-цвета — константы
     tailwind.config = {
       theme: {
         extend: {
           colors: {
-            fg:       { DEFAULT: '#0A0A0A', secondary: '#404040', muted: '#737373' },
-            surface:  { DEFAULT: '#FFFFFF', alt: '#FAFAFA', card: '#F5F5F5' },
-            line:     { DEFAULT: '#E5E5E5', light: '#F0F0F0' },
-            state:    { success: '#16A34A', warning: '#D97706', error: '#DC2626', info: '#2563EB' }
+            fg: {
+              DEFAULT:   'var(--fg)',
+              secondary: 'var(--fg-secondary)',
+              muted:     'var(--fg-muted)'
+            },
+            surface: {
+              DEFAULT: 'var(--bg)',
+              alt:     'var(--bg-alt)',
+              card:    'var(--bg-card)'
+            },
+            line: {
+              DEFAULT: 'var(--line)',
+              light:   'var(--line-light)'
+            },
+            state: { success: '#16A34A', warning: '#D97706', error: '#DC2626', info: '#2563EB' }
           },
           fontFamily: { sans: ['"SN Pro"', 'system-ui', '-apple-system', 'sans-serif'] },
           maxWidth: { app: '1400px' }
@@ -38,15 +50,46 @@
 
   <style>
     :root {
-      --bg: #FFFFFF;
-      --bg-alt: #FAFAFA;
-      --bg-card: #F5F5F5;
-      --fg: #0A0A0A;
-      --fg-secondary: #404040;
-      --fg-muted: #737373;
-      --line: #E5E5E5;
-      --line-light: #F0F0F0;
+      /* === ОСНОВА ПРИЛОЖЕНИЯ — заполняется JS из активной палитры === */
+      --bg:            #FFFFFF;
+      --bg-alt:        #FAFAFA;
+      --bg-card:       #F5F5F5;
+      --fg:            #0A0A0A;
+      --fg-secondary:  #404040;
+      --fg-muted:      #737373;
+      --line:          #E5E5E5;
+      --line-light:    #F0F0F0;
+
+      /* === ВЫСОТА И СКРУГЛЕНИЕ КОНТРОЛОВ ШАПКИ === */
+      --ctrl-h:        38px;
+      --ctrl-radius:   12px;
+
+      /* === AURORA (фон): палитра — заполняется JS === */
+      --aurora-bg:        #FFFFFF;
+      --aurora-primary:   #FFFFFF;
+      --aurora-secondary: #888888;
+      --aurora-grad1:     #666666;
+      --aurora-grad2:     #333333;
+      --aurora-grad3:     #000000;
+      --aurora-opacity:   0.22;
+      --aurora-blur:      14px;
+      --aurora-blend:     multiply;
+
+      /* === AURORA: геометрия и анимация (одинаково для всех тем) === */
+      --aurora-mask-x:     100%;
+      --aurora-mask-y:     0%;
+      --aurora-mask-black: 10%;
+      --aurora-mask-fade:  65%;
+      --grad-angle:        100deg;
+      --grad1-stop1: 0%;  --grad1-stop2: 5%;  --grad1-stop3: 12%; --grad1-stop4: 18%; --grad1-stop5: 25%;
+      --grad2-stop1: 8%;  --grad2-stop2: 14%; --grad2-stop3: 22%; --grad2-stop4: 32%; --grad2-stop5: 42%;
+      --bg-size-main-1: 300%;  --bg-size-main-2: 200%;
+      --bg-size-after-1: 200%; --bg-size-after-2: 100%;
+      --anim-duration: 90s;
+      --anim-pos-start: 50%;   --anim-pos-end: 350%;
+      --transition-duration: 0.6s;
     }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
     html, body {
       font-family: 'SN Pro', system-ui, -apple-system, sans-serif;
@@ -54,32 +97,99 @@
       color: var(--fg);
       -webkit-font-smoothing: antialiased;
       -moz-osx-font-smoothing: grayscale;
+      transition: background-color var(--transition-duration) ease, color var(--transition-duration) ease;
     }
-    body { min-height: 100vh; overflow-x: hidden; }
+    body { min-height: 100vh; overflow-x: hidden; position: relative; }
 
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--fg-muted); }
 
+    /* ============================================================
+       AURORA BACKGROUND
+       ============================================================ */
+    .aurora-background {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      opacity: var(--aurora-opacity);
+      filter: blur(var(--aurora-blur));
+      transition: opacity var(--transition-duration) ease;
+      will-change: transform;
+
+      -webkit-mask-image: radial-gradient(ellipse at var(--aurora-mask-x) var(--aurora-mask-y),
+        black var(--aurora-mask-black), transparent var(--aurora-mask-fade));
+      mask-image: radial-gradient(ellipse at var(--aurora-mask-x) var(--aurora-mask-y),
+        black var(--aurora-mask-black), transparent var(--aurora-mask-fade));
+
+      background-image:
+        repeating-linear-gradient(var(--grad-angle),
+          var(--aurora-primary) var(--grad1-stop1),
+          var(--aurora-primary) var(--grad1-stop2),
+          transparent var(--grad1-stop3),
+          transparent var(--grad1-stop4),
+          var(--aurora-primary) var(--grad1-stop5)
+        ),
+        repeating-linear-gradient(var(--grad-angle),
+          var(--aurora-secondary) var(--grad2-stop1),
+          var(--aurora-grad1) var(--grad2-stop2),
+          var(--aurora-grad2) var(--grad2-stop3),
+          var(--aurora-grad3) var(--grad2-stop4),
+          var(--aurora-grad1) var(--grad2-stop5)
+        );
+      background-size: var(--bg-size-main-1) 100%, var(--bg-size-main-2) 100%;
+      background-position: var(--anim-pos-start) 50%, var(--anim-pos-start) 50%;
+      background-color: var(--aurora-bg);
+    }
+    .aurora-background::after {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: inherit;
+      background-size: var(--bg-size-after-1) 100%, var(--bg-size-after-2) 100%;
+      background-attachment: fixed;
+      mix-blend-mode: var(--aurora-blend);
+      animation: aurora-shift var(--anim-duration) linear infinite;
+    }
+    @keyframes aurora-shift {
+      0%   { background-position: var(--anim-pos-start) 50%, var(--anim-pos-start) 50%; }
+      100% { background-position: var(--anim-pos-end)   50%, var(--anim-pos-end)   50%; }
+    }
+
+    /* Перехватывающий оверлей для плавной смены темы */
+    .theme-transition-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: var(--bg);
+      opacity: 0; pointer-events: none;
+      transition: opacity var(--transition-duration) ease;
+    }
+    .theme-transition-overlay.active { opacity: 0.85; pointer-events: all; }
+
+    /* ============================================================
+       BLUEPRINT GRID — оригинальный фон auth-экрана (стал не нужен,
+       заменён на aurora, но классы оставлены, если где-то ещё)
+       ============================================================ */
     .blueprint-grid {
       background-image:
         linear-gradient(rgba(10,10,10,0.035) 1px, transparent 1px),
         linear-gradient(90deg, rgba(10,10,10,0.035) 1px, transparent 1px);
       background-size: 48px 48px;
     }
-
-    .corner-mark { position: absolute; width: 18px; height: 18px; border-color: rgba(10,10,10,0.18); border-style: solid; pointer-events: none;  }
+    .corner-mark { position: absolute; width: 18px; height: 18px; border-color: rgba(10,10,10,0.18); border-style: solid; pointer-events: none; }
     .corner-mark-tl { top: 0; left: 0; border-width: 1px 0 0 1px; }
     .corner-mark-tr { top: 0; right: 0; border-width: 1px 1px 0 0; }
     .corner-mark-bl { bottom: 0; left: 0; border-width: 0 0 1px 1px; }
     .corner-mark-br { bottom: 0; right: 0; border-width: 0 1px 1px 0; }
 
+    /* ============================================================
+       КНОПКИ ПРИЛОЖЕНИЯ (используют CSS-переменные)
+       ============================================================ */
     .btn-primary {
       background: var(--fg); color: var(--bg); border: 1px solid var(--fg);
       transition: all .2s ease;
     }
-    .btn-primary:hover:not(:disabled) { background: #202020; border-color: #202020; }
+    .btn-primary:hover:not(:disabled) { opacity: 0.88; }
     .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
 
     .btn-secondary {
@@ -94,21 +204,82 @@
     }
     .btn-google:hover:not(:disabled) { background: var(--bg-alt); border-color: var(--fg); }
 
-    .nav-item { position: relative; transition: color .2s ease; color: var(--fg-muted); }
-    .nav-item::after {
-      content: ''; position: absolute; bottom: -6px; left: 0; width: 0; height: 1px;
-      background: var(--fg); transition: width .25s ease;
+    /* ============================================================
+       ШАПКА — все контролы одной высоты и одного скругления
+       ============================================================ */
+    .header-blur {
+      /* fallback */
+      background: var(--bg);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
     }
-    .nav-item:hover { color: var(--fg); }
-    .nav-item.active { color: var(--fg); }
-    .nav-item.active::after { width: 100%; }
+    @supports (background: color-mix(in srgb, white, black)) {
+      .header-blur {
+        background: color-mix(in srgb, var(--bg) 82%, transparent);
+      }
+    }
 
+    .ctrl {
+      height: var(--ctrl-h);
+      border-radius: var(--ctrl-radius);
+      border: 1px solid var(--line);
+      background: var(--bg);
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 0 12px;
+      font-size: 13px; color: var(--fg);
+      transition: border-color .2s ease, background .2s ease;
+      cursor: pointer;
+    }
+    .ctrl:hover { border-color: var(--fg-muted); }
+    .ctrl-square {
+      width: var(--ctrl-h);
+      padding: 0;
+      justify-content: center;
+      gap: 0;
+    }
+    .ctrl-logo {
+      cursor: default;
+      pointer-events: none;
+    }
+    .ctrl-logo:hover { border-color: var(--line); }
+
+    /* ----- Segmented nav (radio-input стиль) ----- */
+    .nav-segmented {
+      height: var(--ctrl-h);
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      border-radius: var(--ctrl-radius);
+      padding: 4px;
+      display: inline-flex; align-items: stretch; gap: 0;
+    }
+    .nav-segmented .nav-item {
+      padding: 0 14px;
+      border-radius: calc(var(--ctrl-radius) - 4px);
+      color: var(--fg-muted);
+      font-size: 13px;
+      transition: all .15s ease-in-out;
+      display: inline-flex; align-items: center;
+      text-decoration: none; white-space: nowrap;
+    }
+    .nav-segmented .nav-item:hover { color: var(--fg); }
+    .nav-segmented .nav-item.active {
+      background: var(--bg);
+      color: var(--fg);
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 0 0 1px rgba(0,0,0,.04);
+    }
+
+    /* ----- Сайдбар-навигация (мобильная) ----- */
     .sidebar-item {
       border: 1px solid transparent; transition: all .2s ease; color: var(--fg-secondary);
     }
     .sidebar-item:hover { background: var(--bg-alt); border-color: var(--line-light); color: var(--fg); }
     .sidebar-item.active { background: var(--bg-alt); border-color: var(--line); color: var(--fg); }
 
+    /* ============================================================
+       КАРТОЧКА ГРУППЫ (auth — экран выбора)
+       ============================================================ */
     .group-card {
       border: 1px solid var(--line); transition: all .2s ease; background: var(--bg);
     }
@@ -116,6 +287,9 @@
       border-color: var(--fg); background: var(--bg-alt); transform: translateY(-1px);
     }
 
+    /* ============================================================
+       ЛОАДЕР И TOAST
+       ============================================================ */
     .loader {
       animation: spin 1s linear infinite;
       border: 2px solid var(--line);
@@ -142,15 +316,108 @@
         animation-duration: .01ms !important;
         transition-duration: .01ms !important;
       }
+      .aurora-background::after { animation: none !important; }
+    }
+
+    /* ============================================================
+       ПЕРЕКЛЮЧАТЕЛЬ ТЕМ (ctrl + линия тем справа налево)
+       ============================================================ */
+    .theme-switcher { position: relative; }
+
+    .theme-line {
+      position: absolute;
+      right: calc(100% + 8px);
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex; align-items: center; gap: 6px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .2s ease;
+    }
+    .theme-line.active { pointer-events: auto; opacity: 1; }
+
+    .theme-node {
+      width: calc(var(--ctrl-h) - 6px);
+      height: calc(var(--ctrl-h) - 6px);
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: var(--bg);
+      display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      opacity: 0;
+      transform: translateX(14px) scale(0.7);
+      transition: opacity .25s ease, transform .25s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  border-color .15s ease, box-shadow .15s ease;
+      position: relative;
+    }
+    .theme-node:hover { border-color: var(--fg-muted); }
+    .theme-node.active {
+      border-color: var(--fg);
+      box-shadow: 0 0 0 2px var(--bg);
+    }
+    .theme-node .theme-preview {
+      width: 18px; height: 18px;
+      border-radius: 6px;
+      pointer-events: none;
+    }
+    .theme-node::after {
+      content: attr(title);
+      position: absolute;
+      bottom: -22px; left: 50%;
+      transform: translateX(-50%) translateY(4px);
+      font-size: 10px;
+      background: var(--fg); color: var(--bg);
+      padding: 3px 7px; border-radius: 6px;
+      white-space: nowrap;
+      opacity: 0; pointer-events: none;
+      transition: opacity .15s ease, transform .15s ease;
+    }
+    .theme-node:hover::after {
+      opacity: 1; transform: translateX(-50%) translateY(0);
+    }
+
+    /* Появление в стиле "справа налево" — ближайшая к кнопке темы выезжает первой */
+    .theme-line.active .theme-node { opacity: 1; transform: translateX(0) scale(1); }
+    .theme-line .theme-node:nth-last-child(1) { transition-delay: 0ms;   }
+    .theme-line .theme-node:nth-last-child(2) { transition-delay: 35ms;  }
+    .theme-line .theme-node:nth-last-child(3) { transition-delay: 70ms;  }
+    .theme-line .theme-node:nth-last-child(4) { transition-delay: 105ms; }
+    .theme-line .theme-node:nth-last-child(5) { transition-delay: 140ms; }
+    .theme-line .theme-node:nth-last-child(6) { transition-delay: 175ms; }
+    .theme-line .theme-node:nth-last-child(7) { transition-delay: 210ms; }
+    .theme-line:not(.active) .theme-node {
+      transition-delay: 0ms !important;
+      opacity: 0; transform: translateX(14px) scale(0.7);
+    }
+
+    .btn-theme.active .icon-palette { display: none; }
+    .btn-theme.active .icon-close   { display: block; }
+    .btn-theme .icon-close { display: none; }
+    .btn-theme.active { background: var(--bg-alt); border-color: var(--fg-muted); }
+
+    /* На мобильных скрываем линию (откроется направо вниз? — пока просто скрываем) */
+    @media (max-width: 480px) {
+      .theme-line { display: none; }
+      .theme-line.mobile-open {
+        display: flex;
+        position: fixed;
+        right: 12px; top: calc(var(--ctrl-h) + 70px);
+        flex-direction: column-reverse;
+      }
     }
   </style>
 </head>
 <body>
 
-  <div id="app">
+  <!-- AURORA фон + плавный оверлей перехода тем -->
+  <div class="aurora-background" aria-hidden="true"></div>
+  <div class="theme-transition-overlay" aria-hidden="true"></div>
+
+  <div id="app" class="relative z-10">
 
     <!-- SCREEN: Loading -->
-    <div id="screen-loading" class="fixed inset-0 z-50 flex items-center justify-center bg-surface">
+    <div id="screen-loading" class="fixed inset-0 z-50 flex items-center justify-center" style="background: var(--bg);">
       <div class="text-center">
         <div class="w-12 h-12 loader mx-auto mb-4"></div>
         <p class="text-fg-muted text-sm tracking-wider uppercase">Загрузка</p>
@@ -158,7 +425,7 @@
     </div>
 
     <!-- SCREEN: Auth -->
-    <div id="screen-auth" class="hidden fixed inset-0 z-40 blueprint-grid bg-surface overflow-y-auto">
+    <div id="screen-auth" class="hidden fixed inset-0 z-40 overflow-y-auto">
       <div class="min-h-screen flex items-center justify-center px-4 py-8">
         <div class="w-full max-w-md">
           <div class="text-center mb-10 reveal">
@@ -213,14 +480,11 @@
                 <p class="text-fg-muted text-sm">Вы участник нескольких рабочих пространств</p>
               </div>
 
-              <div id="group-list" class="space-y-2 mb-5">
-                <!-- заполняется из app.js -->
-              </div>
+              <div id="group-list" class="space-y-2 mb-5"></div>
 
               <button id="btn-create-group-open" class="w-full py-3 text-fg-muted text-sm hover:text-fg transition-colors border-t border-line-light pt-4">
                 + Создать новую группу
               </button>
-
               <button id="btn-signout-picker" class="mt-3 w-full py-2 text-fg-muted text-xs hover:text-fg transition-colors">
                 Выйти из аккаунта
               </button>
@@ -240,14 +504,10 @@
 
               <label class="block mb-4">
                 <span class="text-xs text-fg-muted block mb-1.5">Название группы</span>
-                <input
-                  id="input-group-name"
-                  type="text"
-                  maxlength="100"
+                <input id="input-group-name" type="text" maxlength="100"
                   class="w-full px-4 py-3 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors"
                   placeholder="Например: Пекарня на Мира"
-                  autocomplete="off"
-                  spellcheck="false">
+                  autocomplete="off" spellcheck="false">
               </label>
 
               <button id="btn-create-group-submit" class="btn-primary w-full py-3.5 rounded-xl font-medium mb-2" disabled>
@@ -258,7 +518,7 @@
               </button>
             </div>
 
-            <!-- View: No groups (сирота) -->
+            <!-- View: No groups -->
             <div id="view-no-groups" class="hidden bg-surface rounded-2xl p-8 border border-line relative">
               <span class="corner-mark corner-mark-tl"></span>
               <span class="corner-mark corner-mark-tr"></span>
@@ -284,7 +544,7 @@
               </div>
             </div>
 
-            <!-- View: Session active on another device -->
+            <!-- View: Session active -->
             <div id="view-session-active" class="hidden bg-surface rounded-2xl p-8 border border-line relative">
               <span class="corner-mark corner-mark-tl"></span>
               <span class="corner-mark corner-mark-tr"></span>
@@ -325,7 +585,7 @@
               </div>
             </div>
 
-            <!-- View: Blocked user -->
+            <!-- View: Blocked -->
             <div id="view-blocked" class="hidden bg-surface rounded-2xl p-8 border border-line relative">
               <span class="corner-mark corner-mark-tl"></span>
               <span class="corner-mark corner-mark-tr"></span>
@@ -363,11 +623,12 @@
     <!-- SCREEN: Main -->
     <div id="screen-main" class="hidden">
 
-      <header class="sticky top-0 z-30 bg-surface/90 border-b border-line backdrop-blur">
-        <div class="max-w-app mx-auto flex items-center justify-between h-16 px-4 lg:px-6">
+      <header class="header-blur sticky top-0 z-30">
+        <div class="max-w-app mx-auto flex items-center justify-between gap-3 h-16 px-4 lg:px-6">
 
-          <div class="flex items-center gap-3">
-            <button id="btn-mobile-menu" class="lg:hidden w-10 h-10 flex items-center justify-center rounded-xl border border-line hover:border-fg transition-colors">
+          <!-- Левая зона -->
+          <div class="flex items-center gap-2">
+            <button id="btn-mobile-menu" class="ctrl ctrl-square lg:hidden" aria-label="Меню">
               <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                 <line x1="4" y1="6" x2="20" y2="6"/>
                 <line x1="4" y1="12" x2="20" y2="12"/>
@@ -375,46 +636,45 @@
               </svg>
             </button>
 
-            <a href="#" class="flex items-center gap-2.5">
-              <div class="w-9 h-9 rounded-xl bg-surface border border-line flex items-center justify-center">
-                <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M7 20V4h6a4 4 0 0 1 0 8H7"/>
-                  <path d="m13 12 4 8"/>
-                </svg>
-              </div>
-              <span class="font-medium hidden sm:block tracking-tight">RIVA</span>
+            <a href="#" class="ctrl ctrl-square ctrl-logo" aria-label="RIVA">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 20V4h6a4 4 0 0 1 0 8H7"/>
+                <path d="m13 12 4 8"/>
+              </svg>
             </a>
+            <span class="font-medium hidden sm:block tracking-tight" style="font-size:14px;">RIVA</span>
 
             <!-- Group switcher -->
-            <div class="relative" id="group-switcher-wrap">
-              <button id="btn-group-switcher" class="flex items-center gap-2 py-1.5 px-3 rounded-xl border border-line hover:border-fg transition-colors ml-2">
+            <div class="relative ml-1" id="group-switcher-wrap">
+              <button id="btn-group-switcher" class="ctrl">
                 <svg class="w-4 h-4 text-fg-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
                   <path d="M3 21h18"/>
                   <path d="M5 21V7l8-4v18"/>
                   <path d="M19 21V11l-6-4"/>
                 </svg>
-                <span id="current-group-name" class="text-sm max-w-[200px] truncate">—</span>
+                <span id="current-group-name" class="max-w-[200px] truncate">—</span>
                 <svg id="group-switcher-arrow" class="w-4 h-4 text-fg-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="6 9 12 15 18 9"/></svg>
               </button>
-              <div id="group-switcher-menu" class="hidden absolute left-0 top-full mt-2 w-72 bg-surface rounded-xl border border-line shadow-lg shadow-black/5 py-1.5 z-50 max-h-80 overflow-y-auto">
-                <!-- заполняется из app.js -->
-              </div>
+              <div id="group-switcher-menu" class="hidden absolute left-0 top-full mt-2 w-72 bg-surface rounded-xl border border-line shadow-lg shadow-black/5 py-1.5 z-50 max-h-80 overflow-y-auto"></div>
             </div>
           </div>
 
-          <nav id="top-nav" class="hidden lg:flex items-center gap-7">
-            <!-- Populated by app.js based on role -->
-          </nav>
+          <!-- Центральная навигация (segmented control) -->
+          <nav id="top-nav" class="nav-segmented hidden lg:inline-flex"></nav>
 
+          <!-- Правая зона: профиль + тема -->
           <div class="flex items-center gap-2">
+
+            <!-- Profile -->
             <div class="relative" id="profile-wrap">
-              <button id="btn-profile" class="flex items-center gap-2 py-1.5 px-2 rounded-xl border border-line hover:border-fg transition-colors">
-                <div class="w-7 h-7 rounded-lg overflow-hidden bg-surface-alt flex items-center justify-center" id="header-avatar">
+              <button id="btn-profile" class="ctrl" style="padding: 0 8px 0 4px;">
+                <span class="inline-flex items-center justify-center rounded-md overflow-hidden" id="header-avatar"
+                      style="width:26px; height:26px; background: var(--bg-alt);">
                   <svg class="w-4 h-4 text-fg-muted" viewBox="0 0 24 24" fill="currentColor">
                     <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
                   </svg>
-                </div>
-                <span class="text-sm hidden sm:block max-w-[140px] truncate" id="header-name"></span>
+                </span>
+                <span class="hidden sm:block max-w-[140px] truncate" id="header-name"></span>
                 <svg class="w-4 h-4 text-fg-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="6 9 12 15 18 9"/></svg>
               </button>
               <div id="profile-menu" class="hidden absolute right-0 top-full mt-2 w-64 bg-surface rounded-xl border border-line shadow-lg shadow-black/5 py-1.5 z-50">
@@ -433,6 +693,32 @@
                 </button>
               </div>
             </div>
+
+            <!-- Theme switcher -->
+            <div class="theme-switcher">
+              <!-- Линия тем (появляется СПРАВА НАЛЕВО относительно кнопки) -->
+              <div class="theme-line" id="theme-line">
+                <button class="theme-node" data-theme="bw-light"  title="Светлая Ч/Б"><span class="theme-preview" style="background:linear-gradient(135deg,#FFFFFF 50%,#0A0A0A 50%)"></span></button>
+                <button class="theme-node" data-theme="bw-dark"   title="Тёмная Ч/Б"><span class="theme-preview" style="background:linear-gradient(135deg,#0A0B0E 50%,#FAFAFA 50%)"></span></button>
+                <button class="theme-node" data-theme="gradient-1" title="Тёплый песок"><span class="theme-preview" style="background:linear-gradient(135deg,#E5D2BB,#8A7560,#3F3A30)"></span></button>
+                <button class="theme-node" data-theme="gradient-2" title="Кофе с молоком"><span class="theme-preview" style="background:linear-gradient(135deg,#C68554,#7A4A2C,#2A1E18)"></span></button>
+                <button class="theme-node" data-theme="gradient-3" title="Морской бриз"><span class="theme-preview" style="background:linear-gradient(135deg,#A4C5D8,#3C7A95,#1E353F)"></span></button>
+                <button class="theme-node" data-theme="gradient-4" title="Туманный лес"><span class="theme-preview" style="background:linear-gradient(135deg,#A5BABA,#556450,#252820)"></span></button>
+                <button class="theme-node" data-theme="gradient-5" title="Стальной минимал"><span class="theme-preview" style="background:linear-gradient(135deg,#D8D9DD,#5A5E68,#1E1F23)"></span></button>
+              </div>
+
+              <button id="btn-theme" class="ctrl ctrl-square btn-theme" aria-label="Сменить тему">
+                <svg class="icon-palette w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <circle cx="12" cy="12" r="10"/>
+                  <circle cx="12" cy="8" r="2" fill="currentColor"/>
+                  <path d="M8 14c1.5-2 6.5-2 8 0" stroke-linecap="round"/>
+                </svg>
+                <svg class="icon-close w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M18 6 6 18M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+
           </div>
         </div>
       </header>
@@ -442,9 +728,7 @@
         <div class="h-16 px-5 flex items-center border-b border-line">
           <span class="font-medium tracking-tight">RIVA</span>
         </div>
-        <nav id="side-nav" class="p-3 space-y-1">
-          <!-- Populated by app.js -->
-        </nav>
+        <nav id="side-nav" class="p-3 space-y-1"></nav>
       </aside>
 
       <main class="max-w-app mx-auto px-4 lg:px-6 py-6">
@@ -459,6 +743,202 @@
   </div>
 
   <div id="toasts" class="fixed bottom-4 right-4 z-[60] space-y-2 max-w-sm pointer-events-none"></div>
+
+  <!-- ============================================================
+       ПАЛИТРЫ И ПЕРЕКЛЮЧАТЕЛЬ ТЕМ
+       ============================================================ -->
+  <script>
+    (function () {
+      const PALETTES = {
+        // Текущая светлая (сохранена в неизменном виде)
+        'bw-light': {
+          bg: '#FFFFFF', bgAlt: '#FAFAFA', bgCard: '#F5F5F5',
+          fg: '#0A0A0A', fgSecondary: '#404040', fgMuted: '#737373',
+          line: '#E5E5E5', lineLight: '#F0F0F0',
+          aurora: {
+            bg: '#FFFFFF',
+            primary: '#FFFFFF',
+            secondary: '#A8A8A8',
+            grad1: '#888888', grad2: '#555555', grad3: '#222222',
+            opacity: 0.22, blur: 14, blend: 'multiply'
+          }
+        },
+        // Тёмная
+        'bw-dark': {
+          bg: '#15171C', bgAlt: '#1C1F25', bgCard: '#23262E',
+          fg: '#F5F5F5', fgSecondary: '#A3A3A3', fgMuted: '#737373',
+          line: '#2B2F38', lineLight: '#24272F',
+          aurora: {
+            bg: '#0A0B0E',
+            primary: '#23262E',
+            secondary: '#454A55',
+            grad1: '#5B6170', grad2: '#7A8090', grad3: '#9CA3B3',
+            opacity: 0.32, blur: 10, blend: 'screen'
+          }
+        },
+        // Тёплый песок
+        'gradient-1': {
+          bg: '#FCFBF6', bgAlt: '#F4F0E5', bgCard: '#EEE7D6',
+          fg: '#2A2823', fgSecondary: '#5C5547', fgMuted: '#8A8270',
+          line: '#DCD3BD', lineLight: '#EAE3CE',
+          aurora: {
+            bg: '#FCFBF6',
+            primary: '#E5D2BB',
+            secondary: '#A89077',
+            grad1: '#8A7560', grad2: '#6A5B4A', grad3: '#3F3A30',
+            opacity: 0.32, blur: 12, blend: 'soft-light'
+          }
+        },
+        // Кофе с молоком
+        'gradient-2': {
+          bg: '#F7F1E8', bgAlt: '#EFE6D5', bgCard: '#E6D8C1',
+          fg: '#2A1E18', fgSecondary: '#5A4438', fgMuted: '#8A7A6A',
+          line: '#D2C0A6', lineLight: '#E2D4BC',
+          aurora: {
+            bg: '#F7F1E8',
+            primary: '#C68554',
+            secondary: '#8A5A36',
+            grad1: '#7A4A2C', grad2: '#5A3320', grad3: '#2A1E18',
+            opacity: 0.30, blur: 13, blend: 'soft-light'
+          }
+        },
+        // Морской бриз
+        'gradient-3': {
+          bg: '#F4F8FA', bgAlt: '#E8EFF4', bgCard: '#D9E5ED',
+          fg: '#15252D', fgSecondary: '#3B5562', fgMuted: '#6E8595',
+          line: '#C3D4DE', lineLight: '#DEE8EE',
+          aurora: {
+            bg: '#F4F8FA',
+            primary: '#A4C5D8',
+            secondary: '#5E92AB',
+            grad1: '#3C7A95', grad2: '#28586D', grad3: '#1E353F',
+            opacity: 0.32, blur: 12, blend: 'soft-light'
+          }
+        },
+        // Туманный лес
+        'gradient-4': {
+          bg: '#F2F5F0', bgAlt: '#E7ECE3', bgCard: '#D9E0D2',
+          fg: '#1F2A20', fgSecondary: '#465045', fgMuted: '#7B8A78',
+          line: '#C0CBB9', lineLight: '#DCE3D4',
+          aurora: {
+            bg: '#F2F5F0',
+            primary: '#A5BABA',
+            secondary: '#6B7E6A',
+            grad1: '#556450', grad2: '#3E4A38', grad3: '#252820',
+            opacity: 0.30, blur: 13, blend: 'soft-light'
+          }
+        },
+        // Стальной минимал
+        'gradient-5': {
+          bg: '#F8F8FA', bgAlt: '#EEEFF2', bgCard: '#E0E2E7',
+          fg: '#1A1B1F', fgSecondary: '#3F4148', fgMuted: '#71747C',
+          line: '#C7C9D0', lineLight: '#DEE0E5',
+          aurora: {
+            bg: '#F8F8FA',
+            primary: '#D8D9DD',
+            secondary: '#9395A0',
+            grad1: '#5A5E68', grad2: '#3A3D45', grad3: '#1E1F23',
+            opacity: 0.28, blur: 13, blend: 'soft-light'
+          }
+        }
+      };
+
+      const STORAGE_KEY = 'riva-theme';
+
+      function applyPalette(key) {
+        const p = PALETTES[key];
+        if (!p) return;
+        const r = document.documentElement;
+
+        // Приложение
+        r.style.setProperty('--bg',           p.bg);
+        r.style.setProperty('--bg-alt',       p.bgAlt);
+        r.style.setProperty('--bg-card',      p.bgCard);
+        r.style.setProperty('--fg',           p.fg);
+        r.style.setProperty('--fg-secondary', p.fgSecondary);
+        r.style.setProperty('--fg-muted',     p.fgMuted);
+        r.style.setProperty('--line',         p.line);
+        r.style.setProperty('--line-light',   p.lineLight);
+
+        // Aurora
+        r.style.setProperty('--aurora-bg',        p.aurora.bg);
+        r.style.setProperty('--aurora-primary',   p.aurora.primary);
+        r.style.setProperty('--aurora-secondary', p.aurora.secondary);
+        r.style.setProperty('--aurora-grad1',     p.aurora.grad1);
+        r.style.setProperty('--aurora-grad2',     p.aurora.grad2);
+        r.style.setProperty('--aurora-grad3',     p.aurora.grad3);
+        r.style.setProperty('--aurora-opacity',   String(p.aurora.opacity));
+        r.style.setProperty('--aurora-blur',      p.aurora.blur + 'px');
+        r.style.setProperty('--aurora-blend',     p.aurora.blend);
+
+        // theme-color meta для статус-бара браузера/PWA
+        document.querySelector('meta[name="theme-color"]')?.setAttribute('content', p.bg);
+
+        // активный кружок в линии
+        document.querySelectorAll('.theme-node').forEach(n =>
+          n.classList.toggle('active', n.dataset.theme === key));
+      }
+
+      function switchTheme(key) {
+        const aurora = document.querySelector('.aurora-background');
+        const overlay = document.querySelector('.theme-transition-overlay');
+        const cur = PALETTES[key];
+        if (!cur) return;
+
+        // Плавный переход через оверлей
+        if (aurora) aurora.style.opacity = '0.05';
+        overlay?.classList.add('active');
+
+        setTimeout(() => {
+          applyPalette(key);
+          localStorage.setItem(STORAGE_KEY, key);
+
+          requestAnimationFrame(() => {
+            if (aurora) aurora.style.opacity = cur.aurora.opacity;
+            overlay?.classList.remove('active');
+          });
+        }, 350);
+      }
+
+      // Применяем сохранённую тему ДО рендеринга app.js (no flash)
+      const saved = localStorage.getItem(STORAGE_KEY) || 'bw-light';
+      applyPalette(PALETTES[saved] ? saved : 'bw-light');
+
+      // Биндинги — после DOMContentLoaded (т.к. кнопки лежат в DOM)
+      document.addEventListener('DOMContentLoaded', () => {
+        const btnTheme = document.getElementById('btn-theme');
+        const line = document.getElementById('theme-line');
+        if (!btnTheme || !line) return;
+
+        btnTheme.addEventListener('click', (e) => {
+          e.stopPropagation();
+          const isOpen = btnTheme.classList.toggle('active');
+          line.classList.toggle('active', isOpen);
+        });
+
+        document.querySelectorAll('.theme-node').forEach(b => {
+          b.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const key = b.dataset.theme;
+            if (!PALETTES[key]) return;
+            btnTheme.classList.remove('active');
+            line.classList.remove('active');
+            switchTheme(key);
+          });
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!e.target.closest('.theme-switcher')) {
+            btnTheme.classList.remove('active');
+            line.classList.remove('active');
+          }
+        });
+      });
+
+      // expose для отладки
+      window.RIVA_THEME = { applyPalette, switchTheme, PALETTES };
+    })();
+  </script>
 
   <script type="module" src="./assets/app.js"></script>
 </body>
