@@ -68,6 +68,35 @@
   </div>
 </section>
 
+<!-- ============================================================
+     ШАБЛОН СТРОКИ РЕЦЕПТА — используется на подстранице "Рецепты".
+     Каждое поле помечено data-field="...", на него ссылается JS.
+============================================================ -->
+<template id="m2-recipe-row-tpl">
+  <article class="m2-row m2-row--recipe" data-rec-id="">
+    <span class="m2-row__code"     data-field="code"></span>
+    <span class="m2-row__title"    data-field="name"></span>
+    <span class="m2-row__stat"     data-field="output"></span>
+    <span class="m2-row__stat"     data-field="ingredients"></span>
+    <span class="m2-row__stat"     data-field="hours"></span>
+    <span class="m2-row__product"  data-field="product"></span>
+    <span class="m2-row__chip"     data-field="chip"></span>
+  </article>
+</template>
+
+<!-- ============================================================
+     ШАБЛОН СТРОКИ ПАРТИИ — используется на подстранице "Партии".
+============================================================ -->
+<template id="m2-run-row-tpl">
+  <article class="m2-row m2-row--run" data-run-id="">
+    <span class="m2-row__code"     data-field="number"></span>
+    <span class="m2-badge"          data-field="status"></span>
+    <span class="m2-row__title"    data-field="recipe"></span>
+    <span class="m2-row__planfact" data-field="planfact"></span>
+    <span class="m2-row__date"     data-field="date"></span>
+  </article>
+</template>
+
 <!-- =========================
      MODAL: редактор рецепта
 ========================== -->
@@ -250,22 +279,166 @@
   .m2-tab.active { color: var(--fg); }
   .m2-tab.active .m2-tab-bar { transform: scaleX(1); }
 
-  .m2-rec-card, .m2-run-card {
-    border: 1px solid var(--line);
-    background: var(--bg);
-    transition: all .15s ease;
+  /* ============================================================
+     ШАБЛОН СТРОКИ (modal2 — Рецепты и Партии)
+     Связан с <template id="m2-recipe-row-tpl"> и <template id="m2-run-row-tpl">.
+
+     Главные настройки:
+       --m2-accent         — акцентный цвет темы (по умолчанию = основной текст)
+       --m2-bg-pct         — насыщенность фона карточки   (3%)
+       --m2-bg-hover       — насыщенность на hover        (6%)
+       --m2-border-pct     — насыщенность бордера         (8%)
+       --m2-badge-pct      — насыщенность фона чипов     (13% = +10% к карточке)
+       --m2-blur           — размытие фона карточки      (3px)
+       --m2-badge-blur     — размытие фона чипов         (6px)
+  ============================================================ */
+  .m2-row {
+    --m2-accent: var(--fg);
+    --m2-bg-pct: 3%;
+    --m2-bg-hover: 6%;
+    --m2-border-pct: 8%;
+    --m2-blur: 3px;
+
+    background: color-mix(in srgb, var(--m2-accent) var(--m2-bg-pct), transparent);
+    backdrop-filter: blur(var(--m2-blur));
+    -webkit-backdrop-filter: blur(var(--m2-blur));
+    border: 1px solid color-mix(in srgb, var(--m2-accent) var(--m2-border-pct), transparent);
+    border-radius: 12px;
+
+    display: grid;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+
+    transition: background .15s ease, border-color .15s ease;
     cursor: pointer;
   }
-  .m2-rec-card:hover, .m2-run-card:hover { border-color: var(--fg-muted); }
+  .m2-row:hover {
+    background: color-mix(in srgb, var(--m2-accent) var(--m2-bg-hover), transparent);
+    border-color: color-mix(in srgb, var(--m2-accent) calc(var(--m2-border-pct) + 10%), transparent);
+  }
 
-  .m2-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; line-height: 1.4; white-space: nowrap; }
-  .m2-badge-planned     { background: #F5F5F5; color: #525252; }
-  .m2-badge-in_progress { background: #DBEAFE; color: #1D4ED8; }
-  .m2-badge-done        { background: #DCFCE7; color: #15803D; }
-  .m2-badge-cancelled   { background: #FEE2E2; color: #B91C1C; }
+  /* Грид для рецепта: код · название · 3 стата · продукт · чип */
+  .m2-row--recipe {
+    grid-template-columns:
+      /* код         */ 110px
+      /* название    */ minmax(0, 1fr)
+      /* выход       */ 110px
+      /* ингред.     */ 110px
+      /* нормо-часы  */ 100px
+      /* продукция   */ minmax(0, 1fr)
+      /* чип         */ 80px;
+  }
 
-  .m2-chip-sub { background: #EEF2FF; color: #4338CA; }
-  .m2-chip-mat { background: #F0FDF4; color: #15803D; }
+  /* Грид для партии: номер · статус · рецепт · план/факт · дата */
+  .m2-row--run {
+    grid-template-columns:
+      /* номер     */ 170px
+      /* статус    */ 140px
+      /* рецепт    */ minmax(0, 1fr)
+      /* план/факт */ 190px
+      /* дата      */ 180px;
+  }
+
+  /* Ячейки строки — единые стили для обоих типов */
+  .m2-row__code {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .m2-row__title {
+    font-size: 13px;
+    color: var(--fg-secondary);
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .m2-row__stat {
+    font-size: 12px;
+    color: var(--fg);
+    white-space: nowrap;
+  }
+  .m2-row__product {
+    font-size: 12px;
+    color: var(--fg-muted);
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .m2-row__planfact {
+    font-size: 13px;
+    color: var(--fg);
+    text-align: right;
+    white-space: nowrap;
+  }
+  .m2-row__date {
+    font-size: 12px;
+    color: var(--fg-muted);
+    text-align: right;
+    white-space: nowrap;
+  }
+  .m2-row__chip { justify-self: end; }
+  .m2-row__chip:empty { display: none; }
+
+  /* ============================================================
+     ЧИПЫ И БЕЙДЖИ (статусы партии, чипы ингредиентов в редакторе)
+     Фон/размытие на ~10% сильнее, чем у карточки.
+     Цвет задаётся переменной --badge-c.
+  ============================================================ */
+  .m2-badge,
+  .m2-chip-sub,
+  .m2-chip-mat {
+    --m2-badge-pct: 13%;
+    --m2-badge-blur: 6px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    padding: 3px 9px;
+    border-radius: 7px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
+    white-space: nowrap;
+    background: color-mix(in srgb, var(--badge-c, var(--fg-muted)) var(--m2-badge-pct), transparent);
+    color: var(--badge-c, var(--fg-muted));
+    backdrop-filter: blur(var(--m2-badge-blur));
+    -webkit-backdrop-filter: blur(var(--m2-badge-blur));
+  }
+
+  /* Статусы партии */
+  .m2-badge-planned     { --badge-c: #6B7280; }
+  .m2-badge-in_progress { --badge-c: #2563EB; }
+  .m2-badge-done        { --badge-c: #15803D; }
+  .m2-badge-cancelled   { --badge-c: #DC2626; }
+
+  /* Чипы для ингредиентов в редакторе рецепта */
+  .m2-chip-sub { --badge-c: #4338CA; }   /* вложенный рецепт — индиго */
+  .m2-chip-mat { --badge-c: #15803D; }   /* материал — зелёный */
+
+  /* Адаптив */
+  @media (max-width: 1024px) {
+    .m2-row--recipe,
+    .m2-row--run {
+      grid-template-columns: auto minmax(0, 1fr) auto auto;
+      gap: 10px;
+    }
+    .m2-row__product, .m2-row__chip { display: none; }
+  }
+  @media (max-width: 700px) {
+    .m2-row--recipe,
+    .m2-row--run {
+      grid-template-columns: 1fr;
+      gap: 4px;
+      padding: 12px 14px;
+    }
+    .m2-row__date, .m2-row__planfact { text-align: left; }
+  }
 </style>
 
 <script type="module">
@@ -296,6 +469,16 @@ function switchTab(name) {
   if (name === 'runs') loadRuns();
 }
 document.querySelectorAll('.m2-tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
+
+// Делегирование клика — один раз для обоих списков карточек.
+$('m2-rec-list').addEventListener('click', (e) => {
+  const card = e.target.closest('[data-rec-id]');
+  if (card && card.dataset.recId) openRecipeEditor(card.dataset.recId);
+});
+$('m2-run-list').addEventListener('click', (e) => {
+  const card = e.target.closest('[data-run-id]');
+  if (card && card.dataset.runId) openRunEditor(card.dataset.runId);
+});
 
 // Кэш склада и рецептов для селектов и автокомплита
 const cache = {
@@ -349,57 +532,48 @@ function renderRecipes() {
     return;
   }
 
-  $('m2-rec-list').innerHTML = list.map(r => {
-    const out = cache.warehouse.find(w => w.id === r.output_item_id);
-    const outQty = `${formatNumber(r.output_quantity)} ${out?.unit || ''}`;
-    const outName = out ? `«${out.name}»` : '—';
-    const ingCount = r.recipe_ingredients?.length || 0;
-    const hasSub = (r.recipe_ingredients || []).some(i => i.sub_recipe_id);
-    const hours = Number(r.labor_hours || 0);
+  const container = $('m2-rec-list');
+  container.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  list.forEach(r => frag.appendChild(renderRecipeRow(r)));
+  container.appendChild(frag);
+}
 
-    return `
-      <div class="m2-rec-card rounded-xl px-4 py-3" data-rec-id="${esc(r.id)}">
-        <div class="flex items-center gap-4 flex-wrap md:flex-nowrap">
+function renderRecipeRow(r) {
+  const tpl = document.getElementById('m2-recipe-row-tpl');
+  const node = tpl.content.firstElementChild.cloneNode(true);
+  node.dataset.recId = r.id;
 
-          <!-- Левая зона: код + название -->
-          <div class="min-w-0 flex-1 md:basis-1/3 md:flex-grow-0">
-            <div class="text-[10px] uppercase tracking-wider text-fg-muted mb-0.5">${r.code ? esc(r.code) : 'РЕЦЕПТ'}</div>
-            <div class="font-medium truncate" title="${esc(r.name)}">${esc(r.name)}</div>
-          </div>
+  const fld = (name) => node.querySelector(`[data-field="${name}"]`);
 
-          <!-- Центр: три пары -->
-          <div class="flex items-stretch gap-6 flex-shrink-0">
-            <div>
-              <div class="text-[11px] text-fg-muted">Выход</div>
-              <div class="font-medium text-sm whitespace-nowrap">${esc(outQty)}</div>
-            </div>
-            <div>
-              <div class="text-[11px] text-fg-muted">Ингредиентов</div>
-              <div class="font-medium text-sm">${ingCount}</div>
-            </div>
-            <div>
-              <div class="text-[11px] text-fg-muted">Нормо-часы</div>
-              <div class="font-medium text-sm">${hours > 0 ? formatNumber(hours) + ' ч' : '—'}</div>
-            </div>
-          </div>
+  const out = cache.warehouse.find(w => w.id === r.output_item_id);
+  const ingCount = r.recipe_ingredients?.length || 0;
+  const hasSub = (r.recipe_ingredients || []).some(i => i.sub_recipe_id);
+  const hours = Number(r.labor_hours || 0);
 
-          <!-- Правая зона: продукт + чип "вложен." -->
-          <div class="min-w-0 flex-1 md:ml-auto md:text-right flex items-center md:justify-end gap-2">
-            <div class="min-w-0 flex-1 md:flex-grow-0">
-              <div class="text-[11px] text-fg-muted">Продукция</div>
-              <div class="text-sm text-fg-secondary truncate" title="${esc(out?.name || '')}">${esc(outName)}</div>
-            </div>
-            ${hasSub ? '<span class="m2-badge m2-chip-sub flex-shrink-0" title="Содержит вложенные рецепты">вложен.</span>' : ''}
-          </div>
+  fld('code').textContent = r.code || '—';
 
-        </div>
-      </div>
-    `;
-  }).join('');
+  const name = fld('name');
+  name.textContent = r.name || '—';
+  name.title = r.name || '';
 
-  document.querySelectorAll('.m2-rec-card').forEach(card => {
-    card.addEventListener('click', () => openRecipeEditor(card.dataset.recId));
-  });
+  fld('output').textContent = `${formatNumber(r.output_quantity)} ${out?.unit || ''}`;
+  fld('ingredients').textContent = `${ingCount} ингр.`;
+  fld('hours').textContent = hours > 0 ? `${formatNumber(hours)} ч` : '—';
+
+  const productName = out?.name || '—';
+  const pr = fld('product');
+  pr.textContent = productName;
+  pr.title = productName;
+
+  if (hasSub) {
+    const chip = fld('chip');
+    chip.textContent = 'вложен.';
+    chip.title = 'Содержит вложенные рецепты';
+    chip.classList.add('m2-chip-sub');
+  }
+
+  return node;
 }
 
 // ---- Recipe editor ----
@@ -757,47 +931,43 @@ function renderRuns() {
     return;
   }
 
-  $('m2-run-list').innerHTML = list.map(r => {
-    const out = r.recipes ? cache.warehouse.find(w => w.id === r.recipes.output_item_id) : null;
-    const unit = out?.unit || '';
-    const dateLine = r.status === 'done' && r.finished_at
-      ? `Завершено ${formatDate(new Date(r.finished_at))}`
-      : r.status === 'in_progress' && r.started_at
-        ? `В работе с ${formatDate(new Date(r.started_at))}`
-        : `Создано ${formatDate(new Date(r.created_at))}`;
+  const container = $('m2-run-list');
+  container.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  list.forEach(r => frag.appendChild(renderRunRow(r)));
+  container.appendChild(frag);
+}
 
-    const planFact = `${formatNumber(r.planned_quantity)}${r.actual_quantity ? ' / ' + formatNumber(r.actual_quantity) : ' / —'}`;
+function renderRunRow(r) {
+  const tpl = document.getElementById('m2-run-row-tpl');
+  const node = tpl.content.firstElementChild.cloneNode(true);
+  node.dataset.runId = r.id;
 
-    return `
-      <div class="m2-run-card rounded-xl px-4 py-3" data-run-id="${esc(r.id)}">
-        <div class="flex items-center gap-3 flex-wrap md:flex-nowrap">
+  const fld = (name) => node.querySelector(`[data-field="${name}"]`);
+  const out = r.recipes ? cache.warehouse.find(w => w.id === r.recipes.output_item_id) : null;
+  const unit = out?.unit || '';
 
-          <!-- Номер + статус -->
-          <span class="font-medium whitespace-nowrap text-sm">${esc(r.run_number || '—')}</span>
-          <span class="m2-badge m2-badge-${r.status} flex-shrink-0">${esc(RUN_STATUS[r.status]?.label || r.status)}</span>
+  fld('number').textContent = r.run_number || '—';
 
-          <!-- Название рецепта -->
-          <div class="min-w-0 flex-1 text-sm text-fg-secondary truncate" title="${esc(r.recipes?.name || '')}">
-            ${esc(r.recipes?.name || '(рецепт удалён)')}
-          </div>
+  const status = fld('status');
+  status.textContent = RUN_STATUS[r.status]?.label || r.status;
+  status.classList.add('m2-badge-' + r.status);
 
-          <!-- План / Факт -->
-          <div class="text-sm whitespace-nowrap flex-shrink-0">
-            <span class="text-fg-muted text-xs mr-1">План/Факт:</span>
-            <span class="font-medium">${planFact} ${esc(unit)}</span>
-          </div>
+  const recipeName = r.recipes?.name || '(рецепт удалён)';
+  const recipe = fld('recipe');
+  recipe.textContent = recipeName;
+  recipe.title = recipeName;
 
-          <!-- Дата -->
-          <div class="text-xs text-fg-muted whitespace-nowrap flex-shrink-0">${esc(dateLine)}</div>
+  const planFact = `${formatNumber(r.planned_quantity)}${r.actual_quantity ? ' / ' + formatNumber(r.actual_quantity) : ' / —'}`;
+  fld('planfact').textContent = `${planFact} ${unit}`.trim();
 
-        </div>
-      </div>
-    `;
-  }).join('');
+  fld('date').textContent = r.status === 'done' && r.finished_at
+    ? `Завершено ${formatDate(new Date(r.finished_at))}`
+    : r.status === 'in_progress' && r.started_at
+      ? `В работе с ${formatDate(new Date(r.started_at))}`
+      : `Создано ${formatDate(new Date(r.created_at))}`;
 
-  document.querySelectorAll('.m2-run-card').forEach(card => {
-    card.addEventListener('click', () => openRunEditor(card.dataset.runId));
-  });
+  return node;
 }
 
 // ---- Run editor ----
