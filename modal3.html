@@ -60,6 +60,25 @@
   </div>
 </section>
 
+<!-- ============================================================
+     ШАБЛОН СТРОКИ ЗАКАЗА — используется и в активных, и в завершённых.
+     Структура контента: 7 колонок CSS Grid (см. .m3-row в стилях ниже).
+     При желании поля можно менять местами / переименовывать —
+     главное, чтобы у каждого поля был data-field="<имя>", на которое
+     ссылается JS-функция renderOrderCard().
+============================================================ -->
+<template id="m3-order-row-tpl">
+  <article class="m3-row" data-ord-id="">
+    <span class="m3-row__num"      data-field="number"></span>
+    <span class="m3-badge"          data-field="status"></span>
+    <span class="m3-badge"          data-field="payment"></span>
+    <span class="m3-row__customer" data-field="customer"></span>
+    <span class="m3-row__items"    data-field="items"></span>
+    <span class="m3-row__total"    data-field="total"></span>
+    <span class="m3-row__date"     data-field="date"></span>
+  </article>
+</template>
+
 <!-- =========================
      MODAL: редактор заказа продажи
 ========================== -->
@@ -156,23 +175,140 @@
   .m3-tab.active { color: var(--fg); }
   .m3-tab.active .m3-tab-bar { transform: scaleX(1); }
 
-  .m3-order-card {
-    border: 1px solid var(--line);
-    background: var(--bg);
-    transition: all .15s ease;
+  /* ============================================================
+     ШАБЛОН СТРОКИ ЗАКАЗА (modal3 — Активные и Завершённые)
+     Стили изолированы, легко правятся. Связаны с <template id="m3-order-row-tpl">.
+
+     Главные настройки:
+       --m3-accent   — акцентный цвет темы (по умолчанию = основной текст)
+       --m3-bg-pct   — насыщенность фона карточки   (3% по умолчанию)
+       --m3-bg-hover — насыщенность фона на hover  (6%)
+       --m3-border-pct — насыщенность бордера     (8%)
+       --m3-badge-pct — насыщенность фона чипов   (13% = +10% к карточке)
+       --m3-blur     — размытие фона карточки     (3px)
+       --m3-badge-blur — размытие фона чипов     (6px)
+  ============================================================ */
+  .m3-row {
+    --m3-accent: var(--fg);
+    --m3-bg-pct: 3%;
+    --m3-bg-hover: 6%;
+    --m3-border-pct: 8%;
+    --m3-blur: 3px;
+
+    background: color-mix(in srgb, var(--m3-accent) var(--m3-bg-pct), transparent);
+    backdrop-filter: blur(var(--m3-blur));
+    -webkit-backdrop-filter: blur(var(--m3-blur));
+    border: 1px solid color-mix(in srgb, var(--m3-accent) var(--m3-border-pct), transparent);
+    border-radius: 12px;
+
+    /* Сетка: фиксированные ширины для всех колонок, кроме клиента */
+    display: grid;
+    grid-template-columns:
+      /* номер заказа    */ 150px
+      /* статус заказа   */ 120px
+      /* статус оплаты   */ 120px
+      /* клиент          */ minmax(0, 1fr)
+      /* кол-во позиций  */ 70px
+      /* сумма           */ 130px
+      /* дата            */ 170px;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+
+    transition: background .15s ease, border-color .15s ease;
     cursor: pointer;
   }
-  .m3-order-card:hover { border-color: var(--fg-muted); }
 
-  .m3-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; line-height: 1.4; white-space: nowrap; }
-  .m3-badge-draft      { background: #F5F5F5; color: #525252; }
-  .m3-badge-confirmed  { background: #DBEAFE; color: #1D4ED8; }
-  .m3-badge-shipped    { background: #FEF3C7; color: #92400E; }
-  .m3-badge-completed  { background: #DCFCE7; color: #15803D; }
-  .m3-badge-cancelled  { background: #FEE2E2; color: #B91C1C; }
-  .m3-badge-paid       { background: #DCFCE7; color: #15803D; }
-  .m3-badge-partial    { background: #FEF3C7; color: #92400E; }
-  .m3-badge-unpaid     { background: #FEE2E2; color: #B91C1C; }
+  .m3-row:hover {
+    background: color-mix(in srgb, var(--m3-accent) var(--m3-bg-hover), transparent);
+    border-color: color-mix(in srgb, var(--m3-accent) calc(var(--m3-border-pct) + 10%), transparent);
+  }
+
+  .m3-row__num {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .m3-row__customer {
+    font-size: 13px;
+    color: var(--fg-secondary);
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .m3-row__items,
+  .m3-row__date {
+    font-size: 12px;
+    color: var(--fg-muted);
+    white-space: nowrap;
+  }
+
+  .m3-row__total {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg);
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  .m3-row__date { text-align: right; }
+
+  /* ============================================================
+     ЧИПЫ СТАТУСОВ
+     Фон/размытие на ~10% сильнее, чем у карточки. Цвет задаётся
+     переменной --badge-c (свой для каждого статуса).
+  ============================================================ */
+  .m3-badge {
+    --m3-badge-pct: 13%;
+    --m3-badge-blur: 6px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-self: start; /* не растягивать на всю ширину grid-ячейки */
+    padding: 3px 9px;
+    border-radius: 7px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
+    white-space: nowrap;
+    background: color-mix(in srgb, var(--badge-c, var(--fg-muted)) var(--m3-badge-pct), transparent);
+    color: var(--badge-c, var(--fg-muted));
+    backdrop-filter: blur(var(--m3-badge-blur));
+    -webkit-backdrop-filter: blur(var(--m3-badge-blur));
+  }
+  /* Статусы заказа */
+  .m3-badge-draft     { --badge-c: #6B7280; }
+  .m3-badge-confirmed { --badge-c: #2563EB; }
+  .m3-badge-shipped   { --badge-c: #D97706; }
+  .m3-badge-completed { --badge-c: #15803D; }
+  .m3-badge-cancelled { --badge-c: #DC2626; }
+  /* Статусы оплаты */
+  .m3-badge-paid      { --badge-c: #15803D; }
+  .m3-badge-partial   { --badge-c: #D97706; }
+  .m3-badge-unpaid    { --badge-c: #DC2626; }
+
+  /* Адаптив: ужимаем колонки на средних экранах */
+  @media (max-width: 1024px) {
+    .m3-row {
+      grid-template-columns: auto auto auto minmax(0, 1fr) auto auto auto;
+      gap: 10px;
+    }
+  }
+  /* Узкие экраны: в столбик */
+  @media (max-width: 700px) {
+    .m3-row {
+      grid-template-columns: 1fr;
+      gap: 4px;
+      padding: 12px 14px;
+    }
+    .m3-row__date, .m3-row__total { text-align: left; }
+  }
 </style>
 
 <script type="module">
@@ -200,6 +336,15 @@ function switchTab(name) {
   if (name === 'completed') loadCompleted();
 }
 document.querySelectorAll('.m3-tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
+
+// Делегирование клика на карточки — однократная привязка для обеих подстраниц.
+// Шаблон <template id="m3-order-row-tpl"> ставит data-ord-id на корневой элемент.
+['m3-act-list', 'm3-cmp-list'].forEach(id => {
+  $(id).addEventListener('click', (e) => {
+    const card = e.target.closest('[data-ord-id]');
+    if (card && card.dataset.ordId) openOrderEditor(card.dataset.ordId);
+  });
+});
 
 // ---- Кэш справочников ----
 const cache = {
@@ -282,46 +427,54 @@ function renderActive() {
     return;
   }
 
-  $('m3-act-list').innerHTML = list.map(o => renderOrderCard(o, false)).join('');
-  document.querySelectorAll('#m3-act-list .m3-order-card').forEach(c =>
-    c.addEventListener('click', () => openOrderEditor(c.dataset.ordId)));
+  const container = $('m3-act-list');
+  container.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  list.forEach(o => frag.appendChild(renderOrderCard(o)));
+  container.appendChild(frag);
 }
 
-function renderOrderCard(o, readOnly) {
+function renderOrderCard(o) {
+  const tpl = document.getElementById('m3-order-row-tpl');
+  const node = tpl.content.firstElementChild.cloneNode(true);
+  node.dataset.ordId = o.id;
+
+  const fld = (name) => node.querySelector(`[data-field="${name}"]`);
+
+  // Номер
+  fld('number').textContent = o.order_number || '—';
+
+  // Статус заказа
+  const st = fld('status');
+  st.textContent = STATUS_LABEL[o.status] || o.status;
+  st.classList.add('m3-badge-' + o.status);
+
+  // Статус оплаты
+  const pm = fld('payment');
+  pm.textContent = PAYMENT_LABEL[o.payment_status] || o.payment_status;
+  pm.classList.add('m3-badge-' + o.payment_status);
+
+  // Клиент (с тултипом полного имени)
+  const customerName = o.customers?.name || 'Клиент не указан';
+  const cu = fld('customer');
+  cu.textContent = customerName;
+  cu.title = customerName;
+
+  // Позиции
   const itemsCount = o.sales_order_items?.length || 0;
-  const total = orderTotal(o);
-  const dateLine = o.completed_at
+  fld('items').textContent = `${itemsCount} поз.`;
+
+  // Сумма
+  fld('total').textContent = formatMoney(orderTotal(o));
+
+  // Дата (контекст зависит от статуса)
+  fld('date').textContent = o.completed_at
     ? `Завершён ${formatDate(new Date(o.completed_at))}`
     : o.shipped_at
       ? `Отгружен ${formatDate(new Date(o.shipped_at))}`
       : `Создан ${formatDate(new Date(o.created_at))}`;
-  const customer = o.customers?.name || 'Клиент не указан';
-  const itemsLabel = `${itemsCount} ${pluralize(itemsCount, ['поз.','поз.','поз.'])}`;
 
-  return `
-    <div class="m3-order-card rounded-xl px-4 py-3" data-ord-id="${esc(o.id)}">
-      <div class="flex items-center gap-3 flex-wrap md:flex-nowrap">
-
-        <!-- Номер + бейджи статуса и оплаты -->
-        <span class="font-medium whitespace-nowrap text-sm">${esc(o.order_number || '—')}</span>
-        <span class="m3-badge m3-badge-${o.status} flex-shrink-0">${esc(STATUS_LABEL[o.status] || o.status)}</span>
-        <span class="m3-badge m3-badge-${o.payment_status} flex-shrink-0">${esc(PAYMENT_LABEL[o.payment_status] || o.payment_status)}</span>
-
-        <!-- Клиент -->
-        <div class="min-w-0 flex-1 text-sm text-fg-secondary truncate" title="${esc(customer)}">${esc(customer)}</div>
-
-        <!-- Кол-во позиций -->
-        <div class="text-xs text-fg-muted whitespace-nowrap flex-shrink-0">${itemsLabel}</div>
-
-        <!-- Сумма -->
-        <div class="font-medium text-sm whitespace-nowrap flex-shrink-0">${esc(formatMoney(total))}</div>
-
-        <!-- Дата -->
-        <div class="text-xs text-fg-muted whitespace-nowrap flex-shrink-0">${esc(dateLine)}</div>
-
-      </div>
-    </div>
-  `;
+  return node;
 }
 
 // ================================================================
@@ -368,9 +521,11 @@ function renderCompleted() {
     return;
   }
 
-  $('m3-cmp-list').innerHTML = list.map(o => renderOrderCard(o, true)).join('');
-  document.querySelectorAll('#m3-cmp-list .m3-order-card').forEach(c =>
-    c.addEventListener('click', () => openOrderEditor(c.dataset.ordId)));
+  const container = $('m3-cmp-list');
+  container.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  list.forEach(o => frag.appendChild(renderOrderCard(o)));
+  container.appendChild(frag);
 }
 
 // ================================================================
