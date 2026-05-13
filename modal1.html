@@ -86,6 +86,38 @@
 
 </section>
 
+<!-- ============================================================
+     ШАБЛОН СТРОКИ СКЛАДА — используется на подстранице "Склад".
+============================================================ -->
+<template id="m1-wh-row-tpl">
+  <article class="m1-row m1-row--warehouse" data-wh-id="">
+    <span class="m1-row__head">
+      <span class="m1-row__type"   data-field="type"></span>
+      <span class="m1-row__name"   data-field="name"></span>
+    </span>
+    <span class="m1-row__stat"      data-field="quantity"></span>
+    <span class="m1-row__stat"      data-field="price"></span>
+    <span class="m1-row__stat m1-row__total" data-field="sum"></span>
+    <span class="m1-row__comment"   data-field="comment"></span>
+    <span class="m1-row__date"      data-field="date"></span>
+  </article>
+</template>
+
+<!-- ============================================================
+     ШАБЛОН СТРОКИ ЗАКАЗА СНАБЖЕНИЯ — используется на подстранице "Заказы".
+============================================================ -->
+<template id="m1-ord-row-tpl">
+  <article class="m1-row m1-row--order" data-ord-id="">
+    <span class="m1-row__code"     data-field="number"></span>
+    <span class="m1-badge"          data-field="status"></span>
+    <span class="m1-badge"          data-field="payment"></span>
+    <span class="m1-row__title"    data-field="supplier"></span>
+    <span class="m1-row__items"    data-field="items"></span>
+    <span class="m1-row__total"    data-field="total"></span>
+    <span class="m1-row__date"     data-field="date"></span>
+  </article>
+</template>
+
 <!-- =========================
      MODAL: редактор позиции склада
 ========================== -->
@@ -251,28 +283,189 @@
   .m1-wh-filter:not(.active) { color: var(--fg-muted); }
   .m1-wh-filter:not(.active):hover { color: var(--fg); }
 
-  .m1-wh-card.empty { opacity: 0.45; }
-  .m1-wh-card {
-    border: 1px solid var(--line);
-    background: var(--bg);
-    transition: all .15s ease;
-  }
-  .m1-wh-card:hover { border-color: var(--fg-muted); cursor: pointer; }
+  /* ============================================================
+     ШАБЛОН СТРОКИ (modal1 — Склад и Заказы снабжения)
+     Связан с <template id="m1-wh-row-tpl"> и <template id="m1-ord-row-tpl">.
 
-  .m1-ord-card {
-    border: 1px solid var(--line);
-    background: var(--bg);
-    transition: all .15s ease;
-  }
-  .m1-ord-card:hover { border-color: var(--fg-muted); }
+     Главные настройки:
+       --m1-accent     — акцентный цвет темы (по умолчанию = основной текст)
+       --m1-bg-pct     — насыщенность фона карточки   (3%)
+       --m1-bg-hover   — насыщенность на hover        (6%)
+       --m1-border-pct — насыщенность бордера         (8%)
+       --m1-badge-pct  — насыщенность фона чипов     (13% = +10% к карточке)
+       --m1-blur       — размытие фона карточки      (3px)
+       --m1-badge-blur — размытие фона чипов         (6px)
+  ============================================================ */
+  .m1-row {
+    --m1-accent: var(--fg);
+    --m1-bg-pct: 3%;
+    --m1-bg-hover: 6%;
+    --m1-border-pct: 8%;
+    --m1-blur: 3px;
 
-  .m1-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; line-height: 1.4; white-space: nowrap; }
-  .m1-badge-draft       { background: #F5F5F5; color: #525252; }
-  .m1-badge-placed      { background: #DBEAFE; color: #1D4ED8; }
-  .m1-badge-in_transit  { background: #FEF3C7; color: #92400E; }
-  .m1-badge-received    { background: #DCFCE7; color: #15803D; }
-  .m1-badge-paid        { background: #DCFCE7; color: #15803D; }
-  .m1-badge-unpaid      { background: #FEE2E2; color: #B91C1C; }
+    background: color-mix(in srgb, var(--m1-accent) var(--m1-bg-pct), transparent);
+    backdrop-filter: blur(var(--m1-blur));
+    -webkit-backdrop-filter: blur(var(--m1-blur));
+    border: 1px solid color-mix(in srgb, var(--m1-accent) var(--m1-border-pct), transparent);
+    border-radius: 12px;
+
+    display: grid;
+    align-items: center;
+    gap: 12px;
+    padding: 10px 16px;
+
+    transition: background .15s ease, border-color .15s ease, opacity .15s ease;
+    cursor: pointer;
+  }
+  .m1-row:hover {
+    background: color-mix(in srgb, var(--m1-accent) var(--m1-bg-hover), transparent);
+    border-color: color-mix(in srgb, var(--m1-accent) calc(var(--m1-border-pct) + 10%), transparent);
+  }
+  .m1-row.is-empty { opacity: 0.45; }
+
+  /* Грид для склада: head · остаток · цена · сумма · комментарий · дата */
+  .m1-row--warehouse {
+    grid-template-columns:
+      /* тип + название */ minmax(0, 1fr)
+      /* остаток       */ 120px
+      /* цена          */ 110px
+      /* сумма         */ 130px
+      /* комментарий   */ minmax(0, 1fr)
+      /* дата          */ 130px;
+  }
+
+  /* Грид для заказа снабжения (как у продаж: номер · статус · оплата · поставщик · поз. · сумма · дата) */
+  .m1-row--order {
+    grid-template-columns:
+      /* номер заказа    */ 150px
+      /* статус заказа   */ 130px
+      /* статус оплаты   */ 130px
+      /* поставщик       */ minmax(0, 1fr)
+      /* кол-во позиций  */ 70px
+      /* сумма           */ 130px
+      /* дата            */ 170px;
+  }
+
+  /* Двустрочный блок "тип сверху + название снизу" для склада */
+  .m1-row__head {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    gap: 1px;
+  }
+  .m1-row__type {
+    font-size: 10px;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--fg-muted);
+    white-space: nowrap;
+  }
+  .m1-row__name {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  /* Общие ячейки строк */
+  .m1-row__code {
+    font-size: 13px;
+    font-weight: 500;
+    color: var(--fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .m1-row__title {
+    font-size: 13px;
+    color: var(--fg-secondary);
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .m1-row__stat {
+    font-size: 13px;
+    color: var(--fg);
+    white-space: nowrap;
+  }
+  .m1-row__total {
+    font-weight: 600;
+    text-align: right;
+  }
+  .m1-row__items {
+    font-size: 12px;
+    color: var(--fg-muted);
+    white-space: nowrap;
+  }
+  .m1-row__comment {
+    font-size: 12px;
+    color: var(--fg-muted);
+    font-style: italic;
+    min-width: 0;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: right;
+  }
+  .m1-row__date {
+    font-size: 12px;
+    color: var(--fg-muted);
+    text-align: right;
+    white-space: nowrap;
+  }
+
+  /* ============================================================
+     БЕЙДЖИ СТАТУСОВ — фон/размытие на +10% сильнее карточки
+  ============================================================ */
+  .m1-badge {
+    --m1-badge-pct: 13%;
+    --m1-badge-blur: 6px;
+
+    display: inline-flex;
+    align-items: center;
+    justify-self: start;
+    padding: 3px 9px;
+    border-radius: 7px;
+    font-size: 11px;
+    font-weight: 500;
+    line-height: 1.4;
+    white-space: nowrap;
+    background: color-mix(in srgb, var(--badge-c, var(--fg-muted)) var(--m1-badge-pct), transparent);
+    color: var(--badge-c, var(--fg-muted));
+    backdrop-filter: blur(var(--m1-badge-blur));
+    -webkit-backdrop-filter: blur(var(--m1-badge-blur));
+  }
+  /* Статусы заказа снабжения */
+  .m1-badge-draft      { --badge-c: #6B7280; }
+  .m1-badge-placed     { --badge-c: #2563EB; }
+  .m1-badge-in_transit { --badge-c: #D97706; }
+  .m1-badge-received   { --badge-c: #15803D; }
+  /* Статусы оплаты */
+  .m1-badge-paid       { --badge-c: #15803D; }
+  .m1-badge-partial    { --badge-c: #D97706; }
+  .m1-badge-unpaid     { --badge-c: #DC2626; }
+
+  /* Адаптив */
+  @media (max-width: 1024px) {
+    .m1-row--warehouse,
+    .m1-row--order {
+      grid-template-columns: minmax(0, 1fr) auto auto auto;
+      gap: 10px;
+    }
+    .m1-row__comment, .m1-row__items { display: none; }
+  }
+  @media (max-width: 700px) {
+    .m1-row--warehouse,
+    .m1-row--order {
+      grid-template-columns: 1fr;
+      gap: 4px;
+      padding: 12px 14px;
+    }
+    .m1-row__total, .m1-row__date, .m1-row__comment { text-align: left; }
+  }
 </style>
 
 <script type="module">
@@ -298,6 +491,16 @@ function switchTab(name) {
   if (name === 'orders') loadOrders();
 }
 document.querySelectorAll('.m1-tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
+
+// Делегирование клика — однократно для обоих списков карточек.
+$('m1-wh-grid').addEventListener('click', (e) => {
+  const card = e.target.closest('[data-wh-id]');
+  if (card && card.dataset.whId) openWarehouseEditor(card.dataset.whId);
+});
+$('m1-ord-list').addEventListener('click', (e) => {
+  const card = e.target.closest('[data-ord-id]');
+  if (card && card.dataset.ordId) openOrderEditor(card.dataset.ordId);
+});
 
 // Скрываем write-кнопки, если у пользователя нет прав
 if (!canWrite) {
@@ -357,57 +560,49 @@ function renderWarehouse() {
     return;
   }
 
-  $('m1-wh-grid').innerHTML = list.map(x => {
-    const qty = Number(x.quantity || 0);
-    const price = Number(x.price || 0);
-    const sum = qty * price;
-    const empty = qty === 0;
-    const typeLabel = x.type === 'material' ? 'материал' : 'продукция';
-    const dateStr = formatDate(new Date(x.updated_at || x.created_at));
-    const commentText = x.comment || '';
+  const container = $('m1-wh-grid');
+  container.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  list.forEach(x => frag.appendChild(renderWarehouseRow(x)));
+  container.appendChild(frag);
+}
 
-    return `
-      <div class="m1-wh-card ${empty ? 'empty' : ''} rounded-xl px-4 py-3" data-wh-id="${esc(x.id)}">
-        <div class="flex items-center gap-4 flex-wrap md:flex-nowrap">
+function renderWarehouseRow(x) {
+  const tpl = document.getElementById('m1-wh-row-tpl');
+  const node = tpl.content.firstElementChild.cloneNode(true);
+  node.dataset.whId = x.id;
 
-          <!-- Левая зона: тип + артикул, название -->
-          <div class="min-w-0 flex-1 md:basis-1/3 md:flex-grow-0">
-            <div class="text-[10px] uppercase tracking-wider text-fg-muted mb-0.5">${esc(typeLabel)}${x.article ? ' · ' + esc(x.article) : ''}</div>
-            <div class="font-medium truncate" title="${esc(x.name)}">${esc(x.name)}</div>
-          </div>
+  const fld = (name) => node.querySelector(`[data-field="${name}"]`);
 
-          <!-- Центр: три пары (подпись / значение) -->
-          <div class="flex items-stretch gap-6 flex-shrink-0">
-            <div>
-              <div class="text-[11px] text-fg-muted">Остаток</div>
-              <div class="font-medium text-sm">${esc(formatQuantity(qty, x.unit))}</div>
-            </div>
-            <div>
-              <div class="text-[11px] text-fg-muted">Цена</div>
-              <div class="font-medium text-sm">${esc(formatMoney(price))}</div>
-            </div>
-            <div>
-              <div class="text-[11px] text-fg-muted">Сумма</div>
-              <div class="font-medium text-sm">${esc(formatMoney(sum))}</div>
-            </div>
-          </div>
+  const qty = Number(x.quantity || 0);
+  const price = Number(x.price || 0);
+  const sum = qty * price;
+  const typeLabel = x.type === 'material' ? 'материал' : 'продукция';
+  const commentText = x.comment || '';
 
-          <!-- Правая зона: комментарий (1 строка + тултип) + дата -->
-          <div class="min-w-0 flex-1 md:ml-auto md:text-right">
-            ${commentText
-              ? `<div class="m1-wh-comment text-xs text-fg-muted italic truncate" title="${esc(commentText)}">${esc(commentText)}</div>`
-              : `<div class="text-xs text-fg-muted italic">&nbsp;</div>`}
-            <div class="text-[11px] text-fg-muted mt-0.5">${esc(dateStr)}</div>
-          </div>
+  if (qty === 0) node.classList.add('is-empty');
 
-        </div>
-      </div>
-    `;
-  }).join('');
+  fld('type').textContent = x.article ? `${typeLabel} · ${x.article}` : typeLabel;
 
-  document.querySelectorAll('.m1-wh-card').forEach(card => {
-    card.addEventListener('click', () => openWarehouseEditor(card.dataset.whId));
-  });
+  const name = fld('name');
+  name.textContent = x.name || '—';
+  name.title = x.name || '';
+
+  fld('quantity').textContent = formatQuantity(qty, x.unit);
+  fld('price').textContent = formatMoney(price);
+  fld('sum').textContent = formatMoney(sum);
+
+  const cm = fld('comment');
+  if (commentText) {
+    cm.textContent = commentText;
+    cm.title = commentText;
+  } else {
+    cm.innerHTML = '&nbsp;';   // место зарезервировано, чтобы дата не уезжала
+  }
+
+  fld('date').textContent = formatDate(new Date(x.updated_at || x.created_at));
+
+  return node;
 }
 
 // ---- Warehouse editor modal ----
@@ -554,36 +749,45 @@ function renderOrders() {
     return;
   }
 
-  $('m1-ord-list').innerHTML = list.map(o => {
-    const itemsCount = o.supply_order_items?.length || 0;
-    const total = orderTotal(o);
-    const dateLine = o.placed_at
-      ? `Размещён ${formatDate(new Date(o.placed_at))}`
-      : `Создан ${formatDate(new Date(o.created_at))}`;
+  const container = $('m1-ord-list');
+  container.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  list.forEach(o => frag.appendChild(renderOrderRow(o)));
+  container.appendChild(frag);
+}
 
-    return `
-      <div class="m1-ord-card rounded-xl p-4 cursor-pointer" data-ord-id="${esc(o.id)}">
-        <div class="flex items-start justify-between gap-3 flex-wrap">
-          <div class="min-w-0 flex-1">
-            <div class="flex items-center gap-2 flex-wrap mb-1">
-              <span class="font-medium">${esc(o.order_number || '—')}</span>
-              <span class="m1-badge m1-badge-${o.status}">${esc(STATUS_LABEL[o.status] || o.status)}</span>
-              <span class="m1-badge m1-badge-${o.payment_status}">${esc(PAYMENT_LABEL[o.payment_status] || o.payment_status)}</span>
-            </div>
-            <div class="text-sm text-fg-secondary">${esc(o.suppliers?.name || 'Поставщик не указан')}</div>
-            <div class="text-xs text-fg-muted mt-1">${esc(dateLine)} · ${itemsCount} ${pluralize(itemsCount, ['позиция','позиции','позиций'])}</div>
-          </div>
-          <div class="text-right">
-            <div class="font-medium">${esc(formatMoney(total))}</div>
-          </div>
-        </div>
-      </div>
-    `;
-  }).join('');
+function renderOrderRow(o) {
+  const tpl = document.getElementById('m1-ord-row-tpl');
+  const node = tpl.content.firstElementChild.cloneNode(true);
+  node.dataset.ordId = o.id;
 
-  document.querySelectorAll('.m1-ord-card').forEach(card => {
-    card.addEventListener('click', () => openOrderEditor(card.dataset.ordId));
-  });
+  const fld = (name) => node.querySelector(`[data-field="${name}"]`);
+
+  fld('number').textContent = o.order_number || '—';
+
+  const st = fld('status');
+  st.textContent = STATUS_LABEL[o.status] || o.status;
+  st.classList.add('m1-badge-' + o.status);
+
+  const pm = fld('payment');
+  pm.textContent = PAYMENT_LABEL[o.payment_status] || o.payment_status;
+  pm.classList.add('m1-badge-' + o.payment_status);
+
+  const supplierName = o.suppliers?.name || 'Поставщик не указан';
+  const sp = fld('supplier');
+  sp.textContent = supplierName;
+  sp.title = supplierName;
+
+  const itemsCount = o.supply_order_items?.length || 0;
+  fld('items').textContent = `${itemsCount} поз.`;
+
+  fld('total').textContent = formatMoney(orderTotal(o));
+
+  fld('date').textContent = o.placed_at
+    ? `Размещён ${formatDate(new Date(o.placed_at))}`
+    : `Создан ${formatDate(new Date(o.created_at))}`;
+
+  return node;
 }
 
 // ---- Order editor ----
