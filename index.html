@@ -1,1675 +1,945 @@
 <!DOCTYPE html>
-<html lang="ru" data-theme="bw-light">
+<html lang="ru">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>AI Equipment Selection</title>
+  <title>RIVA</title>
+  <meta name="description" content="Производственное веб-приложение для малого бизнеса">
   <meta name="theme-color" content="#FFFFFF">
+
+  <link rel="manifest" href="./manifest.json">
+  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="default">
+  <meta name="apple-mobile-web-app-title" content="RIVA">
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=SN+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
-  <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet">
+
+  <script>
+    // Tailwind theme: themed-цвета через CSS-переменные, state-цвета — константы
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            fg: {
+              DEFAULT:   'var(--fg)',
+              secondary: 'var(--fg-secondary)',
+              muted:     'var(--fg-muted)'
+            },
+            surface: {
+              DEFAULT: 'var(--bg)',
+              alt:     'var(--bg-alt)',
+              card:    'var(--bg-card)'
+            },
+            line: {
+              DEFAULT: 'var(--line)',
+              light:   'var(--line-light)'
+            },
+            state: { success: '#16A34A', warning: '#D97706', error: '#DC2626', info: '#2563EB' }
+          },
+          fontFamily: { sans: ['"SN Pro"', 'system-ui', '-apple-system', 'sans-serif'] },
+          maxWidth: { app: '1400px' }
+        }
+      }
+    };
+  </script>
 
   <style>
     :root {
-      --bg: #FFFFFF; --bg-alt: #FAFAFA; --bg-card: #F5F5F5;
-      --fg: #0A0A0A; --fg-secondary: #404040; --fg-muted: #737373;
-      --line: #E5E5E5; --line-light: #F0F0F0;
-      --accent: #000000; --accent-hover: #333333;
-      --success: #10b981; --warning: #f59e0b; --error: #ef4444;
-      --ctrl-h: 38px; --ctrl-radius: 12px;
+      /* === ОСНОВА ПРИЛОЖЕНИЯ — заполняется JS из активной палитры === */
+      --bg:            #FFFFFF;
+      --bg-alt:        #FAFAFA;
+      --bg-card:       #F5F5F5;
+      --fg:            #0A0A0A;
+      --fg-secondary:  #404040;
+      --fg-muted:      #737373;
+      --line:          #E5E5E5;
+      --line-light:    #F0F0F0;
+
+      /* === ВЫСОТА И СКРУГЛЕНИЕ КОНТРОЛОВ ШАПКИ === */
+      --ctrl-h:        38px;
+      --ctrl-radius:   12px;
+
+      /* === AURORA (фон): палитра — заполняется JS === */
+      --aurora-bg:        #FFFFFF;
+      --aurora-primary:   #FFFFFF;
+      --aurora-secondary: #888888;
+      --aurora-grad1:     #666666;
+      --aurora-grad2:     #333333;
+      --aurora-grad3:     #000000;
+      --aurora-opacity:   0.22;
+      --aurora-blur:      14px;
+      --aurora-blend:     multiply;
+
+      /* === AURORA: геометрия и анимация (одинаково для всех тем) === */
+      --aurora-mask-x:     100%;
+      --aurora-mask-y:     0%;
+      --aurora-mask-black: 10%;
+      --aurora-mask-fade:  65%;
+      --grad-angle:        100deg;
+      --grad1-stop1: 0%;  --grad1-stop2: 5%;  --grad1-stop3: 12%; --grad1-stop4: 18%; --grad1-stop5: 25%;
+      --grad2-stop1: 8%;  --grad2-stop2: 14%; --grad2-stop3: 22%; --grad2-stop4: 32%; --grad2-stop5: 42%;
+      --bg-size-main-1: 300%;  --bg-size-main-2: 200%;
+      --bg-size-after-1: 200%; --bg-size-after-2: 100%;
+      --anim-duration: 90s;
+      --anim-pos-start: 50%;   --anim-pos-end: 350%;
       --transition-duration: 0.6s;
     }
-    [data-theme="bw-dark"] {
-      --bg: #15171C; --bg-alt: #1C1F25; --bg-card: #23262E;
-      --fg: #F5F5F5; --fg-secondary: #A3A3A3; --fg-muted: #737373;
-      --line: #2B2F38; --line-light: #24272F;
-      --accent: #F5F5F5; --accent-hover: #DDDDDD;
-    }
+
     * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body { font-family: 'SN Pro', system-ui, -apple-system, sans-serif; background: var(--bg); color: var(--fg); -webkit-font-smoothing: antialiased; transition: background-color var(--transition-duration), color var(--transition-duration); }
-    body { min-height: 100vh; width: 100vw; overflow-x: hidden; position: relative; }
+    html, body {
+      font-family: 'SN Pro', system-ui, -apple-system, sans-serif;
+      background: var(--bg);
+      color: var(--fg);
+      -webkit-font-smoothing: antialiased;
+      -moz-osx-font-smoothing: grayscale;
+      transition: background-color var(--transition-duration) ease, color var(--transition-duration) ease;
+    }
+    body { min-height: 100vh; overflow-x: hidden; position: relative; }
 
     ::-webkit-scrollbar { width: 6px; height: 6px; }
     ::-webkit-scrollbar-track { background: transparent; }
     ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
     ::-webkit-scrollbar-thumb:hover { background: var(--fg-muted); }
 
-    .theme-transition-overlay { position: fixed; inset: 0; z-index: 1000; background: var(--bg); opacity: 0; pointer-events: none; transition: opacity var(--transition-duration); }
+    /* ============================================================
+       AURORA BACKGROUND
+       ============================================================ */
+    .aurora-background {
+      pointer-events: none;
+      position: fixed;
+      inset: 0;
+      z-index: 0;
+      opacity: var(--aurora-opacity);
+      filter: blur(var(--aurora-blur));
+      transition: opacity var(--transition-duration) ease;
+      will-change: transform;
+
+      -webkit-mask-image: radial-gradient(ellipse at var(--aurora-mask-x) var(--aurora-mask-y),
+        black var(--aurora-mask-black), transparent var(--aurora-mask-fade));
+      mask-image: radial-gradient(ellipse at var(--aurora-mask-x) var(--aurora-mask-y),
+        black var(--aurora-mask-black), transparent var(--aurora-mask-fade));
+
+      background-image:
+        repeating-linear-gradient(var(--grad-angle),
+          var(--aurora-primary) var(--grad1-stop1),
+          var(--aurora-primary) var(--grad1-stop2),
+          transparent var(--grad1-stop3),
+          transparent var(--grad1-stop4),
+          var(--aurora-primary) var(--grad1-stop5)
+        ),
+        repeating-linear-gradient(var(--grad-angle),
+          var(--aurora-secondary) var(--grad2-stop1),
+          var(--aurora-grad1) var(--grad2-stop2),
+          var(--aurora-grad2) var(--grad2-stop3),
+          var(--aurora-grad3) var(--grad2-stop4),
+          var(--aurora-grad1) var(--grad2-stop5)
+        );
+      background-size: var(--bg-size-main-1) 100%, var(--bg-size-main-2) 100%;
+      background-position: var(--anim-pos-start) 50%, var(--anim-pos-start) 50%;
+      background-color: var(--aurora-bg);
+    }
+    .aurora-background::after {
+      content: '';
+      position: absolute; inset: 0;
+      background-image: inherit;
+      background-size: var(--bg-size-after-1) 100%, var(--bg-size-after-2) 100%;
+      background-attachment: fixed;
+      mix-blend-mode: var(--aurora-blend);
+      animation: aurora-shift var(--anim-duration) linear infinite;
+    }
+    @keyframes aurora-shift {
+      0%   { background-position: var(--anim-pos-start) 50%, var(--anim-pos-start) 50%; }
+      100% { background-position: var(--anim-pos-end)   50%, var(--anim-pos-end)   50%; }
+    }
+
+    /* Перехватывающий оверлей для плавной смены темы */
+    .theme-transition-overlay {
+      position: fixed; inset: 0; z-index: 1000;
+      background: var(--bg);
+      opacity: 0; pointer-events: none;
+      transition: opacity var(--transition-duration) ease;
+    }
     .theme-transition-overlay.active { opacity: 0.85; pointer-events: all; }
 
-    /* ============ PRELOADER ============ */
-    #preloader { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); display: flex; gap: 10px; opacity: 0; visibility: hidden; transition: opacity 0.5s, visibility 0.5s; z-index: 9999; }
-    #preloader.visible { opacity: 1; visibility: visible; }
-    #preloader.fade-out { opacity: 0; visibility: hidden; }
-    .line { width: 10px; height: 70px; background: var(--fg); animation: bounce 1.5s infinite ease-in-out; border-radius: 4px; }
-    .line:nth-child(2) { animation-delay: 0.3s; } .line:nth-child(3) { animation-delay: 0.6s; } .line:nth-child(5) { animation-delay: 1.2s; }
-    @keyframes bounce { 0%,20%,50%,80%,100% { transform: translateY(0); } 40% { transform: translateY(-30px); } 60% { transform: translateY(-15px); } }
-
-    /* ============ LOGIN ============ */
-    #login-wrapper { opacity: 0; transition: opacity 0.5s; width: 100%; height: 100vh; position: fixed; top: 0; left: 0; z-index: 100; pointer-events: none; display: flex; align-items: center; justify-content: center; }
-    #login-wrapper.show { opacity: 1; pointer-events: auto; }
-    .login-card { width: 900px; max-width: 95vw; height: 600px; max-height: 90vh; border-radius: 16px; overflow: hidden; position: relative; border: 1px solid var(--line); background: var(--bg); display: flex; box-shadow: 0 25px 50px -12px rgba(0,0,0,.15); }
-    .login-overlay { position: absolute; top: 0; left: 0; width: 385px; height: 100%; background: var(--accent); color: var(--bg); border-radius: 16px 0 0 16px; transition: left 1s; z-index: 9999; pointer-events: auto; }
-    .login-overlay.open-sign-up { left: calc(100% - 385px); border-radius: 0 16px 16px 0; }
-    .login-overlay .ov-pane { position: absolute; inset: 0; padding: 40px 30px; display: flex; flex-direction: column; justify-content: center; gap: 18px; transition: opacity 0.5s; }
-    .login-overlay .ov-pane.signup { opacity: 0; pointer-events: none; }
-    .login-overlay.open-sign-up .ov-pane.signin { opacity: 0; pointer-events: none; }
-    .login-overlay.open-sign-up .ov-pane.signup { opacity: 1; pointer-events: auto; }
-    .login-overlay h3 { font-size: 18px; font-weight: 700; }
-    .login-overlay p { font-size: 13px; opacity: 0.7; line-height: 1.5; }
-    .btn-overlay { padding: 12px; background: transparent; border: 1px solid rgba(255,255,255,0.3); color: inherit; font-size: 13px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.4s; }
-    .btn-overlay:hover { background: rgba(255,255,255,0.1); border-color: currentColor; }
-
-    .login-form-area { position: absolute; top: 0; left: 385px; width: calc(100% - 385px); height: 100%; display: flex; align-items: center; justify-content: center; }
-    .form-pane { position: absolute; inset: 0; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 30px; opacity: 0; transition: opacity 0.5s; }
-    .form-pane.show { display: flex; opacity: 1; }
-    .form-pane h2 { font-size: 24px; font-weight: 600; margin-bottom: 16px; }
-
-    .modalFORM { display: flex; flex-direction: column; gap: 14px; background: var(--bg-card); border: 1px solid var(--line); padding: 26px; width: 380px; border-radius: 12px; }
-    .modalFORM h3 { font-size: 16px; font-weight: 700; text-align: center; text-transform: uppercase; color: var(--fg); }
-    .inputField { width: 100%; padding: 11px 14px; font-size: 14px; border-radius: 8px; border: 1px solid var(--line); background: var(--bg); outline: none; transition: all 0.3s; color: var(--fg); font-family: inherit; }
-    .inputField:focus { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(0,0,0,.06); }
-    .inputField::placeholder { color: var(--fg-muted); }
-    .btn-submit { width: 100%; padding: 12px; background: var(--accent); border: none; color: var(--bg); font-size: 14px; font-weight: 600; border-radius: 8px; cursor: pointer; transition: all 0.4s; font-family: inherit; }
-    .btn-submit:hover { background: var(--accent-hover); }
-    .btn-submit:disabled { opacity: 0.6; cursor: not-allowed; }
-    .btn-google-login { width: 100%; padding: 11px; background: var(--bg); border: 1px solid var(--line); color: var(--fg); font-size: 14px; font-weight: 600; border-radius: 8px; cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 8px; transition: all 0.2s; font-family: inherit; }
-    .btn-google-login:hover { background: var(--bg-alt); border-color: var(--fg); }
-    .login-error { padding: 8px 12px; background: rgba(239,68,68,.1); color: var(--error); border-radius: 6px; font-size: 12px; }
-    .login-divider { display: flex; align-items: center; gap: 10px; color: var(--fg-muted); font-size: 11px; }
-    .login-divider::before, .login-divider::after { content: ""; flex: 1; height: 1px; background: var(--line); }
-
-    /* ============ DB DISCONNECT ============ */
-    #db-disconnect-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,.5); backdrop-filter: blur(4px); opacity: 0; pointer-events: none; transition: opacity 0.5s; z-index: 2000; }
-    #db-disconnect-overlay.show { opacity: 1; pointer-events: auto; }
-
-    /* ============ HEADER (RIVA) ============ */
-    .header-blur { background: var(--bg); border-bottom: 1px solid var(--line); backdrop-filter: blur(10px); position: sticky; top: 0; z-index: 30; }
-    @supports (background: color-mix(in srgb, white, black)) {
-      .header-blur { background: color-mix(in srgb, var(--bg) 82%, transparent); }
+    /* ============================================================
+       BLUEPRINT GRID — оригинальный фон auth-экрана (стал не нужен,
+       заменён на aurora, но классы оставлены, если где-то ещё)
+       ============================================================ */
+    .blueprint-grid {
+      background-image:
+        linear-gradient(rgba(10,10,10,0.035) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(10,10,10,0.035) 1px, transparent 1px);
+      background-size: 48px 48px;
     }
-    .header-inner { max-width: 1400px; margin: 0 auto; display: flex; align-items: center; justify-content: space-between; gap: 12px; height: 64px; padding: 0 16px; }
-    @media(min-width: 1024px) { .header-inner { padding: 0 24px; } }
+    .corner-mark { position: absolute; width: 18px; height: 18px; border-color: rgba(10,10,10,0.18); border-style: solid; pointer-events: none; }
+    .corner-mark-tl { top: 0; left: 0; border-width: 1px 0 0 1px; }
+    .corner-mark-tr { top: 0; right: 0; border-width: 1px 1px 0 0; }
+    .corner-mark-bl { bottom: 0; left: 0; border-width: 0 0 1px 1px; }
+    .corner-mark-br { bottom: 0; right: 0; border-width: 0 1px 1px 0; }
 
-    .ctrl { height: var(--ctrl-h); border-radius: var(--ctrl-radius); border: 1px solid var(--line); background: var(--bg); display: inline-flex; align-items: center; gap: 8px; padding: 0 12px; font-size: 13px; color: var(--fg); transition: all 0.2s; cursor: pointer; font-family: inherit; }
+    /* ============================================================
+       КНОПКИ ПРИЛОЖЕНИЯ (используют CSS-переменные)
+       ============================================================ */
+    .btn-primary {
+      background: var(--fg); color: var(--bg); border: 1px solid var(--fg);
+      transition: all .2s ease;
+    }
+    .btn-primary:hover:not(:disabled) { opacity: 0.88; }
+    .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+
+    .btn-secondary {
+      background: var(--bg); color: var(--fg); border: 1px solid var(--line);
+      transition: all .2s ease;
+    }
+    .btn-secondary:hover:not(:disabled) { background: var(--bg-alt); border-color: var(--fg-muted); }
+
+    .btn-google {
+      background: var(--bg); color: var(--fg); border: 1px solid var(--line);
+      transition: all .2s ease;
+    }
+    .btn-google:hover:not(:disabled) { background: var(--bg-alt); border-color: var(--fg); }
+
+    /* ============================================================
+       ШАПКА — все контролы одной высоты и одного скругления
+       ============================================================ */
+    .header-blur {
+      /* fallback */
+      background: var(--bg);
+      border-bottom: 1px solid var(--line);
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+    @supports (background: color-mix(in srgb, white, black)) {
+      .header-blur {
+        background: color-mix(in srgb, var(--bg) 82%, transparent);
+      }
+    }
+
+    .ctrl {
+      height: var(--ctrl-h);
+      border-radius: var(--ctrl-radius);
+      border: 1px solid var(--line);
+      background: var(--bg);
+      display: inline-flex; align-items: center; gap: 8px;
+      padding: 0 12px;
+      font-size: 13px; color: var(--fg);
+      transition: border-color .2s ease, background .2s ease;
+      cursor: pointer;
+    }
     .ctrl:hover { border-color: var(--fg-muted); }
-    .ctrl-square { width: var(--ctrl-h); padding: 0; justify-content: center; gap: 0; }
-    .ctrl-logo { cursor: default; pointer-events: none; }
+    .ctrl-square {
+      width: var(--ctrl-h);
+      padding: 0;
+      justify-content: center;
+      gap: 0;
+    }
+    .ctrl-logo {
+      cursor: default;
+      pointer-events: none;
+    }
+    .ctrl-logo:hover { border-color: var(--line); }
 
-    .group-switcher-wrap { position: relative; margin-left: 4px; }
-    .group-switcher-menu { display: none; position: absolute; left: 0; top: calc(100% + 8px); width: 280px; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,.05); padding: 6px; z-index: 50; max-height: 320px; overflow-y: auto; }
-    .group-switcher-menu.open { display: block; }
-    .group-switcher-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; cursor: pointer; transition: background 0.15s; font-size: 13px; }
-    .group-switcher-item:hover { background: var(--bg-alt); }
-    .group-switcher-item.active { background: var(--bg-alt); font-weight: 600; }
+    /* ----- Segmented nav (radio-input стиль) ----- */
+    .nav-segmented {
+      height: var(--ctrl-h);
+      background: var(--bg-card);
+      border: 1px solid var(--line);
+      border-radius: var(--ctrl-radius);
+      padding: 4px;
+      display: inline-flex; align-items: stretch; gap: 0;
+    }
+    .nav-segmented .nav-item {
+      padding: 0 14px;
+      border-radius: calc(var(--ctrl-radius) - 4px);
+      color: var(--fg-muted);
+      font-size: 13px;
+      transition: all .15s ease-in-out;
+      display: inline-flex; align-items: center;
+      text-decoration: none; white-space: nowrap;
+    }
+    .nav-segmented .nav-item:hover { color: var(--fg); }
+    .nav-segmented .nav-item.active {
+      background: var(--bg);
+      color: var(--fg);
+      font-weight: 600;
+      box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 0 0 1px rgba(0,0,0,.04);
+    }
 
-    .profile-wrap { position: relative; }
-    .profile-menu { display: none; position: absolute; right: 0; top: calc(100% + 8px); width: 260px; background: var(--bg); border: 1px solid var(--line); border-radius: 12px; box-shadow: 0 10px 25px rgba(0,0,0,.05); padding: 6px; z-index: 50; }
-    .profile-menu.open { display: block; }
-    .profile-menu-head { padding: 12px 14px; border-bottom: 1px solid var(--line-light); }
-    .profile-menu-name { font-size: 13px; font-weight: 600; }
-    .profile-menu-email { font-size: 12px; color: var(--fg-muted); margin-top: 2px; word-break: break-all; }
-    .profile-menu-balance { font-size: 12px; color: var(--fg-muted); margin-top: 6px; }
-    .profile-menu-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; border-radius: 8px; cursor: pointer; transition: background 0.15s; font-size: 13px; color: var(--fg); border: none; background: none; width: 100%; text-align: left; font-family: inherit; }
-    .profile-menu-item:hover { background: var(--bg-alt); }
-    .profile-menu-item.danger { color: var(--error); }
+    /* ----- Сайдбар-навигация (мобильная) ----- */
+    .sidebar-item {
+      border: 1px solid transparent; transition: all .2s ease; color: var(--fg-secondary);
+    }
+    .sidebar-item:hover { background: var(--bg-alt); border-color: var(--line-light); color: var(--fg); }
+    .sidebar-item.active { background: var(--bg-alt); border-color: var(--line); color: var(--fg); }
 
-    /* ============ THEME SWITCHER ============ */
+    /* ============================================================
+       КАРТОЧКА ГРУППЫ (auth — экран выбора)
+       ============================================================ */
+    .group-card {
+      border: 1px solid var(--line); transition: all .2s ease; background: var(--bg);
+    }
+    .group-card:hover {
+      border-color: var(--fg); background: var(--bg-alt); transform: translateY(-1px);
+    }
+
+    /* ============================================================
+       ЛОАДЕР И TOAST
+       ============================================================ */
+    .loader {
+      animation: spin 1s linear infinite;
+      border: 2px solid var(--line);
+      border-top-color: var(--fg);
+      border-radius: 50%;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .reveal { opacity: 0; transform: translateY(12px); transition: opacity .6s cubic-bezier(.16,1,.3,1), transform .6s cubic-bezier(.16,1,.3,1); }
+    .reveal.visible { opacity: 1; transform: translateY(0); }
+    .delay-1 { transition-delay: .1s; }
+    .delay-2 { transition-delay: .2s; }
+
+    .toast { animation: toastIn .3s cubic-bezier(.16,1,.3,1) forwards; }
+    @keyframes toastIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
+
+    @media (max-width: 1023px) {
+      .sidebar { transform: translateX(-100%); transition: transform .3s cubic-bezier(.16,1,.3,1); }
+      .sidebar.open { transform: translateX(0); }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *, *::before, *::after {
+        animation-duration: .01ms !important;
+        transition-duration: .01ms !important;
+      }
+      .aurora-background::after { animation: none !important; }
+    }
+
+    /* ============================================================
+       ПЕРЕКЛЮЧАТЕЛЬ ТЕМ (ctrl + линия тем справа налево)
+       ============================================================ */
     .theme-switcher { position: relative; }
-    .theme-line { position: absolute; right: calc(100% + 8px); top: 50%; transform: translateY(-50%); display: flex; align-items: center; gap: 6px; pointer-events: none; opacity: 0; transition: opacity 0.2s; }
+
+    .theme-line {
+      position: absolute;
+      right: calc(100% + 8px);
+      top: 50%;
+      transform: translateY(-50%);
+      display: flex; align-items: center; gap: 6px;
+      pointer-events: none;
+      opacity: 0;
+      transition: opacity .2s ease;
+    }
     .theme-line.active { pointer-events: auto; opacity: 1; }
-    .theme-node { width: calc(var(--ctrl-h) - 6px); height: calc(var(--ctrl-h) - 6px); border-radius: 10px; border: 1px solid var(--line); background: var(--bg); display: inline-flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; opacity: 0; transform: translateX(14px) scale(0.7); transition: opacity 0.25s, transform 0.25s cubic-bezier(0.34,1.56,0.64,1), border-color 0.15s; }
+
+    .theme-node {
+      width: calc(var(--ctrl-h) - 6px);
+      height: calc(var(--ctrl-h) - 6px);
+      border-radius: 10px;
+      border: 1px solid var(--line);
+      background: var(--bg);
+      display: inline-flex; align-items: center; justify-content: center;
+      cursor: pointer;
+      padding: 0;
+      opacity: 0;
+      transform: translateX(14px) scale(0.7);
+      transition: opacity .25s ease, transform .25s cubic-bezier(0.34, 1.56, 0.64, 1),
+                  border-color .15s ease, box-shadow .15s ease;
+      position: relative;
+    }
     .theme-node:hover { border-color: var(--fg-muted); }
-    .theme-node.active { border-color: var(--fg); box-shadow: 0 0 0 2px var(--bg); }
-    .theme-node .theme-preview { width: 18px; height: 18px; border-radius: 6px; pointer-events: none; }
+    .theme-node.active {
+      border-color: var(--fg);
+      box-shadow: 0 0 0 2px var(--bg);
+    }
+    .theme-node .theme-preview {
+      width: 18px; height: 18px;
+      border-radius: 6px;
+      pointer-events: none;
+    }
+    .theme-node::after {
+      content: attr(title);
+      position: absolute;
+      bottom: -22px; left: 50%;
+      transform: translateX(-50%) translateY(4px);
+      font-size: 10px;
+      background: var(--fg); color: var(--bg);
+      padding: 3px 7px; border-radius: 6px;
+      white-space: nowrap;
+      opacity: 0; pointer-events: none;
+      transition: opacity .15s ease, transform .15s ease;
+    }
+    .theme-node:hover::after {
+      opacity: 1; transform: translateX(-50%) translateY(0);
+    }
+
+    /* Появление в стиле "справа налево" — ближайшая к кнопке темы выезжает первой */
     .theme-line.active .theme-node { opacity: 1; transform: translateX(0) scale(1); }
-    .theme-line .theme-node:nth-last-child(1) { transition-delay: 0ms; }
-    .theme-line .theme-node:nth-last-child(2) { transition-delay: 50ms; }
+    .theme-line .theme-node:nth-last-child(1) { transition-delay: 0ms;   }
+    .theme-line .theme-node:nth-last-child(2) { transition-delay: 35ms;  }
+    .theme-line .theme-node:nth-last-child(3) { transition-delay: 70ms;  }
+    .theme-line .theme-node:nth-last-child(4) { transition-delay: 105ms; }
+    .theme-line .theme-node:nth-last-child(5) { transition-delay: 140ms; }
+    .theme-line .theme-node:nth-last-child(6) { transition-delay: 175ms; }
+    .theme-line .theme-node:nth-last-child(7) { transition-delay: 210ms; }
+    .theme-line:not(.active) .theme-node {
+      transition-delay: 0ms !important;
+      opacity: 0; transform: translateX(14px) scale(0.7);
+    }
+
     .btn-theme.active .icon-palette { display: none; }
-    .btn-theme.active .icon-close { display: block; }
+    .btn-theme.active .icon-close   { display: block; }
     .btn-theme .icon-close { display: none; }
     .btn-theme.active { background: var(--bg-alt); border-color: var(--fg-muted); }
 
-    /* ============ MODAL9 ============ */
-    .spec-modal { display: none; flex-direction: column; align-items: center; position: relative; min-height: calc(100vh - 64px); }
-    .spec-modal.visible { display: flex; }
-
-    .glass3d { background: var(--bg-card); border: 1px solid var(--line); border-radius: 16px; box-shadow: 0 4px 6px -1px rgba(0,0,0,.05); }
-
-    .modal9-top-window { width: 100%; max-width: 1400px; padding: 16px 24px; box-sizing: border-box; margin: 20px auto 12px; }
-    .modal9-top-body { display: flex; flex-direction: row; align-items: center; gap: 12px; flex-wrap: wrap; }
-
-    .upload-btn-main { background: var(--accent); color: var(--bg); border: none; padding: 0 20px; height: 40px; border-radius: 10px; font-size: 14px; font-weight: 600; cursor: pointer; transition: all 0.2s; display: flex; align-items: center; gap: 8px; white-space: nowrap; font-family: inherit; position: relative; }
-    .upload-btn-main:hover { background: var(--accent-hover); }
-    .upload-btn-main:disabled { opacity: 0.6; cursor: default; }
-    .upload-btn-main .loader { display: none; position: absolute; width: 16px; height: 16px; border: 2px solid rgba(255,255,255,.3); border-top-color: var(--bg); border-radius: 50%; animation: spin 0.8s linear infinite; }
-    .upload-btn-main.loading .loader { display: block; }
-    .upload-btn-main.loading .button-text { visibility: hidden; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-
-    .upload-status-wrapper { display: flex; flex-direction: column; align-items: flex-start; color: var(--fg-secondary); font-size: 12px; min-width: 150px; flex: 1; }
-    .upload-progress { width: 100%; height: 4px; }
-
-    .input-container { position: relative; }
-    .styled_input_bar { padding: 9px 12px; font-size: 13px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg); color: var(--fg); outline: none; transition: all 0.3s; font-family: inherit; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .styled_input_bar:hover { border-color: var(--fg-muted); }
-    .styled_input_bar:focus { border-color: var(--accent); background: var(--bg); }
-    .styled_input_bar::placeholder { color: var(--fg-muted); opacity: 0; }
-    .input-label { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); font-size: 13px; color: var(--fg-muted); pointer-events: none; transition: all 0.3s; padding: 0 4px; background: transparent; }
-    .styled_input_bar:focus + .input-label, .styled_input_bar:not(:placeholder-shown) + .input-label { top: 0; left: 10px; font-size: 10px; background: var(--bg-card); color: var(--fg-secondary); }
-
-    .group-close { background: none; border: none; cursor: pointer; color: var(--fg-muted); font-size: 18px; transition: color 0.2s; }
-    .group-close:hover { color: var(--fg); }
-
-    .switch { position: relative; display: inline-block; width: 40px; height: 22px; flex-shrink: 0; }
-    .switch input { opacity: 0; width: 0; height: 0; }
-    .toggle-slider { position: absolute; cursor: pointer; inset: 0; background: var(--line); transition: 0.4s; border-radius: 22px; }
-    .toggle-slider:before { position: absolute; content: ""; height: 16px; width: 16px; left: 3px; bottom: 3px; background: var(--bg); transition: 0.4s; border-radius: 50%; }
-    input:checked + .toggle-slider { background: var(--accent); }
-    input:checked + .toggle-slider:before { transform: translateX(18px); }
-    .toggle-text { color: var(--fg-secondary); font-size: 12px; white-space: nowrap; }
-
-    .modal9-window { width: 100%; max-width: 1400px; padding: 20px 24px; box-sizing: border-box; margin: 0 auto 20px; min-height: 60vh; }
-    .modal9-content { width: 100%; overflow-x: auto; }
-    .modal9-content::-webkit-scrollbar { height: 6px; }
-
-    .history-list { display: flex; flex-direction: column; gap: 6px; min-width: max-content; }
-    .history-controls { width: 100%; display: flex; justify-content: center; margin-top: 12px; }
-    .history-load-more { background: var(--accent); border: none; color: var(--bg); padding: 8px 24px; border-radius: 8px; font-size: 13px; font-weight: 500; cursor: pointer; font-family: inherit; transition: background 0.2s; }
-    .history-load-more:hover { background: var(--accent-hover); }
-    .history-load-more:disabled { opacity: 0.6; cursor: default; }
-
-    .history-item { display: flex; flex-direction: row; padding: 5px 8px; gap: 6px; transition: background 0.2s; border-radius: 6px; align-items: center; }
-    .history-item:hover { background: var(--bg-alt); cursor: pointer; }
-    .status-field-wrapper { display: inline-flex; align-items: center; gap: 4px; }
-    .status-icon { font-size: 18px; color: var(--fg-muted); transition: color 0.3s, text-shadow 0.3s; }
-
-    .spec-container { margin: 4px 0 12px; padding: 0 8px; }
-    .spec-content { display: none; transition: opacity 0.4s; }
-    .spec-content.visible { display: block; opacity: 1; }
-    .fade-toggle { transition: opacity 0.4s; }
-    .fade-toggle.hidden { opacity: 0; pointer-events: none; }
-
-    /* Progress steps */
-    .spec-progress { display: flex; gap: 12px; margin: 12px 0; width: 100%; }
-    .spec-progress .step { flex: 1; display: flex; flex-direction: column; gap: 4px; }
-    .spec-progress .bar { width: 100%; height: 3px; background: var(--line); border-radius: 2px; transition: background 0.3s; }
-    .spec-progress .step.active .bar { background: var(--success); }
-    .spec-progress .step-body { display: flex; gap: 8px; align-items: center; padding-top: 4px; }
-    .spec-progress .label { font-size: 11px; color: var(--fg-muted); white-space: nowrap; font-weight: 500; }
-    .spec-progress .step.active .label { color: var(--fg); font-weight: 600; }
-    .spec-progress .icons .material-symbols-outlined { font-size: 14px; color: var(--fg-muted); }
-    .spec-progress .step.active .icons .material-symbols-outlined { color: var(--success); }
-    .darkmatter-btn { background: var(--accent); border: none; color: var(--bg); padding: 6px 12px; border-radius: 6px; font-size: 11px; cursor: pointer; transition: background 0.2s; font-weight: 500; font-family: inherit; height: 26px; position: relative; }
-    .darkmatter-btn:hover { background: var(--accent-hover); }
-    .darkmatter-btn:disabled { opacity: 0.5; cursor: default; }
-    .darkmatter-btn .loader { display: none; position: absolute; left: calc(50% - 8px); top: calc(50% - 8px); width: 14px; height: 14px; border: 2px solid rgba(255,255,255,.3); border-top-color: var(--bg); border-radius: 50%; animation: spin 1s linear infinite; }
-    .darkmatter-btn.loading .loader { display: block; }
-    .darkmatter-btn.loading .button-text { visibility: hidden; }
-
-    /* Action buttons */
-    .spec-action-row { display: none; align-items: center; gap: 8px; flex-wrap: wrap; margin: 8px 0; }
-    .spec-action-row.visible { display: flex; }
-    .spec-action-btn { display: inline-flex; align-items: center; justify-content: center; min-width: 140px; height: 32px; padding: 0 14px; border: 1px solid var(--line); border-radius: 8px; background: var(--bg-card); color: var(--fg); font-size: 12px; font-weight: 500; cursor: pointer; transition: all 0.2s; font-family: inherit; }
-    .spec-action-btn:hover { background: var(--bg-alt); border-color: var(--accent); }
-    .spec-action-btn--excel { border-color: var(--success); color: var(--success); }
-    .spec-action-btn--excel:hover { background: var(--success); color: #fff; border-color: var(--success); }
-    .spec-action-btn .material-symbols-outlined { font-size: 16px; margin-right: 4px; }
-
-    /* Spec rows + slideshow */
-    .modalRow { display: flex; gap: 6px; margin-top: 6px; flex-wrap: nowrap; }
-    .modalColumn { display: flex; flex-direction: column; gap: 6px; }
-    .modalCONTEINERpost { display: flex; gap: 8px; padding: 8px; border: 1px solid var(--line-light); border-radius: 8px; margin-top: 6px; background: var(--bg); }
-
-    .slideshow-container { position: relative; flex: 1; min-width: 700px; display: grid; border-radius: 8px; }
-    .slide { grid-area: 1 / 1; width: 100%; height: auto; opacity: 0; visibility: hidden; transition: opacity 0.4s, visibility 0.4s; }
-    .slide.active { opacity: 1; visibility: visible; z-index: 2; }
-    .slide-content { padding: 24px 30px 8px 0; }
-    .caption { padding: 6px 12px; font-size: 11px; letter-spacing: 0.5px; text-align: right; color: var(--fg-muted); font-weight: 500; }
-    .prev, .next { cursor: pointer; position: absolute; top: 18px; color: var(--fg-muted); font-size: 16px; width: 26px; height: 26px; display: flex; align-items: center; justify-content: center; border-radius: 50%; background: var(--bg); border: 1px solid var(--line); transition: all 0.2s; opacity: 0.85; z-index: 3; user-select: none; font-weight: bold; }
-    .prev:hover, .next:hover { opacity: 1; background: var(--accent); color: var(--bg); border-color: var(--accent); }
-    .prev { left: 4px; } .next { right: 4px; }
-    .dots-container { position: absolute; bottom: 38px; left: 50%; transform: translateX(-50%); display: flex; gap: 6px; z-index: 3; }
-    .dot { width: 6px; height: 6px; border-radius: 50%; background: var(--line); cursor: pointer; transition: all 0.3s; }
-    .dot.active { background: var(--accent); transform: scale(1.2); }
-
-    .spec-close-btn-accent { background: var(--accent); color: var(--bg); border: none; border-radius: 6px; height: 30px; width: 30px; display: flex; align-items: center; justify-content: center; font-size: 16px; cursor: pointer; transition: background 0.2s; position: absolute; right: -38px; top: 50%; transform: translateY(-50%); z-index: 10; box-shadow: 0 2px 5px rgba(0,0,0,.1); }
-    .spec-close-btn-accent:hover { background: var(--accent-hover); }
-
-    .copy-tooltip { position: fixed; background: var(--accent); color: var(--bg); padding: 4px 8px; border-radius: 4px; font-size: 11px; pointer-events: none; z-index: 11000; }
-
-    .spec-context-menu { position: absolute; display: none; min-width: 220px; background: var(--bg); color: var(--fg); border: 1px solid var(--line); border-radius: 10px; box-shadow: 0 10px 25px rgba(0,0,0,.1); padding: 6px 0; z-index: 4000; }
-    .spec-context-menu.visible { display: block; }
-    .spec-context-menu button { width: 100%; padding: 9px 16px; border: none; background: none; font-size: 13px; text-align: left; color: inherit; cursor: pointer; transition: background 0.2s; font-family: inherit; }
-    .spec-context-menu button:hover { background: var(--bg-alt); }
-
-    .toasts { position: fixed; bottom: 16px; right: 16px; z-index: 5000; display: flex; flex-direction: column; gap: 8px; }
-    .toast { background: var(--bg); border: 1px solid var(--line); border-radius: 8px; padding: 10px 14px; box-shadow: 0 10px 25px rgba(0,0,0,.1); font-size: 13px; min-width: 220px; max-width: 360px; animation: slideIn 0.2s ease-out; }
-    .toast.success { border-left: 4px solid var(--success); }
-    .toast.error { border-left: 4px solid var(--error); }
-    .toast.info { border-left: 4px solid var(--accent); }
-    @keyframes slideIn { from { transform: translateX(20px); opacity: 0; } to { transform: none; opacity: 1; } }
-
-    .fade-in { animation: fadeIn 0.3s ease; }
-    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-    .fade { transition: opacity 0.5s; opacity: 0.3; }
-
-    @media (max-width: 768px) {
-      .header-inner { padding: 0 12px; }
-      .login-card { width: 95vw; height: auto; flex-direction: column; }
-      .login-overlay { display: none; }
-      .login-form-area { position: relative; left: 0; width: 100%; padding: 20px 0; }
-      .modalCONTEINERpost { flex-direction: column; }
-      .slideshow-container { min-width: 100%; }
+    /* На мобильных скрываем линию (откроется направо вниз? — пока просто скрываем) */
+    @media (max-width: 480px) {
+      .theme-line { display: none; }
+      .theme-line.mobile-open {
+        display: flex;
+        position: fixed;
+        right: 12px; top: calc(var(--ctrl-h) + 70px);
+        flex-direction: column-reverse;
+      }
     }
   </style>
 </head>
 <body>
 
-<div class="theme-transition-overlay"></div>
+  <!-- AURORA фон + плавный оверлей перехода тем -->
+  <div class="aurora-background" aria-hidden="true"></div>
+  <div class="theme-transition-overlay" aria-hidden="true"></div>
 
-<!-- Preloader -->
-<div id="preloader"><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line"></div></div>
+  <div id="app" class="relative z-10">
 
-<!-- DB disconnect overlay -->
-<div id="db-disconnect-overlay"></div>
-
-<!-- ============================================
-     LOGIN SCREEN
-     ============================================ -->
-<div id="login-wrapper">
-  <div class="login-card">
-    <div class="login-overlay" id="overlay">
-      <div class="ov-pane signin">
-        <h3>ТОЛЬКО УЗНАЛИ О НАС?</h3>
-        <p>Расскажите немного о себе,<br>и совершенствуйте своё дело вместе с нами!</p>
-        <button class="btn-overlay" id="slide-right-button">Создать учётную запись</button>
-      </div>
-      <div class="ov-pane signup" style="text-align:left;">
-        <h3>МЫ ЗНАКОМЫ?</h3>
-        <p>Если вы уже зарегистрированы,<br>перейдите на форму входа</p>
-        <button class="btn-overlay" id="slide-left-button">Форма входа</button>
+    <!-- SCREEN: Loading -->
+    <div id="screen-loading" class="fixed inset-0 z-50 flex items-center justify-center" style="background: var(--bg);">
+      <div class="text-center">
+        <div class="w-12 h-12 loader mx-auto mb-4"></div>
+        <p class="text-fg-muted text-sm tracking-wider uppercase">Загрузка</p>
       </div>
     </div>
-    <div class="login-form-area">
-      <div class="form-pane signin show" id="sign-up-info">
-        <h2>AI Equipment Selection</h2>
-        <form id="login-form" autocomplete="on">
-          <div class="modalFORM">
-            <h3>ФОРМА ВХОДА</h3>
-            <button type="button" class="btn-google-login" id="google-signin-btn">
-              <svg width="18" height="18" viewBox="0 0 24 24">
-                <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
-                <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+
+    <!-- SCREEN: Auth -->
+    <div id="screen-auth" class="hidden fixed inset-0 z-40 overflow-y-auto">
+      <div class="min-h-screen flex items-center justify-center px-4 py-8">
+        <div class="w-full max-w-md">
+          <div class="text-center mb-10 reveal">
+            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-surface border border-line mb-5">
+              <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 20V4h6a4 4 0 0 1 0 8H7"/>
+                <path d="m13 12 4 8"/>
               </svg>
-              Войти через Google
-            </button>
-            <div class="login-divider"><span>или</span></div>
-            <input class="inputField" type="email" placeholder="email: user@gmail.com" id="loginEmail" name="email" autocomplete="username" required>
-            <input class="inputField" type="password" placeholder="ваш пароль" id="loginPassword" name="password" autocomplete="current-password" minlength="6" required>
-            <div id="login-error" class="login-error" style="display:none"></div>
-            <button class="btn-submit" id="loginBtn">Войти</button>
+            </div>
+            <h1 class="text-2xl font-medium text-fg mb-1 tracking-tight">RIVA</h1>
+            <p class="text-fg-muted text-sm">Производственное приложение</p>
           </div>
-        </form>
-      </div>
-      <div class="form-pane signup" id="sign-in-info">
-        <h2>AI Equipment Selection</h2>
-        <form id="registration-form" autocomplete="on">
-          <div class="modalFORM">
-            <h3>ФОРМА РЕГИСТРАЦИИ</h3>
-            <input class="inputField" placeholder="Имя и фамилия" type="text" name="full_name" required>
-            <input class="inputField" placeholder="mail@gmail.com" type="email" name="email" autocomplete="email" required>
-            <input class="inputField" placeholder="пароль (мин. 6 символов)" type="password" name="password" autocomplete="new-password" minlength="6" required>
-            <div id="signup-error" class="login-error" style="display:none"></div>
-            <button class="btn-submit" id="regBtn">Создать аккаунт</button>
+
+          <div class="reveal delay-1">
+
+            <!-- View: Google login -->
+            <div id="view-google-login" class="bg-surface rounded-2xl p-8 border border-line relative">
+              <span class="corner-mark corner-mark-tl"></span>
+              <span class="corner-mark corner-mark-tr"></span>
+              <span class="corner-mark corner-mark-bl"></span>
+              <span class="corner-mark corner-mark-br"></span>
+
+              <div class="text-center mb-6">
+                <h2 class="text-lg font-medium mb-1">Вход в систему</h2>
+                <p class="text-fg-muted text-sm">Авторизуйтесь через Google аккаунт</p>
+              </div>
+
+              <button id="btn-google" class="btn-google w-full py-3.5 rounded-xl font-medium flex items-center justify-center gap-3">
+                <svg class="w-5 h-5" viewBox="0 0 24 24">
+                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
+                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
+                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
+                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+                </svg>
+                <span>Войти через Google</span>
+              </button>
+
+              <p class="mt-5 pt-5 border-t border-line-light text-fg-muted text-xs text-center leading-relaxed">
+                При первом входе создаётся личная группа, где вы — администратор. Вас также могут пригласить в группы коллег.
+              </p>
+            </div>
+
+            <!-- View: Group picker -->
+            <div id="view-group-picker" class="hidden bg-surface rounded-2xl p-8 border border-line relative">
+              <span class="corner-mark corner-mark-tl"></span>
+              <span class="corner-mark corner-mark-tr"></span>
+              <span class="corner-mark corner-mark-bl"></span>
+              <span class="corner-mark corner-mark-br"></span>
+
+              <div class="text-center mb-6">
+                <h2 class="text-lg font-medium mb-1">Выберите группу</h2>
+                <p class="text-fg-muted text-sm">Вы участник нескольких рабочих пространств</p>
+              </div>
+
+              <div id="group-list" class="space-y-2 mb-5"></div>
+
+              <button id="btn-create-group-open" class="w-full py-3 text-fg-muted text-sm hover:text-fg transition-colors border-t border-line-light pt-4">
+                + Создать новую группу
+              </button>
+              <button id="btn-signout-picker" class="mt-3 w-full py-2 text-fg-muted text-xs hover:text-fg transition-colors">
+                Выйти из аккаунта
+              </button>
+            </div>
+
+            <!-- View: Create group -->
+            <div id="view-create-group" class="hidden bg-surface rounded-2xl p-8 border border-line relative">
+              <span class="corner-mark corner-mark-tl"></span>
+              <span class="corner-mark corner-mark-tr"></span>
+              <span class="corner-mark corner-mark-bl"></span>
+              <span class="corner-mark corner-mark-br"></span>
+
+              <div class="text-center mb-6">
+                <h2 class="text-lg font-medium mb-1">Новая группа</h2>
+                <p class="text-fg-muted text-sm">Вы будете администратором и владельцем</p>
+              </div>
+
+              <label class="block mb-4">
+                <span class="text-xs text-fg-muted block mb-1.5">Название группы</span>
+                <input id="input-group-name" type="text" maxlength="100"
+                  class="w-full px-4 py-3 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors"
+                  placeholder="Например: Пекарня на Мира"
+                  autocomplete="off" spellcheck="false">
+              </label>
+
+              <button id="btn-create-group-submit" class="btn-primary w-full py-3.5 rounded-xl font-medium mb-2" disabled>
+                Создать группу
+              </button>
+              <button id="btn-create-group-cancel" class="btn-secondary w-full py-2.5 rounded-xl text-sm">
+                Отмена
+              </button>
+            </div>
+
+            <!-- View: No groups -->
+            <div id="view-no-groups" class="hidden bg-surface rounded-2xl p-8 border border-line relative">
+              <span class="corner-mark corner-mark-tl"></span>
+              <span class="corner-mark corner-mark-tr"></span>
+              <span class="corner-mark corner-mark-bl"></span>
+              <span class="corner-mark corner-mark-br"></span>
+
+              <div class="text-center">
+                <div class="w-14 h-14 rounded-full bg-surface-alt border border-line mx-auto mb-4 flex items-center justify-center">
+                  <svg class="w-7 h-7 text-fg-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <rect x="3" y="3" width="18" height="18" rx="2"/>
+                    <line x1="9" y1="9" x2="15" y2="15"/>
+                    <line x1="15" y1="9" x2="9" y2="15"/>
+                  </svg>
+                </div>
+                <h2 class="text-lg font-medium mb-2">Нет доступных групп</h2>
+                <p class="text-fg-muted text-sm mb-6">Вас удалили из всех групп, или пока никто не пригласил.</p>
+                <button id="btn-create-group-from-empty" class="btn-primary w-full py-3 rounded-xl font-medium mb-2">
+                  Создать свою группу
+                </button>
+                <button id="btn-signout-empty" class="w-full py-2 text-fg-muted text-sm hover:text-fg transition-colors">
+                  Выйти
+                </button>
+              </div>
+            </div>
+
+            <!-- View: Session active -->
+            <div id="view-session-active" class="hidden bg-surface rounded-2xl p-8 border border-line relative">
+              <span class="corner-mark corner-mark-tl"></span>
+              <span class="corner-mark corner-mark-tr"></span>
+              <span class="corner-mark corner-mark-bl"></span>
+              <span class="corner-mark corner-mark-br"></span>
+
+              <div class="text-center">
+                <div class="w-14 h-14 rounded-full bg-state-warning/10 border border-state-warning/30 mx-auto mb-4 flex items-center justify-center">
+                  <svg class="w-7 h-7 text-state-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="5" y="2" width="14" height="20" rx="2"/>
+                    <line x1="12" y1="18" x2="12.01" y2="18"/>
+                  </svg>
+                </div>
+                <h2 class="text-lg font-medium mb-2">Учётная запись активна</h2>
+                <p class="text-fg-muted text-sm mb-5">Ваш аккаунт уже используется на другом устройстве</p>
+
+                <div class="bg-surface-alt rounded-xl p-4 mb-5 text-left text-sm border border-line-light">
+                  <div class="flex justify-between gap-3 py-1">
+                    <span class="text-fg-muted flex-shrink-0">Устройство</span>
+                    <span id="session-device" class="text-fg text-right truncate">—</span>
+                  </div>
+                  <div class="flex justify-between gap-3 py-1">
+                    <span class="text-fg-muted flex-shrink-0">Начало сессии</span>
+                    <span id="session-started" class="text-fg text-right">—</span>
+                  </div>
+                </div>
+
+                <p class="text-fg-muted text-xs mb-5 leading-relaxed">
+                  Выйдите из системы на другом устройстве, чтобы войти здесь. Сессия освобождается автоматически через 2 минуты бездействия.
+                </p>
+
+                <button id="btn-retry-session" class="btn-secondary w-full py-3 rounded-xl font-medium text-sm mb-2">
+                  Повторить попытку
+                </button>
+                <button id="btn-signout-1" class="w-full py-2 text-fg-muted text-sm hover:text-fg transition-colors">
+                  Выйти
+                </button>
+              </div>
+            </div>
+
+            <!-- View: Blocked -->
+            <div id="view-blocked" class="hidden bg-surface rounded-2xl p-8 border border-line relative">
+              <span class="corner-mark corner-mark-tl"></span>
+              <span class="corner-mark corner-mark-tr"></span>
+              <span class="corner-mark corner-mark-bl"></span>
+              <span class="corner-mark corner-mark-br"></span>
+
+              <div class="text-center">
+                <div class="w-14 h-14 rounded-full bg-state-error/10 border border-state-error/30 mx-auto mb-4 flex items-center justify-center">
+                  <svg class="w-7 h-7 text-state-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <circle cx="12" cy="12" r="10"/>
+                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
+                  </svg>
+                </div>
+                <h2 class="text-lg font-medium mb-2">Доступ приостановлен</h2>
+                <p class="text-fg-muted text-sm mb-6">Ваш аккаунт заблокирован в системе</p>
+                <button id="btn-signout-2" class="btn-secondary w-full py-3 rounded-xl font-medium text-sm">Выйти</button>
+              </div>
+            </div>
+
           </div>
-        </form>
+
+          <div class="mt-8 text-center reveal delay-2">
+            <div class="inline-flex items-center gap-2 text-fg-muted text-xs">
+              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <rect x="3" y="11" width="18" height="11" rx="2"/>
+                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
+              </svg>
+              Защищённое соединение
+            </div>
+          </div>
+        </div>
       </div>
     </div>
+
+    <!-- SCREEN: Main -->
+    <div id="screen-main" class="hidden">
+
+      <header class="header-blur sticky top-0 z-30">
+        <div class="max-w-app mx-auto flex items-center justify-between gap-3 h-16 px-4 lg:px-6">
+
+          <!-- Левая зона -->
+          <div class="flex items-center gap-2">
+            <button id="btn-mobile-menu" class="ctrl ctrl-square lg:hidden" aria-label="Меню">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <line x1="4" y1="6" x2="20" y2="6"/>
+                <line x1="4" y1="12" x2="20" y2="12"/>
+                <line x1="4" y1="18" x2="20" y2="18"/>
+              </svg>
+            </button>
+
+            <a href="#" class="ctrl ctrl-square ctrl-logo" aria-label="RIVA">
+              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                <path d="M7 20V4h6a4 4 0 0 1 0 8H7"/>
+                <path d="m13 12 4 8"/>
+              </svg>
+            </a>
+            <span class="font-medium hidden sm:block tracking-tight" style="font-size:14px;">RIVA</span>
+
+            <!-- Group switcher -->
+            <div class="relative ml-1" id="group-switcher-wrap">
+              <button id="btn-group-switcher" class="ctrl">
+                <svg class="w-4 h-4 text-fg-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M3 21h18"/>
+                  <path d="M5 21V7l8-4v18"/>
+                  <path d="M19 21V11l-6-4"/>
+                </svg>
+                <span id="current-group-name" class="max-w-[200px] truncate">—</span>
+                <svg id="group-switcher-arrow" class="w-4 h-4 text-fg-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div id="group-switcher-menu" class="hidden absolute left-0 top-full mt-2 w-72 bg-surface rounded-xl border border-line shadow-lg shadow-black/5 py-1.5 z-50 max-h-80 overflow-y-auto"></div>
+            </div>
+          </div>
+
+          <!-- Центральная навигация (segmented control) -->
+          <nav id="top-nav" class="nav-segmented hidden lg:inline-flex"></nav>
+
+          <!-- Правая зона: профиль + тема -->
+          <div class="flex items-center gap-2">
+
+            <!-- Profile -->
+            <div class="relative" id="profile-wrap">
+              <button id="btn-profile" class="ctrl" style="padding: 0 8px 0 4px;">
+                <span class="inline-flex items-center justify-center rounded-md overflow-hidden" id="header-avatar"
+                      style="width:26px; height:26px; background: var(--bg-alt);">
+                  <svg class="w-4 h-4 text-fg-muted" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+                  </svg>
+                </span>
+                <span class="hidden sm:block max-w-[140px] truncate" id="header-name"></span>
+                <svg class="w-4 h-4 text-fg-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="6 9 12 15 18 9"/></svg>
+              </button>
+              <div id="profile-menu" class="hidden absolute right-0 top-full mt-2 w-64 bg-surface rounded-xl border border-line shadow-lg shadow-black/5 py-1.5 z-50">
+                <div class="px-4 py-3 border-b border-line-light">
+                  <p class="text-sm font-medium" id="menu-name"></p>
+                  <p class="text-xs text-fg-muted truncate mt-0.5" id="menu-email"></p>
+                  <p class="text-xs text-fg-muted mt-1.5"><span id="menu-role"></span></p>
+                </div>
+                <button id="btn-signout-main" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-state-error hover:bg-surface-alt transition-colors">
+                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                    <polyline points="16 17 21 12 16 7"/>
+                    <line x1="21" y1="12" x2="9" y2="12"/>
+                  </svg>
+                  Выйти
+                </button>
+              </div>
+            </div>
+
+            <!-- Theme switcher -->
+            <div class="theme-switcher">
+              <!-- Линия тем (появляется СПРАВА НАЛЕВО относительно кнопки) -->
+              <div class="theme-line" id="theme-line">
+                <button class="theme-node" data-theme="bw-light"  title="Светлая Ч/Б"><span class="theme-preview" style="background:linear-gradient(135deg,#FFFFFF 50%,#0A0A0A 50%)"></span></button>
+                <button class="theme-node" data-theme="bw-dark"   title="Тёмная Ч/Б"><span class="theme-preview" style="background:linear-gradient(135deg,#0A0B0E 50%,#FAFAFA 50%)"></span></button>
+                <button class="theme-node" data-theme="gradient-1" title="Тёплый песок"><span class="theme-preview" style="background:linear-gradient(135deg,#E5D2BB,#8A7560,#3F3A30)"></span></button>
+                <button class="theme-node" data-theme="gradient-2" title="Кофе с молоком"><span class="theme-preview" style="background:linear-gradient(135deg,#C68554,#7A4A2C,#2A1E18)"></span></button>
+                <button class="theme-node" data-theme="gradient-3" title="Морской бриз"><span class="theme-preview" style="background:linear-gradient(135deg,#A4C5D8,#3C7A95,#1E353F)"></span></button>
+                <button class="theme-node" data-theme="gradient-4" title="Туманный лес"><span class="theme-preview" style="background:linear-gradient(135deg,#A5BABA,#556450,#252820)"></span></button>
+                <button class="theme-node" data-theme="gradient-5" title="Стальной минимал"><span class="theme-preview" style="background:linear-gradient(135deg,#D8D9DD,#5A5E68,#1E1F23)"></span></button>
+              </div>
+
+              <button id="btn-theme" class="ctrl ctrl-square btn-theme" aria-label="Сменить тему">
+                <svg class="icon-palette w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <circle cx="12" cy="12" r="10"/>
+                  <circle cx="12" cy="8" r="2" fill="currentColor"/>
+                  <path d="M8 14c1.5-2 6.5-2 8 0" stroke-linecap="round"/>
+                </svg>
+                <svg class="icon-close w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                  <path d="M18 6 6 18M6 6l12 12"/>
+                </svg>
+              </button>
+            </div>
+
+          </div>
+        </div>
+      </header>
+
+      <div id="sidebar-backdrop" class="hidden fixed inset-0 bg-black/30 z-20 lg:hidden"></div>
+      <aside id="sidebar" class="sidebar fixed left-0 top-0 bottom-0 w-72 bg-surface border-r border-line z-30 lg:hidden overflow-y-auto">
+        <div class="h-16 px-5 flex items-center border-b border-line">
+          <span class="font-medium tracking-tight">RIVA</span>
+        </div>
+        <nav id="side-nav" class="p-3 space-y-1"></nav>
+      </aside>
+
+      <main class="max-w-app mx-auto px-4 lg:px-6 py-6">
+        <div id="page-container">
+          <div class="flex items-center justify-center py-20">
+            <div class="w-8 h-8 loader"></div>
+          </div>
+        </div>
+      </main>
+    </div>
+
   </div>
-</div>
 
-<!-- ============================================
-     MAIN APP (после логина)
-     ============================================ -->
-<div id="main-app" style="display:none">
+  <div id="toasts" class="fixed bottom-4 right-4 z-[60] space-y-2 max-w-sm pointer-events-none"></div>
 
-  <!-- Header (RIVA style) -->
-  <header class="header-blur">
-    <div class="header-inner">
-      <!-- Left zone -->
-      <div style="display:flex; align-items:center; gap:8px;">
-        <a href="#" class="ctrl ctrl-square ctrl-logo" aria-label="AI Equipment Selection">
-          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M7 20V4h6a4 4 0 0 1 0 8H7"/>
-            <path d="m13 12 4 8"/>
-          </svg>
-        </a>
-        <span style="font-weight:600; font-size:14px; letter-spacing:-0.01em;" class="brand-name">AI Equipment Selection</span>
+  <!-- ============================================================
+       ПАЛИТРЫ И ПЕРЕКЛЮЧАТЕЛЬ ТЕМ
+       ============================================================ -->
+  <script>
+    (function () {
+      const PALETTES = {
+        // Текущая светлая (сохранена в неизменном виде)
+        'bw-light': {
+          bg: '#FFFFFF', bgAlt: '#FAFAFA', bgCard: '#F5F5F5',
+          fg: '#0A0A0A', fgSecondary: '#404040', fgMuted: '#737373',
+          line: '#E5E5E5', lineLight: '#F0F0F0',
+          aurora: {
+            bg: '#FFFFFF',
+            primary: '#FFFFFF',
+            secondary: '#A8A8A8',
+            grad1: '#888888', grad2: '#555555', grad3: '#222222',
+            opacity: 0.22, blur: 14, blend: 'multiply'
+          }
+        },
+        // Тёмная
+        'bw-dark': {
+          bg: '#15171C', bgAlt: '#1C1F25', bgCard: '#23262E',
+          fg: '#F5F5F5', fgSecondary: '#A3A3A3', fgMuted: '#737373',
+          line: '#2B2F38', lineLight: '#24272F',
+          aurora: {
+            bg: '#0A0B0E',
+            primary: '#23262E',
+            secondary: '#454A55',
+            grad1: '#5B6170', grad2: '#7A8090', grad3: '#9CA3B3',
+            opacity: 0.32, blur: 10, blend: 'screen'
+          }
+        },
+        // Тёплый песок
+        'gradient-1': {
+          bg: '#FCFBF6', bgAlt: '#F4F0E5', bgCard: '#EEE7D6',
+          fg: '#2A2823', fgSecondary: '#5C5547', fgMuted: '#8A8270',
+          line: '#DCD3BD', lineLight: '#EAE3CE',
+          aurora: {
+            bg: '#FCFBF6',
+            primary: '#E5D2BB',
+            secondary: '#A89077',
+            grad1: '#8A7560', grad2: '#6A5B4A', grad3: '#3F3A30',
+            opacity: 0.32, blur: 12, blend: 'soft-light'
+          }
+        },
+        // Кофе с молоком
+        'gradient-2': {
+          bg: '#F7F1E8', bgAlt: '#EFE6D5', bgCard: '#E6D8C1',
+          fg: '#2A1E18', fgSecondary: '#5A4438', fgMuted: '#8A7A6A',
+          line: '#D2C0A6', lineLight: '#E2D4BC',
+          aurora: {
+            bg: '#F7F1E8',
+            primary: '#C68554',
+            secondary: '#8A5A36',
+            grad1: '#7A4A2C', grad2: '#5A3320', grad3: '#2A1E18',
+            opacity: 0.30, blur: 13, blend: 'soft-light'
+          }
+        },
+        // Морской бриз
+        'gradient-3': {
+          bg: '#F4F8FA', bgAlt: '#E8EFF4', bgCard: '#D9E5ED',
+          fg: '#15252D', fgSecondary: '#3B5562', fgMuted: '#6E8595',
+          line: '#C3D4DE', lineLight: '#DEE8EE',
+          aurora: {
+            bg: '#F4F8FA',
+            primary: '#A4C5D8',
+            secondary: '#5E92AB',
+            grad1: '#3C7A95', grad2: '#28586D', grad3: '#1E353F',
+            opacity: 0.32, blur: 12, blend: 'soft-light'
+          }
+        },
+        // Туманный лес
+        'gradient-4': {
+          bg: '#F2F5F0', bgAlt: '#E7ECE3', bgCard: '#D9E0D2',
+          fg: '#1F2A20', fgSecondary: '#465045', fgMuted: '#7B8A78',
+          line: '#C0CBB9', lineLight: '#DCE3D4',
+          aurora: {
+            bg: '#F2F5F0',
+            primary: '#A5BABA',
+            secondary: '#6B7E6A',
+            grad1: '#556450', grad2: '#3E4A38', grad3: '#252820',
+            opacity: 0.30, blur: 13, blend: 'soft-light'
+          }
+        },
+        // Стальной минимал
+        'gradient-5': {
+          bg: '#F8F8FA', bgAlt: '#EEEFF2', bgCard: '#E0E2E7',
+          fg: '#1A1B1F', fgSecondary: '#3F4148', fgMuted: '#71747C',
+          line: '#C7C9D0', lineLight: '#DEE0E5',
+          aurora: {
+            bg: '#F8F8FA',
+            primary: '#D8D9DD',
+            secondary: '#9395A0',
+            grad1: '#5A5E68', grad2: '#3A3D45', grad3: '#1E1F23',
+            opacity: 0.28, blur: 13, blend: 'soft-light'
+          }
+        }
+      };
 
-        <!-- Group switcher -->
-        <div class="group-switcher-wrap">
-          <button id="btn-group-switcher" class="ctrl">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M3 21h18"/>
-              <path d="M5 21V7l8-4v18"/>
-              <path d="M19 21V11l-6-4"/>
-            </svg>
-            <span id="current-group-name" style="max-width:200px; overflow:hidden; text-overflow:ellipsis;">—</span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div id="group-switcher-menu" class="group-switcher-menu"></div>
-        </div>
-      </div>
+      const STORAGE_KEY = 'riva-theme';
 
-      <!-- Right zone -->
-      <div style="display:flex; align-items:center; gap:8px;">
-        <div class="profile-wrap">
-          <button id="btn-profile" class="ctrl" style="padding:0 8px 0 4px;">
-            <span style="display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:6px; background:var(--bg-alt); overflow:hidden;" id="header-avatar">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="color:var(--fg-muted)">
-                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-              </svg>
-            </span>
-            <span class="hidden-mobile" id="header-name" style="max-width:140px; overflow:hidden; text-overflow:ellipsis;"></span>
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div id="profile-menu" class="profile-menu">
-            <div class="profile-menu-head">
-              <div class="profile-menu-name" id="menu-name"></div>
-              <div class="profile-menu-email" id="menu-email"></div>
-              <div class="profile-menu-balance" id="menu-balance"></div>
-            </div>
-            <button class="profile-menu-item danger" id="btn-signout-main">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                <polyline points="16 17 21 12 16 7"/>
-                <line x1="21" y1="12" x2="9" y2="12"/>
-              </svg>
-              Выйти
-            </button>
-          </div>
-        </div>
+      function applyPalette(key) {
+        const p = PALETTES[key];
+        if (!p) return;
+        const r = document.documentElement;
 
-        <!-- Theme switcher (только bw-light + bw-dark) -->
-        <div class="theme-switcher">
-          <div class="theme-line" id="theme-line">
-            <button class="theme-node" data-theme="bw-light" title="Светлая Ч/Б"><span class="theme-preview" style="background:linear-gradient(135deg,#FFFFFF 50%,#0A0A0A 50%)"></span></button>
-            <button class="theme-node" data-theme="bw-dark" title="Тёмная Ч/Б"><span class="theme-preview" style="background:linear-gradient(135deg,#0A0B0E 50%,#FAFAFA 50%)"></span></button>
-          </div>
-          <button id="btn-theme" class="ctrl ctrl-square btn-theme" aria-label="Сменить тему">
-            <svg class="icon-palette" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <circle cx="12" cy="12" r="10"/>
-              <circle cx="12" cy="8" r="2" fill="currentColor"/>
-              <path d="M8 14c1.5-2 6.5-2 8 0" stroke-linecap="round"/>
-            </svg>
-            <svg class="icon-close" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-              <path d="M18 6 6 18M6 6l12 12"/>
-            </svg>
-          </button>
-        </div>
-      </div>
-    </div>
-  </header>
+        // Приложение
+        r.style.setProperty('--bg',           p.bg);
+        r.style.setProperty('--bg-alt',       p.bgAlt);
+        r.style.setProperty('--bg-card',      p.bgCard);
+        r.style.setProperty('--fg',           p.fg);
+        r.style.setProperty('--fg-secondary', p.fgSecondary);
+        r.style.setProperty('--fg-muted',     p.fgMuted);
+        r.style.setProperty('--line',         p.line);
+        r.style.setProperty('--line-light',   p.lineLight);
 
-  <!-- ============================================
-       MODAL 9 APP
-       ============================================ -->
-  <div id="modal9-container" class="spec-modal">
-    <div class="spec-context-menu" aria-hidden="true">
-      <button type="button" data-action="copy">Скопировать спецификацию</button>
-      <button type="button" data-action="excel">Скачать спецификацию Excel</button>
-    </div>
+        // Aurora
+        r.style.setProperty('--aurora-bg',        p.aurora.bg);
+        r.style.setProperty('--aurora-primary',   p.aurora.primary);
+        r.style.setProperty('--aurora-secondary', p.aurora.secondary);
+        r.style.setProperty('--aurora-grad1',     p.aurora.grad1);
+        r.style.setProperty('--aurora-grad2',     p.aurora.grad2);
+        r.style.setProperty('--aurora-grad3',     p.aurora.grad3);
+        r.style.setProperty('--aurora-opacity',   String(p.aurora.opacity));
+        r.style.setProperty('--aurora-blur',      p.aurora.blur + 'px');
+        r.style.setProperty('--aurora-blend',     p.aurora.blend);
 
-    <!-- Top: upload + search + toggle -->
-    <div class="modal9-top-window glass3d">
-      <div class="modal9-top-body">
-        <button type="button" class="upload-btn-main" id="upload-btn">
-          <span class="material-symbols-outlined" style="font-size:18px;">upload_file</span>
-          <span class="button-text">загрузить техническое задание</span>
-          <span class="loader"></span>
-        </button>
-        <input type="file" class="js-file-input" id="js-file-input" accept=".pdf,.docx,.xlsx,.xls,.txt,.csv,.rtf,.doc,.ods" style="display:none">
+        // theme-color meta для статус-бара браузера/PWA
+        document.querySelector('meta[name="theme-color"]')?.setAttribute('content', p.bg);
 
-        <div class="upload-status-wrapper">
-          <progress class="upload-progress" id="upload-progress" value="0" max="100" style="display:none;"></progress>
-          <div class="upload-status" id="upload-status"></div>
-        </div>
+        // активный кружок в линии
+        document.querySelectorAll('.theme-node').forEach(n =>
+          n.classList.toggle('active', n.dataset.theme === key));
+      }
 
-        <div class="input-container" style="width:240px;">
-          <input id="file-filter-input" class="styled_input_bar" placeholder=" " style="width:100%;">
-          <label class="input-label">поиск</label>
-          <button class="group-close file-filter-clear" id="file-filter-clear" style="display:none; position:absolute; right:8px; top:50%; transform:translateY(-50%);">×</button>
-        </div>
+      function switchTheme(key) {
+        const aurora = document.querySelector('.aurora-background');
+        const overlay = document.querySelector('.theme-transition-overlay');
+        const cur = PALETTES[key];
+        if (!cur) return;
 
-        <label class="switch">
-          <input type="checkbox" id="my-files-toggle">
-          <span class="toggle-slider"></span>
-        </label>
-        <span class="toggle-text" id="toggle-text">все файлы</span>
-      </div>
-    </div>
+        // Плавный переход через оверлей
+        if (aurora) aurora.style.opacity = '0.05';
+        overlay?.classList.add('active');
 
-    <!-- Main content -->
-    <div class="modal9-window glass3d">
-      <div class="modal9-content">
-        <div class="history-list" id="history-list"></div>
-        <div class="history-controls">
-          <button type="button" class="history-load-more" id="history-load-more" style="display:none;">показать ещё</button>
-        </div>
+        setTimeout(() => {
+          applyPalette(key);
+          localStorage.setItem(STORAGE_KEY, key);
 
-        <!-- Templates -->
-        <template id="history-row-template">
-          <div class="history-item">
-            <div class="input-container"><input type="text" class="styled_input_bar" data-field="file_number" readonly style="width:110px;" placeholder=" "><label class="input-label">номер</label></div>
-            <div class="input-container"><input type="text" class="styled_input_bar" data-field="user_login" readonly style="width:220px;" placeholder=" "><label class="input-label">login</label></div>
-            <div class="input-container"><input type="text" class="styled_input_bar" data-field="created_at" readonly style="width:170px; text-align:center;" placeholder=" "><label class="input-label">дата</label></div>
-            <div class="input-container"><input type="text" class="styled_input_bar" data-field="file_name" readonly style="width:380px;" placeholder=" "><label class="input-label">файл</label></div>
-            <div class="input-container"><input type="text" class="styled_input_bar" data-field="file_ext" readonly style="width:70px; text-transform:uppercase; text-align:center;" placeholder=" "><label class="input-label">ext</label></div>
-            <div class="status-field-wrapper">
-              <div class="input-container"><input type="text" class="styled_input_bar" data-field="status_parser" readonly style="width:90px; text-transform:uppercase; text-align:center;" placeholder=" "><label class="input-label">парсер</label></div>
-              <span class="material-symbols-outlined status-icon" data-status-icon="status_parser">clear_all</span>
-            </div>
-            <div class="status-field-wrapper">
-              <div class="input-container"><input type="text" class="styled_input_bar" data-field="status_selector" readonly style="width:90px; text-transform:uppercase; text-align:center;" placeholder=" "><label class="input-label">селектор</label></div>
-              <span class="material-symbols-outlined status-icon" data-status-icon="status_selector">clear_all</span>
-            </div>
-            <div class="status-field-wrapper">
-              <div class="input-container"><input type="text" class="styled_input_bar" data-field="status_pricer" readonly style="width:90px; text-transform:uppercase; text-align:center;" placeholder=" "><label class="input-label">прайсер</label></div>
-              <span class="material-symbols-outlined status-icon" data-status-icon="status_pricer">clear_all</span>
-            </div>
-            <div class="input-container"><input type="text" class="styled_input_bar" data-field="cost" readonly style="width:84px; text-align:center;" placeholder=" "><label class="input-label">USD</label></div>
-            <div class="input-container"><input type="text" class="styled_input_bar" data-field="id" readonly style="width:80px; text-align:center;" placeholder=" "><label class="input-label">spec #</label></div>
-          </div>
-        </template>
+          requestAnimationFrame(() => {
+            if (aurora) aurora.style.opacity = cur.aurora.opacity;
+            overlay?.classList.remove('active');
+          });
+        }, 350);
+      }
 
-        <template id="spec-template">
-          <div class="spec-container">
-            <div class="spec-content"></div>
-          </div>
-        </template>
+      // Применяем сохранённую тему ДО рендеринга app.js (no flash)
+      const saved = localStorage.getItem(STORAGE_KEY) || 'bw-light';
+      applyPalette(PALETTES[saved] ? saved : 'bw-light');
 
-        <template id="button-group-spec">
-          <div class="spec-action-row">
-            <button type="button" class="spec-action-btn spec-action-btn--excel" data-action="excel">
-              <span class="material-symbols-outlined">download</span>
-              <span class="label">скачать excel</span>
-            </button>
-            <button type="button" class="spec-action-btn" data-action="copy">
-              <span class="material-symbols-outlined">content_copy</span>
-              <span class="label">скопировать</span>
-            </button>
-          </div>
-        </template>
+      // Биндинги — после DOMContentLoaded (т.к. кнопки лежат в DOM)
+      document.addEventListener('DOMContentLoaded', () => {
+        const btnTheme = document.getElementById('btn-theme');
+        const line = document.getElementById('theme-line');
+        if (!btnTheme || !line) return;
 
-        <template id="spec-progress-template">
-          <div class="spec-progress">
-            <div class="step" data-step="1">
-              <div class="bar"></div>
-              <div class="step-body">
-                <div class="label">ПАРСЕР</div>
-                <div class="icons"><span class="material-symbols-outlined status">indeterminate_check_box</span></div>
-                <button class="darkmatter-btn refresh" data-stage="parser" title="Перезапустить парсер">
-                  <span class="button-text">запуск</span><span class="loader"></span>
-                </button>
-              </div>
-            </div>
-            <div class="step" data-step="2">
-              <div class="bar"></div>
-              <div class="step-body">
-                <div class="label">СЕЛЕКТОР</div>
-                <div class="icons"><span class="material-symbols-outlined status">indeterminate_check_box</span></div>
-                <button class="darkmatter-btn refresh" data-stage="selector" title="Перезапустить селектор">
-                  <span class="button-text">запуск</span><span class="loader"></span>
-                </button>
-              </div>
-            </div>
-            <div class="step" data-step="3">
-              <div class="bar"></div>
-              <div class="step-body">
-                <div class="label">ПРАЙСЕР</div>
-                <div class="icons"><span class="material-symbols-outlined status">indeterminate_check_box</span></div>
-                <button class="darkmatter-btn refresh" data-stage="pricer" title="Перезапустить прайсер">
-                  <span class="button-text">запуск</span><span class="loader"></span>
-                </button>
-              </div>
-            </div>
-          </div>
-        </template>
-
-        <template id="spec-row-template">
-          <div class="modalCONTEINERpost">
-            <div class="modalColumn">
-              <div class="modalRow">
-                <div class="input-container"><input type="text" class="styled_input_bar" data-field="pos_number" readonly style="width:80px; text-align:center;" placeholder=" "><label class="input-label">№</label></div>
-                <div class="input-container"><input type="text" class="styled_input_bar" data-field="name" readonly style="width:300px;" placeholder=" "><label class="input-label">наименование</label></div>
-                <div class="input-container"><input type="text" class="styled_input_bar" data-field="qty" readonly style="width:60px; text-align:center;" placeholder=" "><label class="input-label">кол-во</label></div>
-                <div class="input-container"><input type="text" class="styled_input_bar" data-field="unit" readonly style="width:60px; text-align:center;" placeholder=" "><label class="input-label">ед.</label></div>
-              </div>
-            </div>
-            <div class="slideshow-container">
-              <div class="slide active" data-slide="1"><div class="slide-content"></div><div class="caption">Блок 1, требования ТЗ</div></div>
-              <div class="slide" data-slide="2"><div class="slide-content"></div><div class="caption">Блок 2, подобранная позиция</div></div>
-              <div class="slide" data-slide="3"><div class="slide-content"></div><div class="caption">Блок 3, ценовые источники</div></div>
-              <a class="prev">&#10094;</a>
-              <a class="next">&#10095;</a>
-              <div class="dots-container">
-                <div class="dot active" data-index="0"></div>
-                <div class="dot" data-index="1"></div>
-                <div class="dot" data-index="2"></div>
-              </div>
-            </div>
-          </div>
-        </template>
-
-        <template id="spec-attr-template">
-          <div class="modalRow">
-            <div class="input-container"><input type="text" class="styled_input_bar param-input" readonly style="width:480px;" placeholder=" "><label class="input-label">параметр</label></div>
-            <div class="input-container"><input type="text" class="styled_input_bar value-input" readonly style="width:280px;" placeholder=" "><label class="input-label">значение</label></div>
-          </div>
-        </template>
-
-        <template id="spec-block2-template">
-          <div class="modalRow">
-            <div class="input-container"><input type="text" class="styled_input_bar" data-pick="article" readonly style="width:160px;" placeholder=" "><label class="input-label">артикул</label></div>
-            <div class="input-container"><input type="text" class="styled_input_bar" data-pick="model_name" readonly style="width:320px;" placeholder=" "><label class="input-label">наименование</label></div>
-            <div class="input-container"><input type="text" class="styled_input_bar" data-pick="qty" readonly style="width:80px; text-align:center;" placeholder=" "><label class="input-label">кол-во</label></div>
-            <div class="input-container"><input type="text" class="styled_input_bar" data-pick="unit" readonly style="width:70px; text-align:center;" placeholder=" "><label class="input-label">ед.</label></div>
-            <div class="input-container"><input type="text" class="styled_input_bar" data-pick="price" readonly style="width:110px; text-align:right;" placeholder=" "><label class="input-label">цена</label></div>
-            <div class="input-container"><input type="text" class="styled_input_bar" data-pick="sum" readonly style="width:130px; text-align:right;" placeholder=" "><label class="input-label">сумма</label></div>
-          </div>
-        </template>
-
-        <template id="spec-block3-template">
-          <div class="modalRow">
-            <div class="input-container"><input type="text" class="styled_input_bar" data-offer="1-price" readonly style="width:110px; text-align:right;" placeholder=" "><label class="input-label">цена 1</label></div>
-            <div class="input-container"><input type="text" class="styled_input_bar" data-offer="1-store" readonly style="width:140px;" placeholder=" "><label class="input-label">магазин</label></div>
-            <a class="icons" data-offer="1-url" target="_blank" rel="noopener"><span class="material-symbols-outlined">link</span></a>
-            <div class="input-container"><input type="text" class="styled_input_bar" data-offer="2-price" readonly style="width:110px; text-align:right;" placeholder=" "><label class="input-label">цена 2</label></div>
-            <div class="input-container"><input type="text" class="styled_input_bar" data-offer="2-store" readonly style="width:140px;" placeholder=" "><label class="input-label">магазин</label></div>
-            <a class="icons" data-offer="2-url" target="_blank" rel="noopener"><span class="material-symbols-outlined">link</span></a>
-            <div class="input-container"><input type="text" class="styled_input_bar" data-offer="3-price" readonly style="width:110px; text-align:right;" placeholder=" "><label class="input-label">цена 3</label></div>
-            <div class="input-container"><input type="text" class="styled_input_bar" data-offer="3-store" readonly style="width:140px;" placeholder=" "><label class="input-label">магазин</label></div>
-            <a class="icons" data-offer="3-url" target="_blank" rel="noopener"><span class="material-symbols-outlined">link</span></a>
-          </div>
-        </template>
-      </div>
-    </div>
-  </div>
-
-</div>
-
-<!-- Toasts -->
-<div class="toasts" id="toasts"></div>
-
-<!-- ============================================
-     APPLICATION SCRIPT
-     ============================================ -->
-<script type="module">
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
-
-// ============================================================
-// CONFIG
-// ============================================================
-const SUPABASE_URL = "https://ncdwlmgwljjwpuawlssr.supabase.co";
-const SUPABASE_KEY = "sb_publishable_Ii_4oufnEzd44lBEse867A_5rsn4E8j";
-const BUCKET = "uploads";
-const TABLE = "spec_uploads";
-const POS_TABLE = "spec_positions";
-const PICK_TABLE = "spec_position_picks";
-const ALLOWED_EXTS = ["pdf","docx","xlsx","xls","txt","csv","rtf","doc","ods"];
-const HISTORY_LIMIT_DEFAULT = 30;
-const HISTORY_LIMIT_STEP = 30;
-const REALTIME_ROW_LIMIT = 8;
-const STORAGE_KEY_THEME = "ai-eq-theme";
-
-const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
-  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
-});
-window.supabase = supabase;
-
-// ============================================================
-// STATE
-// ============================================================
-const state = {
-  session: null,
-  user: null,
-  profile: null,
-  groupId: null,
-  groups: [],
-  balance: null,
-  history: [],
-  historyLimit: HISTORY_LIMIT_DEFAULT,
-  historyTotalCount: 0,
-  lastStatuses: {},
-  specGroups: {},      // { specId: [positions] }
-  picksByPos: {},      // { posId: [picks] }
-  watchedSpecIds: new Set(),
-  reloadTimers: new Map(),
-  openedSpecId: null,
-  realtimeSub: null,
-  contextSpecContent: null,
-};
-
-// ============================================================
-// HELPERS
-// ============================================================
-const $ = (id) => document.getElementById(id);
-const $$ = (sel, scope = document) => scope.querySelectorAll(sel);
-const sanitize = (s) => s.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9._-]/gi, "_");
-const escapeSearch = (v) => v.replace(/[\\%_]/g, "\\$&");
-const escapeHtml = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
-const toPosNum = (v) => { if (typeof v === "number" && Number.isFinite(v)) return v; const m = String(v ?? "").match(/\d+/); return m ? parseInt(m[0], 10) : Number.MAX_SAFE_INTEGER; };
-const delay = (ms) => new Promise(r => setTimeout(r, ms));
-
-function fmtMoney(amount, currency = "USD", digits = 2) {
-  if (amount == null || isNaN(amount)) return "—";
-  const n = parseFloat(amount);
-  const sym = currency === "RUB" ? "₽" : currency === "USD" ? "$" : currency + " ";
-  const s = n.toFixed(digits).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
-  return currency === "RUB" ? `${s} ${sym}` : `${sym}${s}`;
-}
-
-function fmtDate(d) {
-  if (!d) return "";
-  const date = typeof d === "string" ? new Date(d) : d;
-  const day = String(date.getDate()).padStart(2, "0");
-  const mon = String(date.getMonth() + 1).padStart(2, "0");
-  const yr = date.getFullYear();
-  const hh = String(date.getHours()).padStart(2, "0");
-  const mm = String(date.getMinutes()).padStart(2, "0");
-  return `${day}.${mon}.${yr}, ${hh}:${mm}`;
-}
-
-function formatNumeric(v) {
-  if (v == null || v === "") return "";
-  const n = parseFloat(String(v).replace(/\s/g, "").replace(",", "."));
-  if (!Number.isFinite(n)) return String(v);
-  return n.toLocaleString("ru-RU");
-}
-
-function toast(message, kind = "info", ms = 3500) {
-  const c = $("toasts");
-  if (!c) return;
-  const el = document.createElement("div");
-  el.className = `toast ${kind}`;
-  el.textContent = message;
-  c.appendChild(el);
-  setTimeout(() => { el.style.opacity = "0"; setTimeout(() => el.remove(), 250); }, ms);
-}
-
-function showCopyTip(el) {
-  const tip = document.createElement("div");
-  tip.className = "copy-tooltip";
-  tip.textContent = "скопировано";
-  document.body.appendChild(tip);
-  const r = el.getBoundingClientRect();
-  tip.style.left = r.left + r.width/2 - 40 + "px";
-  tip.style.top = r.top - 24 + "px";
-  setTimeout(() => tip.remove(), 1000);
-}
-
-function translateAuthError(msg) {
-  const m = (msg || "").toLowerCase();
-  if (m.includes("invalid login")) return "Неверный email или пароль";
-  if (m.includes("user already")) return "Пользователь уже зарегистрирован";
-  if (m.includes("email not confirmed")) return "Email не подтверждён — проверь почту";
-  if (m.includes("password should")) return "Пароль слишком короткий (мин. 6)";
-  if (m.includes("rate limit")) return "Слишком много попыток — подожди";
-  return msg || "Неизвестная ошибка";
-}
-
-// ============================================================
-// THEME
-// ============================================================
-function applyTheme(key) {
-  const valid = ["bw-light", "bw-dark"];
-  if (!valid.includes(key)) key = "bw-light";
-  document.documentElement.setAttribute("data-theme", key);
-  localStorage.setItem(STORAGE_KEY_THEME, key);
-  $$(".theme-node").forEach(n => n.classList.toggle("active", n.dataset.theme === key));
-  const tc = document.querySelector('meta[name="theme-color"]');
-  if (tc) tc.setAttribute("content", key === "bw-dark" ? "#15171C" : "#FFFFFF");
-}
-
-function switchTheme(key) {
-  const overlay = document.querySelector(".theme-transition-overlay");
-  overlay?.classList.add("active");
-  setTimeout(() => {
-    applyTheme(key);
-    requestAnimationFrame(() => overlay?.classList.remove("active"));
-  }, 300);
-}
-
-// Apply saved theme immediately
-applyTheme(localStorage.getItem(STORAGE_KEY_THEME) || "bw-light");
-
-// ============================================================
-// AUTH
-// ============================================================
-function showSplash(on) { $("preloader").classList.toggle("visible", on); $("preloader").classList.toggle("fade-out", !on); }
-function showLogin() { $("login-wrapper").classList.add("show"); $("main-app").style.display = "none"; }
-function showApp() {
-  $("login-wrapper").classList.remove("show");
-  $("main-app").style.display = "block";
-  $("modal9-container").classList.add("visible");
-}
-
-function toggleLoginOverlay(toSignUp) {
-  const overlay = $("overlay");
-  const signinPane = $("sign-up-info");
-  const signupPane = $("sign-in-info");
-  if (toSignUp) {
-    overlay.classList.add("open-sign-up");
-    signinPane.classList.remove("show");
-    setTimeout(() => signupPane.classList.add("show"), 500);
-  } else {
-    overlay.classList.remove("open-sign-up");
-    signupPane.classList.remove("show");
-    setTimeout(() => signinPane.classList.add("show"), 500);
-  }
-}
-
-async function handleEmailLogin(e) {
-  e.preventDefault();
-  const email = $("loginEmail").value.trim();
-  const pass = $("loginPassword").value.trim();
-  const btn = $("loginBtn");
-  const errEl = $("login-error");
-  errEl.style.display = "none";
-  if (!email || !pass) return;
-  btn.disabled = true; btn.textContent = "Вход...";
-  try {
-    const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
-    if (error) throw error;
-  } catch (err) {
-    errEl.textContent = translateAuthError(err.message);
-    errEl.style.display = "block";
-    btn.disabled = false; btn.textContent = "Войти";
-  }
-}
-
-async function handleSignup(e) {
-  e.preventDefault();
-  const form = e.target;
-  const fd = new FormData(form);
-  const errEl = $("signup-error");
-  const btn = $("regBtn");
-  errEl.style.display = "none";
-  btn.disabled = true; btn.textContent = "Создание...";
-  try {
-    const { error } = await supabase.auth.signUp({
-      email: fd.get("email"),
-      password: fd.get("password"),
-      options: { data: { full_name: fd.get("full_name") } }
-    });
-    if (error) throw error;
-    toast("Аккаунт создан — проверь почту", "success", 6000);
-    toggleLoginOverlay(false);
-  } catch (err) {
-    errEl.textContent = translateAuthError(err.message);
-    errEl.style.display = "block";
-  } finally {
-    btn.disabled = false; btn.textContent = "Создать аккаунт";
-  }
-}
-
-async function handleGoogleSignIn() {
-  try {
-    await supabase.auth.signInWithOAuth({
-      provider: "google",
-      options: { redirectTo: window.location.origin + window.location.pathname }
-    });
-  } catch (err) {
-    const errEl = $("login-error");
-    errEl.textContent = translateAuthError(err.message);
-    errEl.style.display = "block";
-  }
-}
-
-async function handleSignOut() {
-  if (state.realtimeSub) { try { state.realtimeSub.unsubscribe(); } catch {} state.realtimeSub = null; }
-  await supabase.auth.signOut();
-  state.session = null; state.user = null; state.profile = null; state.groupId = null;
-  showLogin();
-}
-
-async function refreshState() {
-  if (!state.user) return;
-  const { data: profile } = await supabase.from("profiles").select("*").eq("id", state.user.id).maybeSingle();
-  state.profile = profile;
-  const { data: memberships } = await supabase
-    .from("group_members")
-    .select("group_id, role, groups(id, name, status)")
-    .eq("user_id", state.user.id);
-  state.groups = (memberships || []).map(m => ({ id: m.group_id, role: m.role, ...m.groups }));
-  state.groupId = profile?.default_group_id || state.groups[0]?.id || null;
-  if (state.groupId) {
-    const { data: bal } = await supabase.from("billing_balance").select("*").eq("group_id", state.groupId).maybeSingle();
-    state.balance = bal;
-  }
-}
-
-function renderUserHeader() {
-  const name = state.profile?.full_name || state.user?.email || "";
-  $("header-name").textContent = name;
-  $("menu-name").textContent = name;
-  $("menu-email").textContent = state.user?.email || "";
-  const bal = state.balance?.balance_usd;
-  $("menu-balance").textContent = bal != null ? `Баланс: ${fmtMoney(bal, "USD", 4)}` : "Баланс: —";
-  $("current-group-name").textContent = state.groups.find(g => g.id === state.groupId)?.name || "—";
-}
-
-function renderGroupSwitcher() {
-  const menu = $("group-switcher-menu");
-  if (!state.groups.length) { menu.innerHTML = '<div style="padding:12px; color:var(--fg-muted); font-size:12px;">Нет групп</div>'; return; }
-  menu.innerHTML = state.groups.map(g => `
-    <div class="group-switcher-item ${g.id === state.groupId ? 'active' : ''}" data-group-id="${g.id}">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
-      <span style="flex:1; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(g.name || g.id)}</span>
-      <span style="font-size:10px; color:var(--fg-muted); text-transform:uppercase;">${g.role || ""}</span>
-    </div>
-  `).join("");
-  menu.querySelectorAll("[data-group-id]").forEach(el => {
-    el.addEventListener("click", async () => {
-      state.groupId = el.dataset.groupId;
-      $("group-switcher-menu").classList.remove("open");
-      await refreshState();
-      renderUserHeader();
-      await loadHistory({ resetLimit: true });
-    });
-  });
-}
-
-// ============================================================
-// HISTORY / UPLOADS
-// ============================================================
-async function loadHistory(options = {}) {
-  const { resetLimit = false } = options;
-  if (resetLimit) state.historyLimit = HISTORY_LIMIT_DEFAULT;
-  if (!state.groupId) return;
-
-  const oldMap = { ...state.lastStatuses };
-  let query = supabase.from(TABLE)
-    .select("id, file_number, uploaded_by, file_name, file_ext, status_parser, status_selector, status_pricer, total_cost_usd_billed, last_error, created_at", { count: "exact" })
-    .eq("group_id", state.groupId)
-    .order("created_at", { ascending: false });
-
-  if ($("my-files-toggle").checked && state.user) {
-    query = query.eq("uploaded_by", state.user.id);
-  }
-  const searchValue = $("file-filter-input").value.trim();
-  if (searchValue) {
-    const pat = `%${escapeSearch(searchValue)}%`;
-    query = query.or([
-      `file_number.ilike.${pat}`,
-      `file_name.ilike.${pat}`,
-      `file_ext.ilike.${pat}`,
-      `status_parser.ilike.${pat}`,
-      `status_selector.ilike.${pat}`,
-      `status_pricer.ilike.${pat}`,
-    ].join(","));
-  }
-  query = query.limit(state.historyLimit);
-
-  const { data, error, count } = await query;
-  if (error) { console.error(error); return; }
-  state.history = data || [];
-  state.historyTotalCount = count || state.history.length;
-  state.lastStatuses = {};
-  state.history.forEach(h => {
-    state.lastStatuses[h.id] = { status_parser: h.status_parser, status_selector: h.status_selector, status_pricer: h.status_pricer };
-  });
-  recomputeWatched();
-  renderHistory(oldMap);
-  updateLoadMoreVisibility();
-  await loadSpecData();
-}
-
-function recomputeWatched() {
-  state.watchedSpecIds.clear();
-  state.history.slice(0, REALTIME_ROW_LIMIT).forEach(h => state.watchedSpecIds.add(String(h.id)));
-  if (state.openedSpecId) state.watchedSpecIds.add(String(state.openedSpecId));
-}
-
-function updateLoadMoreVisibility() {
-  const btn = $("history-load-more");
-  if (!btn) return;
-  btn.style.display = (state.history.length > 0 && state.history.length < state.historyTotalCount) ? "inline-flex" : "none";
-}
-
-function statusIconState(raw) {
-  const v = String(raw ?? "").trim();
-  if (!v || v === "-") return { icon: "clear_all", color: "var(--fg-muted)", glow: false };
-  if (v === "done") return { icon: "done_all", color: "var(--success)", glow: true };
-  if (v === "in_progress" || v === "queued") return { icon: "autorenew", color: "var(--warning)", glow: false };
-  if (v === "error") return { icon: "error", color: "var(--error)", glow: false };
-  return { icon: "text_fields_alt", color: "var(--fg)", glow: false };
-}
-
-function applyStatusIcon(scope, field, value) {
-  const icon = scope.querySelector(`[data-status-icon="${field}"]`);
-  if (!icon) return;
-  const s = statusIconState(value);
-  icon.textContent = s.icon;
-  icon.style.color = s.color;
-  icon.style.textShadow = s.glow ? "0 0 8px rgba(16,185,129,.5)" : "none";
-}
-
-const STATUS_LABELS = { "-": "—", "queued": "ОЧЕРЕДЬ", "in_progress": "В РАБОТЕ", "done": "ГОТОВО", "error": "ОШИБКА" };
-
-function renderHistory(oldMap = {}) {
-  const list = $("history-list");
-  const template = $("history-row-template");
-  const existing = new Map();
-  list.querySelectorAll(".history-item, .spec-container").forEach(el => {
-    const id = el.dataset.specId;
-    if (id) existing.set(id + (el.classList.contains("spec-container") ? "-cont" : ""), el);
-  });
-
-  const processed = new Set();
-  let anchor = list.firstChild;
-  state.history.forEach(item => {
-    const idStr = String(item.id);
-    processed.add(idStr);
-    let rowEl = list.querySelector(`.history-item[data-spec-id="${idStr}"]`);
-    if (!rowEl) {
-      const frag = template.content.cloneNode(true);
-      rowEl = frag.querySelector(".history-item");
-      rowEl.dataset.specId = idStr;
-      rowEl.classList.add("fade-in");
-      rowEl.addEventListener("click", () => toggleSpecOpen(item.id));
-      rowEl.querySelectorAll("[data-field]").forEach(el => {
-        el.addEventListener("click", e => {
-          if (el.dataset.field === "id") return; // handled by row click
+        btnTheme.addEventListener('click', (e) => {
           e.stopPropagation();
-          navigator.clipboard.writeText(el.value || el.textContent || "");
-          showCopyTip(el);
+          const isOpen = btnTheme.classList.toggle('active');
+          line.classList.toggle('active', isOpen);
+        });
+
+        document.querySelectorAll('.theme-node').forEach(b => {
+          b.addEventListener('click', (e) => {
+            e.stopPropagation();
+            const key = b.dataset.theme;
+            if (!PALETTES[key]) return;
+            btnTheme.classList.remove('active');
+            line.classList.remove('active');
+            switchTheme(key);
+          });
+        });
+
+        document.addEventListener('click', (e) => {
+          if (!e.target.closest('.theme-switcher')) {
+            btnTheme.classList.remove('active');
+            line.classList.remove('active');
+          }
         });
       });
-      list.insertBefore(frag, anchor);
-      rowEl = list.querySelector(`.history-item[data-spec-id="${idStr}"]`);
-    }
 
-    rowEl.querySelectorAll("[data-field]").forEach(el => {
-      const f = el.dataset.field;
-      let v = item[f];
-      if (f === "created_at") v = fmtDate(item.created_at);
-      if (f === "cost") v = item.total_cost_usd_billed ? "$" + parseFloat(item.total_cost_usd_billed).toFixed(4) : "—";
-      const display = (["status_parser","status_selector","status_pricer"].includes(f)) ? (STATUS_LABELS[v] || v || "—") : (v ?? "");
-      if (el.tagName === "INPUT") {
-        if (el.value !== display) el.value = display;
-      } else if (el.textContent !== display) el.textContent = display;
-      if (["status_parser","status_selector","status_pricer"].includes(f)) {
-        applyStatusIcon(rowEl, f, v);
-        if (oldMap[item.id] && oldMap[item.id][f] !== v) {
-          el.classList.add("fade");
-          setTimeout(() => el.classList.remove("fade"), 500);
-        }
-      }
-    });
+      // expose для отладки
+      window.RIVA_THEME = { applyPalette, switchTheme, PALETTES };
+    })();
+  </script>
 
-    if (anchor && rowEl !== anchor) list.insertBefore(rowEl, anchor);
-    const specContainer = list.querySelector(`.spec-container[data-spec-id="${idStr}"]`);
-    if (specContainer && specContainer.previousSibling !== rowEl) list.insertBefore(specContainer, rowEl.nextSibling);
-    anchor = specContainer ? specContainer.nextSibling : rowEl.nextSibling;
-  });
-
-  // Remove orphans
-  list.querySelectorAll(".history-item").forEach(el => {
-    if (!processed.has(el.dataset.specId)) {
-      el.remove();
-      const sc = list.querySelector(`.spec-container[data-spec-id="${el.dataset.specId}"]`);
-      if (sc) sc.remove();
-    }
-  });
-}
-
-async function loadSpecData() {
-  const specIds = state.history.map(h => h.id);
-  if (!specIds.length) { state.specGroups = {}; state.picksByPos = {}; return; }
-  const { data: positions } = await supabase
-    .from(POS_TABLE)
-    .select("id, spec_id, group_id, pos_number, pos_number_int, name, category, qty, qty_unit, attrs")
-    .in("spec_id", specIds)
-    .order("spec_id", { ascending: false })
-    .order("pos_number_int", { ascending: true });
-
-  state.specGroups = {};
-  (positions || []).forEach(p => {
-    const k = String(p.spec_id);
-    (state.specGroups[k] = state.specGroups[k] || []).push(p);
-  });
-
-  const posIds = (positions || []).map(p => p.id);
-  state.picksByPos = {};
-  if (posIds.length) {
-    const { data: picks } = await supabase
-      .from(PICK_TABLE)
-      .select("id, pos_id, spec_id, article, model_name, qty, unit, price, sum, pricer_status, price1_amount, price1_currency, price1_store, price1_url, price2_amount, price2_currency, price2_store, price2_url, price3_amount, price3_currency, price3_store, price3_url")
-      .in("pos_id", posIds);
-    (picks || []).forEach(p => { (state.picksByPos[p.pos_id] = state.picksByPos[p.pos_id] || []).push(p); });
-  }
-}
-
-// ============================================================
-// SPEC RENDERING / TOGGLE
-// ============================================================
-function toggleSpecOpen(specId) {
-  const idStr = String(specId);
-  const list = $("history-list");
-
-  // Close previously opened
-  if (state.openedSpecId && state.openedSpecId !== specId) {
-    const prev = list.querySelector(`.spec-container[data-spec-id="${state.openedSpecId}"]`);
-    if (prev) prev.remove();
-    const prevRow = list.querySelector(`.history-item[data-spec-id="${state.openedSpecId}"]`);
-    const prevClose = prevRow?.querySelector(".spec-close-btn-accent");
-    if (prevClose) prevClose.remove();
-  }
-
-  let container = list.querySelector(`.spec-container[data-spec-id="${idStr}"]`);
-  if (container) {
-    container.remove();
-    state.openedSpecId = null;
-    const row = list.querySelector(`.history-item[data-spec-id="${idStr}"]`);
-    const close = row?.querySelector(".spec-close-btn-accent");
-    if (close) close.remove();
-    recomputeWatched();
-    return;
-  }
-
-  // Open new
-  state.openedSpecId = specId;
-  recomputeWatched();
-  const tpl = $("spec-template").content.cloneNode(true);
-  container = tpl.querySelector(".spec-container");
-  container.dataset.specId = idStr;
-  const content = container.querySelector(".spec-content");
-  content.classList.add("visible");
-
-  // Progress steps
-  const progFrag = $("spec-progress-template").content.cloneNode(true);
-  const progressEl = progFrag.querySelector(".spec-progress");
-  progressEl.dataset.specId = idStr;
-  container.insertBefore(progFrag, content);
-  initProgressHandlers(progressEl, specId);
-  updateSpecProgress(idStr);
-
-  // Action buttons
-  const actFrag = $("button-group-spec").content.cloneNode(true);
-  const actRow = actFrag.querySelector(".spec-action-row");
-  actRow.classList.add("visible");
-  actRow.querySelectorAll("[data-action]").forEach(btn => {
-    btn.addEventListener("click", e => { e.stopPropagation(); runSpecAction(btn.dataset.action, specId, content, btn); });
-  });
-  container.insertBefore(actFrag, content);
-
-  // Spec rows
-  renderSpecContent(content, idStr);
-
-  // Insert after the history row
-  const rowEl = list.querySelector(`.history-item[data-spec-id="${idStr}"]`);
-  list.insertBefore(container, rowEl?.nextSibling || null);
-
-  // Add close button to row
-  if (rowEl) {
-    const idCont = rowEl.querySelector('[data-field="id"]')?.closest(".input-container");
-    if (idCont && !idCont.querySelector(".spec-close-btn-accent")) {
-      idCont.style.position = "relative";
-      const closeBtn = document.createElement("button");
-      closeBtn.className = "spec-close-btn-accent";
-      closeBtn.textContent = "×";
-      closeBtn.addEventListener("click", e => { e.stopPropagation(); toggleSpecOpen(specId); });
-      idCont.appendChild(closeBtn);
-    }
-  }
-}
-
-function renderSpecContent(content, specId) {
-  const idStr = String(specId);
-  const rows = (state.specGroups[idStr] || []).slice().sort((a, b) => toPosNum(a.pos_number_int ?? a.pos_number) - toPosNum(b.pos_number_int ?? b.pos_number));
-  content.innerHTML = "";
-  if (!rows.length) {
-    content.innerHTML = '<div style="padding:30px; text-align:center; color:var(--fg-muted); font-size:13px;">Позиции ещё не извлечены</div>';
-    return;
-  }
-  const rowTpl = $("spec-row-template");
-  const attrTpl = $("spec-attr-template");
-  const block2Tpl = $("spec-block2-template");
-  const block3Tpl = $("spec-block3-template");
-
-  rows.forEach(pos => {
-    const rf = rowTpl.content.cloneNode(true);
-    const setField = (f, v) => { const el = rf.querySelector(`[data-field="${f}"]`); if (el) el.value = v || ""; };
-    setField("pos_number", pos.pos_number);
-    setField("name", pos.name);
-    setField("qty", pos.qty);
-    setField("unit", pos.qty_unit);
-
-    // Slide 1: attributes
-    const slide1 = rf.querySelector('.slide[data-slide="1"] .slide-content');
-    if (slide1) {
-      const pairs = parseAttrs(pos.attrs);
-      pairs.forEach(({ param, value }) => {
-        const af = attrTpl.content.cloneNode(true);
-        const inputs = af.querySelectorAll(".styled_input_bar");
-        if (inputs[0]) inputs[0].value = param;
-        if (inputs[1]) inputs[1].value = value;
-        slide1.appendChild(af);
-      });
-      if (!pairs.length) slide1.innerHTML = '<div style="color:var(--fg-muted); font-size:12px; padding:10px;">Без характеристик</div>';
-    }
-
-    // Slide 2: picks (block 2)
-    const slide2 = rf.querySelector('.slide[data-slide="2"] .slide-content');
-    const picks = state.picksByPos[pos.id] || [];
-    if (slide2) {
-      if (picks.length) {
-        picks.forEach(pk => {
-          const bf = block2Tpl.content.cloneNode(true);
-          const setPick = (f, v) => { const el = bf.querySelector(`[data-pick="${f}"]`); if (el) el.value = v != null ? String(v) : ""; };
-          setPick("article", pk.article);
-          setPick("model_name", pk.model_name);
-          setPick("qty", pk.qty);
-          setPick("unit", pk.unit);
-          setPick("price", pk.price ? formatNumeric(pk.price) + " ₽" : "");
-          setPick("sum", pk.sum ? formatNumeric(pk.sum) + " ₽" : "");
-          slide2.appendChild(bf);
-        });
-      } else {
-        slide2.innerHTML = '<div style="color:var(--fg-muted); font-size:12px; padding:10px;">Подбор ещё не выполнен</div>';
-      }
-    }
-
-    // Slide 3: prices (block 3)
-    const slide3 = rf.querySelector('.slide[data-slide="3"] .slide-content');
-    if (slide3) {
-      if (picks.length) {
-        picks.forEach(pk => {
-          const bf = block3Tpl.content.cloneNode(true);
-          const setOffer = (n, amt, curr, store, url) => {
-            const p = bf.querySelector(`[data-offer="${n}-price"]`);
-            const s = bf.querySelector(`[data-offer="${n}-store"]`);
-            const u = bf.querySelector(`[data-offer="${n}-url"]`);
-            if (p) p.value = amt ? `${formatNumeric(amt)}${curr ? ' ' + curr : ''}` : "";
-            if (s) s.value = store || "";
-            if (u) {
-              if (url) { u.href = url; u.style.opacity = "1"; u.style.pointerEvents = "auto"; }
-              else { u.href = "#"; u.style.opacity = "0.3"; u.style.pointerEvents = "none"; }
-            }
-          };
-          setOffer(1, pk.price1_amount, pk.price1_currency, pk.price1_store, pk.price1_url);
-          setOffer(2, pk.price2_amount, pk.price2_currency, pk.price2_store, pk.price2_url);
-          setOffer(3, pk.price3_amount, pk.price3_currency, pk.price3_store, pk.price3_url);
-          slide3.appendChild(bf);
-        });
-      } else {
-        slide3.innerHTML = '<div style="color:var(--fg-muted); font-size:12px; padding:10px;">Цены ещё не получены</div>';
-      }
-    }
-
-    content.appendChild(rf);
-  });
-
-  // Wire slideshows
-  content.querySelectorAll(".slideshow-container").forEach(setupSlideshow);
-}
-
-function parseAttrs(s) {
-  if (!s) return [];
-  return s.split(/[;|]/).map(t => {
-    t = t.trim(); if (!t) return null;
-    const m = t.match(/^([^:=&]+)[:=&]\s*(.+)$/);
-    if (m) return { param: m[1].trim(), value: m[2].trim() };
-    return { param: t, value: "" };
-  }).filter(Boolean);
-}
-
-function setupSlideshow(container) {
-  const slides = container.querySelectorAll(".slide");
-  const dots = container.querySelectorAll(".dot");
-  let idx = 0;
-  const show = (n) => {
-    slides[idx].classList.remove("active");
-    dots[idx].classList.remove("active");
-    idx = (n + slides.length) % slides.length;
-    slides[idx].classList.add("active");
-    dots[idx].classList.add("active");
-  };
-  container.querySelector(".prev")?.addEventListener("click", () => show(idx - 1));
-  container.querySelector(".next")?.addEventListener("click", () => show(idx + 1));
-  dots.forEach(d => d.addEventListener("click", () => show(parseInt(d.dataset.index))));
-}
-
-// ============================================================
-// PROGRESS / RE-RUN STAGES
-// ============================================================
-function updateSpecProgress(specId) {
-  const idStr = String(specId);
-  const item = state.history.find(h => String(h.id) === idStr);
-  if (!item) return;
-  document.querySelectorAll(`.spec-progress[data-spec-id="${idStr}"]`).forEach(el => {
-    const steps = el.querySelectorAll(".step");
-    const apply = (step, status) => {
-      const icon = step.querySelector(".status");
-      const done = status === "done";
-      const prog = status === "in_progress" || status === "queued";
-      if (done) { step.classList.add("active"); if (icon) icon.textContent = "done_all"; }
-      else if (prog) { step.classList.add("active"); if (icon) icon.textContent = "autorenew"; }
-      else { step.classList.remove("active"); if (icon) icon.textContent = "indeterminate_check_box"; }
-    };
-    apply(steps[0], item.status_parser);
-    apply(steps[1], item.status_selector);
-    apply(steps[2], item.status_pricer);
-  });
-}
-
-function initProgressHandlers(progress, specId) {
-  progress.querySelectorAll(".refresh").forEach(btn => {
-    btn.addEventListener("click", async e => {
-      e.stopPropagation();
-      const stage = btn.dataset.stage;
-      btn.classList.add("loading"); btn.disabled = true;
-      try {
-        if (stage === "parser") {
-          await supabase.from(PICK_TABLE).delete().eq("spec_id", specId);
-          await supabase.from(POS_TABLE).delete().eq("spec_id", specId);
-          await supabase.from(TABLE).update({
-            status_parser: "-", status_selector: "-", status_pricer: "-", last_error: null
-          }).eq("id", specId);
-          const { error } = await supabase.functions.invoke("process-spec", { body: { spec_upload_id: specId } });
-          if (error) throw error;
-          toast("Парсер перезапущен", "success");
-        } else if (stage === "selector") {
-          await supabase.from(PICK_TABLE).delete().eq("spec_id", specId);
-          await supabase.from(TABLE).update({ status_selector: "-", status_pricer: "-" }).eq("id", specId);
-          const { error } = await supabase.functions.invoke("select-positions", { body: { spec_upload_id: specId } });
-          if (error) throw error;
-          toast("Селектор перезапущен", "success");
-        } else if (stage === "pricer") {
-          await supabase.from(PICK_TABLE).update({ pricer_status: "queued", price1_amount: null, price2_amount: null, price3_amount: null, price: null, sum: null }).eq("spec_id", specId);
-          await supabase.from(TABLE).update({ status_pricer: "-" }).eq("id", specId);
-          const { error } = await supabase.functions.invoke("price-picks", { body: { spec_upload_id: specId } });
-          if (error) throw error;
-          toast("Прайсер перезапущен", "success");
-        }
-        await loadHistory();
-      } catch (err) {
-        toast("Ошибка: " + (err.message || err), "error", 6000);
-      } finally {
-        btn.classList.remove("loading"); btn.disabled = false;
-      }
-    });
-  });
-}
-
-// ============================================================
-// UPLOAD
-// ============================================================
-async function handleFileUpload(file) {
-  if (!file || !state.groupId) { toast("Нет активной группы", "error"); return; }
-  const ext = file.name.split(".").pop().toLowerCase();
-  if (!ALLOWED_EXTS.includes(ext)) { toast("Неподдерживаемый формат: " + ALLOWED_EXTS.join(", "), "error"); return; }
-  if (file.size > 50 * 1024 * 1024) { toast("Файл больше 50 МБ", "error"); return; }
-
-  const btn = $("upload-btn");
-  const progress = $("upload-progress");
-  const status = $("upload-status");
-  btn.classList.add("loading"); btn.disabled = true;
-  progress.style.display = "block"; progress.value = 0;
-  status.textContent = "Создаю запись…";
-
-  // 1. Insert spec_uploads row
-  const { data: spec, error: insErr } = await supabase.from(TABLE).insert({
-    group_id: state.groupId,
-    uploaded_by: state.user.id,
-    file_name: file.name,
-    file_ext: ext,
-    file_size: file.size,
-  }).select("id, group_id").single();
-
-  if (insErr) {
-    status.textContent = "Ошибка: " + insErr.message;
-    btn.classList.remove("loading"); btn.disabled = false;
-    return;
-  }
-
-  // 2. Upload to storage
-  const safeName = sanitize(file.name);
-  const filePath = `${spec.group_id}/${spec.id}/${Date.now()}_${safeName}`;
-  status.textContent = "Загрузка файла…";
-  const { error: upErr } = await supabase.storage.from(BUCKET).upload(filePath, file, { upsert: true, contentType: file.type });
-  if (upErr) {
-    await supabase.from(TABLE).update({ status_parser: "error", last_error: "upload: " + upErr.message }).eq("id", spec.id);
-    status.textContent = "Ошибка загрузки";
-    btn.classList.remove("loading"); btn.disabled = false;
-    progress.style.display = "none";
-    return;
-  }
-  progress.value = 100;
-
-  // 3. Update with file_path
-  await supabase.from(TABLE).update({ file_path: filePath }).eq("id", spec.id);
-
-  status.textContent = "Файл загружен — запускаю парсер…";
-  $("js-file-input").value = "";
-
-  // 4. Trigger parser (which chains → selector → pricer)
-  const { data: result, error: invErr } = await supabase.functions.invoke("process-spec", {
-    body: { spec_upload_id: spec.id }
-  });
-  if (invErr) {
-    await supabase.from(TABLE).update({ status_parser: "error", last_error: "invoke: " + invErr.message }).eq("id", spec.id);
-    toast("Парсер не запустился: " + invErr.message, "error", 6000);
-  } else if (result?.ok === false) {
-    toast("Парсер отклонил: " + result.error, "error", 6000);
-  } else {
-    toast("Парсер запущен", "success");
-  }
-
-  setTimeout(() => { progress.style.display = "none"; status.textContent = ""; }, 2500);
-  btn.classList.remove("loading"); btn.disabled = false;
-  await loadHistory();
-}
-
-// ============================================================
-// EXPORT (copy / excel)
-// ============================================================
-function collectSpecData(specId) {
-  const idStr = String(specId);
-  const item = state.history.find(h => String(h.id) === idStr);
-  const positions = (state.specGroups[idStr] || []).slice().sort((a, b) => toPosNum(a.pos_number_int) - toPosNum(b.pos_number_int));
-  return {
-    id: idStr,
-    header: {
-      file_number: item?.file_number || "",
-      file_name: item?.file_name || "",
-      created_at: item?.created_at ? fmtDate(item.created_at) : "",
-    },
-    positions: positions.map(p => ({
-      pos_number: p.pos_number,
-      name: p.name,
-      qty: p.qty,
-      unit: p.qty_unit,
-      attrs: parseAttrs(p.attrs),
-      picks: state.picksByPos[p.id] || [],
-    })),
-  };
-}
-
-function formatSpecForClipboard(data) {
-  const lines = [];
-  lines.push(`Спецификация ${data.header.file_number} | ${data.header.file_name}`);
-  lines.push(`Дата: ${data.header.created_at}`);
-  lines.push("");
-  data.positions.forEach(p => {
-    lines.push(`${p.pos_number}. ${p.name} (${p.qty} ${p.unit})`);
-    p.attrs.forEach(a => lines.push(`\t${a.param}: ${a.value}`));
-    p.picks.forEach(pk => lines.push(`\t→ ${pk.article} | ${pk.model_name} | цена: ${pk.price || "—"} ₽ | сумма: ${pk.sum || "—"} ₽`));
-    lines.push("");
-  });
-  return lines.join("\n");
-}
-
-function createExcelBlob(data) {
-  const rows = [];
-  rows.push(`<tr><th>№</th><th>Наименование</th><th>Кол-во</th><th>Ед.</th><th>Артикул</th><th>Модель</th><th>Цена</th><th>Сумма</th></tr>`);
-  data.positions.forEach(p => {
-    if (p.picks.length) {
-      p.picks.forEach((pk, i) => {
-        rows.push(`<tr><td>${i === 0 ? escapeHtml(p.pos_number) : ""}</td><td>${i === 0 ? escapeHtml(p.name) : ""}</td><td>${escapeHtml(p.qty)}</td><td>${escapeHtml(p.unit)}</td><td>${escapeHtml(pk.article)}</td><td>${escapeHtml(pk.model_name)}</td><td>${pk.price || ""}</td><td>${pk.sum || ""}</td></tr>`);
-      });
-    } else {
-      rows.push(`<tr><td>${escapeHtml(p.pos_number)}</td><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.qty)}</td><td>${escapeHtml(p.unit)}</td><td colspan="4">—</td></tr>`);
-    }
-  });
-  const html = `<table border="1" cellspacing="0" cellpadding="4">${rows.join("")}</table>`;
-  return new Blob(["\uFEFF" + html], { type: "application/vnd.ms-excel" });
-}
-
-async function runSpecAction(action, specId, content, button) {
-  const data = collectSpecData(specId);
-  try {
-    if (action === "copy") {
-      await navigator.clipboard.writeText(formatSpecForClipboard(data));
-      showCopyTip(button);
-    } else if (action === "excel") {
-      const blob = createExcelBlob(data);
-      const url = URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = `spec_${data.header.file_number || specId}.xls`;
-      document.body.appendChild(link);
-      link.click();
-      setTimeout(() => { URL.revokeObjectURL(url); link.remove(); }, 100);
-    }
-  } catch (err) { console.error(err); toast("Ошибка экспорта", "error"); }
-}
-
-// ============================================================
-// CONTEXT MENU
-// ============================================================
-function setupContextMenu() {
-  const menu = document.querySelector(".spec-context-menu");
-  document.addEventListener("contextmenu", e => {
-    const content = e.target.closest(".spec-content");
-    if (!content) { menu.classList.remove("visible"); return; }
-    const specId = content.closest(".spec-container")?.dataset.specId;
-    if (!specId) return;
-    e.preventDefault();
-    state.contextSpecContent = content;
-    menu.dataset.specId = specId;
-    menu.style.left = e.pageX + "px";
-    menu.style.top = e.pageY + "px";
-    menu.classList.add("visible");
-  });
-  document.addEventListener("click", e => {
-    if (!menu.contains(e.target)) menu.classList.remove("visible");
-  });
-  menu.querySelectorAll("[data-action]").forEach(btn => {
-    btn.addEventListener("click", () => {
-      const specId = menu.dataset.specId;
-      if (specId) runSpecAction(btn.dataset.action, specId, state.contextSpecContent, btn);
-      menu.classList.remove("visible");
-    });
-  });
-}
-
-// ============================================================
-// REALTIME
-// ============================================================
-function setupRealtime() {
-  if (state.realtimeSub) { try { state.realtimeSub.unsubscribe(); } catch {} state.realtimeSub = null; }
-  state.realtimeSub = supabase.channel("ai-eq-realtime")
-    .on("postgres_changes", { event: "*", schema: "public", table: TABLE, filter: `group_id=eq.${state.groupId}` },
-      (payload) => {
-        const id = payload.new?.id ?? payload.old?.id;
-        if (payload.eventType === "UPDATE" && state.watchedSpecIds.has(String(id))) {
-          applyRealtimeRegistryUpdate(payload.new);
-        } else if (payload.eventType === "INSERT" || payload.eventType === "DELETE") {
-          loadHistory();
-        }
-      })
-    .on("postgres_changes", { event: "*", schema: "public", table: POS_TABLE },
-      (payload) => {
-        const id = payload.new?.spec_id ?? payload.old?.spec_id;
-        if (state.watchedSpecIds.has(String(id))) scheduleSpecReload(id);
-      })
-    .on("postgres_changes", { event: "*", schema: "public", table: PICK_TABLE },
-      (payload) => {
-        const id = payload.new?.spec_id ?? payload.old?.spec_id;
-        if (state.watchedSpecIds.has(String(id))) scheduleSpecReload(id);
-      })
-    .subscribe();
-}
-
-function applyRealtimeRegistryUpdate(row) {
-  if (!row) return;
-  const idx = state.history.findIndex(h => h.id === row.id);
-  if (idx === -1) return;
-  state.history[idx] = { ...state.history[idx], ...row };
-  state.lastStatuses[row.id] = { status_parser: row.status_parser, status_selector: row.status_selector, status_pricer: row.status_pricer };
-  const rowEl = document.querySelector(`.history-item[data-spec-id="${row.id}"]`);
-  if (!rowEl) return;
-  rowEl.querySelectorAll("[data-field]").forEach(el => {
-    const f = el.dataset.field;
-    let v = row[f];
-    if (f === "created_at") v = fmtDate(row.created_at);
-    if (f === "cost") v = row.total_cost_usd_billed ? "$" + parseFloat(row.total_cost_usd_billed).toFixed(4) : "—";
-    const display = (["status_parser","status_selector","status_pricer"].includes(f)) ? (STATUS_LABELS[v] || v || "—") : (v ?? "");
-    if (el.tagName === "INPUT" && el.value !== display) { el.classList.add("fade"); setTimeout(() => { el.value = display; el.classList.remove("fade"); }, 250); }
-    if (["status_parser","status_selector","status_pricer"].includes(f)) applyStatusIcon(rowEl, f, v);
-  });
-  updateSpecProgress(row.id);
-}
-
-function scheduleSpecReload(specId) {
-  const key = String(specId);
-  if (state.reloadTimers.has(key)) return;
-  const t = setTimeout(async () => {
-    state.reloadTimers.delete(key);
-    await loadSpecData();
-    if (state.openedSpecId === specId || String(state.openedSpecId) === key) {
-      const content = document.querySelector(`.spec-container[data-spec-id="${key}"] .spec-content`);
-      if (content) renderSpecContent(content, key);
-    }
-  }, 500);
-  state.reloadTimers.set(key, t);
-}
-
-// ============================================================
-// WIRING
-// ============================================================
-function wireUI() {
-  // Login slide
-  $("slide-right-button").addEventListener("click", () => toggleLoginOverlay(true));
-  $("slide-left-button").addEventListener("click", () => toggleLoginOverlay(false));
-  $("login-form").addEventListener("submit", handleEmailLogin);
-  $("registration-form").addEventListener("submit", handleSignup);
-  $("google-signin-btn").addEventListener("click", handleGoogleSignIn);
-  $("btn-signout-main").addEventListener("click", handleSignOut);
-
-  // Profile menu
-  $("btn-profile").addEventListener("click", e => { e.stopPropagation(); $("profile-menu").classList.toggle("open"); $("group-switcher-menu").classList.remove("open"); });
-  $("btn-group-switcher").addEventListener("click", e => { e.stopPropagation(); $("group-switcher-menu").classList.toggle("open"); $("profile-menu").classList.remove("open"); });
-  document.addEventListener("click", () => { $("profile-menu").classList.remove("open"); $("group-switcher-menu").classList.remove("open"); });
-
-  // Theme
-  const btnTheme = $("btn-theme");
-  const themeLine = $("theme-line");
-  btnTheme.addEventListener("click", e => {
-    e.stopPropagation();
-    const open = btnTheme.classList.toggle("active");
-    themeLine.classList.toggle("active", open);
-  });
-  $$(".theme-node").forEach(n => {
-    n.addEventListener("click", e => {
-      e.stopPropagation();
-      btnTheme.classList.remove("active");
-      themeLine.classList.remove("active");
-      switchTheme(n.dataset.theme);
-    });
-  });
-  document.addEventListener("click", e => {
-    if (!e.target.closest(".theme-switcher")) {
-      btnTheme.classList.remove("active");
-      themeLine.classList.remove("active");
-    }
-  });
-
-  // Upload
-  $("upload-btn").addEventListener("click", () => $("js-file-input").click());
-  $("js-file-input").addEventListener("change", e => { if (e.target.files[0]) handleFileUpload(e.target.files[0]); });
-
-  // Drag & drop (whole window)
-  ["dragover", "drop"].forEach(ev => window.addEventListener(ev, e => e.preventDefault()));
-  window.addEventListener("drop", e => {
-    if (!$("main-app").style.display || $("main-app").style.display === "none") return;
-    const f = e.dataTransfer?.files?.[0];
-    if (f) handleFileUpload(f);
-  });
-
-  // Search
-  let searchTimer = null;
-  $("file-filter-input").addEventListener("input", () => {
-    const v = $("file-filter-input").value.trim();
-    $("file-filter-clear").style.display = v ? "block" : "none";
-    if (searchTimer) clearTimeout(searchTimer);
-    searchTimer = setTimeout(() => loadHistory(), 350);
-  });
-  $("file-filter-clear").addEventListener("click", () => {
-    $("file-filter-input").value = "";
-    $("file-filter-clear").style.display = "none";
-    loadHistory({ resetLimit: true });
-  });
-
-  // My files toggle
-  $("my-files-toggle").addEventListener("change", e => {
-    $("toggle-text").textContent = e.target.checked ? "только мои файлы" : "все файлы";
-    loadHistory({ resetLimit: true });
-  });
-
-  // Load more
-  $("history-load-more").addEventListener("click", async () => {
-    state.historyLimit += HISTORY_LIMIT_STEP;
-    await loadHistory();
-  });
-}
-
-// ============================================================
-// BOOTSTRAP
-// ============================================================
-async function bootstrap() {
-  $("preloader").classList.add("visible");
-  wireUI();
-  setupContextMenu();
-
-  const { data: { session } } = await supabase.auth.getSession();
-  if (session) {
-    state.session = session;
-    state.user = session.user;
-    await refreshState();
-    renderUserHeader();
-    renderGroupSwitcher();
-    showApp();
-    await loadHistory({ resetLimit: true });
-    setupRealtime();
-  } else {
-    showLogin();
-  }
-  setTimeout(() => { $("preloader").classList.remove("visible"); $("preloader").classList.add("fade-out"); }, 800);
-
-  supabase.auth.onAuthStateChange(async (event, session) => {
-    if (event === "SIGNED_IN" && session) {
-      state.session = session;
-      state.user = session.user;
-      await refreshState();
-      renderUserHeader();
-      renderGroupSwitcher();
-      showApp();
-      await loadHistory({ resetLimit: true });
-      setupRealtime();
-    } else if (event === "SIGNED_OUT") {
-      state.session = null; state.user = null; state.profile = null;
-      showLogin();
-    } else if (event === "TOKEN_REFRESHED" && session) {
-      state.session = session;
-    }
-  });
-
-  // DB connection check
-  setInterval(async () => {
-    const { error } = await supabase.from(TABLE).select("id", { count: "exact", head: true }).limit(1);
-    $("db-disconnect-overlay").classList.toggle("show", !!error);
-  }, 15000);
-}
-
-document.addEventListener("DOMContentLoaded", bootstrap);
-</script>
-
+  <script type="module" src="./assets/app.js"></script>
 </body>
 </html>
