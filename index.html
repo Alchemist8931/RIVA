@@ -331,3 +331,1345 @@
     </div>
   </div>
 </div>
+
+<!-- ============================================
+     MAIN APP (после логина)
+     ============================================ -->
+<div id="main-app" style="display:none">
+
+  <!-- Header (RIVA style) -->
+  <header class="header-blur">
+    <div class="header-inner">
+      <!-- Left zone -->
+      <div style="display:flex; align-items:center; gap:8px;">
+        <a href="#" class="ctrl ctrl-square ctrl-logo" aria-label="AI Equipment Selection">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M7 20V4h6a4 4 0 0 1 0 8H7"/>
+            <path d="m13 12 4 8"/>
+          </svg>
+        </a>
+        <span style="font-weight:600; font-size:14px; letter-spacing:-0.01em;" class="brand-name">AI Equipment Selection</span>
+
+        <!-- Group switcher -->
+        <div class="group-switcher-wrap">
+          <button id="btn-group-switcher" class="ctrl">
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M3 21h18"/>
+              <path d="M5 21V7l8-4v18"/>
+              <path d="M19 21V11l-6-4"/>
+            </svg>
+            <span id="current-group-name" style="max-width:200px; overflow:hidden; text-overflow:ellipsis;">—</span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div id="group-switcher-menu" class="group-switcher-menu"></div>
+        </div>
+      </div>
+
+      <!-- Right zone -->
+      <div style="display:flex; align-items:center; gap:8px;">
+        <div class="profile-wrap">
+          <button id="btn-profile" class="ctrl" style="padding:0 8px 0 4px;">
+            <span style="display:inline-flex; align-items:center; justify-content:center; width:26px; height:26px; border-radius:6px; background:var(--bg-alt); overflow:hidden;" id="header-avatar">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" style="color:var(--fg-muted)">
+                <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+              </svg>
+            </span>
+            <span class="hidden-mobile" id="header-name" style="max-width:140px; overflow:hidden; text-overflow:ellipsis;"></span>
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div id="profile-menu" class="profile-menu">
+            <div class="profile-menu-head">
+              <div class="profile-menu-name" id="menu-name"></div>
+              <div class="profile-menu-email" id="menu-email"></div>
+              <div class="profile-menu-balance" id="menu-balance"></div>
+            </div>
+            <button class="profile-menu-item danger" id="btn-signout-main">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
+                <polyline points="16 17 21 12 16 7"/>
+                <line x1="21" y1="12" x2="9" y2="12"/>
+              </svg>
+              Выйти
+            </button>
+          </div>
+        </div>
+
+        <!-- Theme switcher (только bw-light + bw-dark) -->
+        <div class="theme-switcher">
+          <div class="theme-line" id="theme-line">
+            <button class="theme-node" data-theme="bw-light" title="Светлая Ч/Б"><span class="theme-preview" style="background:linear-gradient(135deg,#FFFFFF 50%,#0A0A0A 50%)"></span></button>
+            <button class="theme-node" data-theme="bw-dark" title="Тёмная Ч/Б"><span class="theme-preview" style="background:linear-gradient(135deg,#0A0B0E 50%,#FAFAFA 50%)"></span></button>
+          </div>
+          <button id="btn-theme" class="ctrl ctrl-square btn-theme" aria-label="Сменить тему">
+            <svg class="icon-palette" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <circle cx="12" cy="12" r="10"/>
+              <circle cx="12" cy="8" r="2" fill="currentColor"/>
+              <path d="M8 14c1.5-2 6.5-2 8 0" stroke-linecap="round"/>
+            </svg>
+            <svg class="icon-close" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+              <path d="M18 6 6 18M6 6l12 12"/>
+            </svg>
+          </button>
+        </div>
+      </div>
+    </div>
+  </header>
+
+  <!-- ============================================
+       MODAL 9 APP
+       ============================================ -->
+  <div id="modal9-container" class="spec-modal">
+    <div class="spec-context-menu" aria-hidden="true">
+      <button type="button" data-action="copy">Скопировать спецификацию</button>
+      <button type="button" data-action="excel">Скачать спецификацию Excel</button>
+    </div>
+
+    <!-- Top: upload + search + toggle -->
+    <div class="modal9-top-window glass3d">
+      <div class="modal9-top-body">
+        <button type="button" class="upload-btn-main" id="upload-btn">
+          <span class="material-symbols-outlined" style="font-size:18px;">upload_file</span>
+          <span class="button-text">загрузить техническое задание</span>
+          <span class="loader"></span>
+        </button>
+        <input type="file" class="js-file-input" id="js-file-input" accept=".pdf,.docx,.xlsx,.xls,.txt,.csv,.rtf,.doc,.ods" style="display:none">
+
+        <div class="upload-status-wrapper">
+          <progress class="upload-progress" id="upload-progress" value="0" max="100" style="display:none;"></progress>
+          <div class="upload-status" id="upload-status"></div>
+        </div>
+
+        <div class="input-container" style="width:240px;">
+          <input id="file-filter-input" class="styled_input_bar" placeholder=" " style="width:100%;">
+          <label class="input-label">поиск</label>
+          <button class="group-close file-filter-clear" id="file-filter-clear" style="display:none; position:absolute; right:8px; top:50%; transform:translateY(-50%);">×</button>
+        </div>
+
+        <label class="switch">
+          <input type="checkbox" id="my-files-toggle">
+          <span class="toggle-slider"></span>
+        </label>
+        <span class="toggle-text" id="toggle-text">все файлы</span>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="modal9-window glass3d">
+      <div class="modal9-content">
+        <div class="history-list" id="history-list"></div>
+        <div class="history-controls">
+          <button type="button" class="history-load-more" id="history-load-more" style="display:none;">показать ещё</button>
+        </div>
+
+        <!-- Templates -->
+        <template id="history-row-template">
+          <div class="history-item">
+            <div class="input-container"><input type="text" class="styled_input_bar" data-field="file_number" readonly style="width:110px;" placeholder=" "><label class="input-label">номер</label></div>
+            <div class="input-container"><input type="text" class="styled_input_bar" data-field="user_login" readonly style="width:220px;" placeholder=" "><label class="input-label">login</label></div>
+            <div class="input-container"><input type="text" class="styled_input_bar" data-field="created_at" readonly style="width:170px; text-align:center;" placeholder=" "><label class="input-label">дата</label></div>
+            <div class="input-container"><input type="text" class="styled_input_bar" data-field="file_name" readonly style="width:380px;" placeholder=" "><label class="input-label">файл</label></div>
+            <div class="input-container"><input type="text" class="styled_input_bar" data-field="file_ext" readonly style="width:70px; text-transform:uppercase; text-align:center;" placeholder=" "><label class="input-label">ext</label></div>
+            <div class="status-field-wrapper">
+              <div class="input-container"><input type="text" class="styled_input_bar" data-field="status_parser" readonly style="width:90px; text-transform:uppercase; text-align:center;" placeholder=" "><label class="input-label">парсер</label></div>
+              <span class="material-symbols-outlined status-icon" data-status-icon="status_parser">clear_all</span>
+            </div>
+            <div class="status-field-wrapper">
+              <div class="input-container"><input type="text" class="styled_input_bar" data-field="status_selector" readonly style="width:90px; text-transform:uppercase; text-align:center;" placeholder=" "><label class="input-label">селектор</label></div>
+              <span class="material-symbols-outlined status-icon" data-status-icon="status_selector">clear_all</span>
+            </div>
+            <div class="status-field-wrapper">
+              <div class="input-container"><input type="text" class="styled_input_bar" data-field="status_pricer" readonly style="width:90px; text-transform:uppercase; text-align:center;" placeholder=" "><label class="input-label">прайсер</label></div>
+              <span class="material-symbols-outlined status-icon" data-status-icon="status_pricer">clear_all</span>
+            </div>
+            <div class="input-container"><input type="text" class="styled_input_bar" data-field="cost" readonly style="width:84px; text-align:center;" placeholder=" "><label class="input-label">USD</label></div>
+            <div class="input-container"><input type="text" class="styled_input_bar" data-field="id" readonly style="width:80px; text-align:center;" placeholder=" "><label class="input-label">spec #</label></div>
+          </div>
+        </template>
+
+        <template id="spec-template">
+          <div class="spec-container">
+            <div class="spec-content"></div>
+          </div>
+        </template>
+
+        <template id="button-group-spec">
+          <div class="spec-action-row">
+            <button type="button" class="spec-action-btn spec-action-btn--excel" data-action="excel">
+              <span class="material-symbols-outlined">download</span>
+              <span class="label">скачать excel</span>
+            </button>
+            <button type="button" class="spec-action-btn" data-action="copy">
+              <span class="material-symbols-outlined">content_copy</span>
+              <span class="label">скопировать</span>
+            </button>
+          </div>
+        </template>
+
+        <template id="spec-progress-template">
+          <div class="spec-progress">
+            <div class="step" data-step="1">
+              <div class="bar"></div>
+              <div class="step-body">
+                <div class="label">ПАРСЕР</div>
+                <div class="icons"><span class="material-symbols-outlined status">indeterminate_check_box</span></div>
+                <button class="darkmatter-btn refresh" data-stage="parser" title="Перезапустить парсер">
+                  <span class="button-text">запуск</span><span class="loader"></span>
+                </button>
+              </div>
+            </div>
+            <div class="step" data-step="2">
+              <div class="bar"></div>
+              <div class="step-body">
+                <div class="label">СЕЛЕКТОР</div>
+                <div class="icons"><span class="material-symbols-outlined status">indeterminate_check_box</span></div>
+                <button class="darkmatter-btn refresh" data-stage="selector" title="Перезапустить селектор">
+                  <span class="button-text">запуск</span><span class="loader"></span>
+                </button>
+              </div>
+            </div>
+            <div class="step" data-step="3">
+              <div class="bar"></div>
+              <div class="step-body">
+                <div class="label">ПРАЙСЕР</div>
+                <div class="icons"><span class="material-symbols-outlined status">indeterminate_check_box</span></div>
+                <button class="darkmatter-btn refresh" data-stage="pricer" title="Перезапустить прайсер">
+                  <span class="button-text">запуск</span><span class="loader"></span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <template id="spec-row-template">
+          <div class="modalCONTEINERpost">
+            <div class="modalColumn">
+              <div class="modalRow">
+                <div class="input-container"><input type="text" class="styled_input_bar" data-field="pos_number" readonly style="width:80px; text-align:center;" placeholder=" "><label class="input-label">№</label></div>
+                <div class="input-container"><input type="text" class="styled_input_bar" data-field="name" readonly style="width:300px;" placeholder=" "><label class="input-label">наименование</label></div>
+                <div class="input-container"><input type="text" class="styled_input_bar" data-field="qty" readonly style="width:60px; text-align:center;" placeholder=" "><label class="input-label">кол-во</label></div>
+                <div class="input-container"><input type="text" class="styled_input_bar" data-field="unit" readonly style="width:60px; text-align:center;" placeholder=" "><label class="input-label">ед.</label></div>
+              </div>
+            </div>
+            <div class="slideshow-container">
+              <div class="slide active" data-slide="1"><div class="slide-content"></div><div class="caption">Блок 1, требования ТЗ</div></div>
+              <div class="slide" data-slide="2"><div class="slide-content"></div><div class="caption">Блок 2, подобранная позиция</div></div>
+              <div class="slide" data-slide="3"><div class="slide-content"></div><div class="caption">Блок 3, ценовые источники</div></div>
+              <a class="prev">&#10094;</a>
+              <a class="next">&#10095;</a>
+              <div class="dots-container">
+                <div class="dot active" data-index="0"></div>
+                <div class="dot" data-index="1"></div>
+                <div class="dot" data-index="2"></div>
+              </div>
+            </div>
+          </div>
+        </template>
+
+        <template id="spec-attr-template">
+          <div class="modalRow">
+            <div class="input-container"><input type="text" class="styled_input_bar param-input" readonly style="width:480px;" placeholder=" "><label class="input-label">параметр</label></div>
+            <div class="input-container"><input type="text" class="styled_input_bar value-input" readonly style="width:280px;" placeholder=" "><label class="input-label">значение</label></div>
+          </div>
+        </template>
+
+        <template id="spec-block2-template">
+          <div class="modalRow">
+            <div class="input-container"><input type="text" class="styled_input_bar" data-pick="article" readonly style="width:160px;" placeholder=" "><label class="input-label">артикул</label></div>
+            <div class="input-container"><input type="text" class="styled_input_bar" data-pick="model_name" readonly style="width:320px;" placeholder=" "><label class="input-label">наименование</label></div>
+            <div class="input-container"><input type="text" class="styled_input_bar" data-pick="qty" readonly style="width:80px; text-align:center;" placeholder=" "><label class="input-label">кол-во</label></div>
+            <div class="input-container"><input type="text" class="styled_input_bar" data-pick="unit" readonly style="width:70px; text-align:center;" placeholder=" "><label class="input-label">ед.</label></div>
+            <div class="input-container"><input type="text" class="styled_input_bar" data-pick="price" readonly style="width:110px; text-align:right;" placeholder=" "><label class="input-label">цена</label></div>
+            <div class="input-container"><input type="text" class="styled_input_bar" data-pick="sum" readonly style="width:130px; text-align:right;" placeholder=" "><label class="input-label">сумма</label></div>
+          </div>
+        </template>
+
+        <template id="spec-block3-template">
+          <div class="modalRow">
+            <div class="input-container"><input type="text" class="styled_input_bar" data-offer="1-price" readonly style="width:110px; text-align:right;" placeholder=" "><label class="input-label">цена 1</label></div>
+            <div class="input-container"><input type="text" class="styled_input_bar" data-offer="1-store" readonly style="width:140px;" placeholder=" "><label class="input-label">магазин</label></div>
+            <a class="icons" data-offer="1-url" target="_blank" rel="noopener"><span class="material-symbols-outlined">link</span></a>
+            <div class="input-container"><input type="text" class="styled_input_bar" data-offer="2-price" readonly style="width:110px; text-align:right;" placeholder=" "><label class="input-label">цена 2</label></div>
+            <div class="input-container"><input type="text" class="styled_input_bar" data-offer="2-store" readonly style="width:140px;" placeholder=" "><label class="input-label">магазин</label></div>
+            <a class="icons" data-offer="2-url" target="_blank" rel="noopener"><span class="material-symbols-outlined">link</span></a>
+            <div class="input-container"><input type="text" class="styled_input_bar" data-offer="3-price" readonly style="width:110px; text-align:right;" placeholder=" "><label class="input-label">цена 3</label></div>
+            <div class="input-container"><input type="text" class="styled_input_bar" data-offer="3-store" readonly style="width:140px;" placeholder=" "><label class="input-label">магазин</label></div>
+            <a class="icons" data-offer="3-url" target="_blank" rel="noopener"><span class="material-symbols-outlined">link</span></a>
+          </div>
+        </template>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Toasts -->
+<div class="toasts" id="toasts"></div>
+
+<!-- ============================================
+     APPLICATION SCRIPT
+     ============================================ -->
+<script type="module">
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.0";
+
+// ============================================================
+// CONFIG
+// ============================================================
+const SUPABASE_URL = "https://ncdwlmgwljjwpuawlssr.supabase.co";
+const SUPABASE_KEY = "sb_publishable_Ii_4oufnEzd44lBEse867A_5rsn4E8j";
+const BUCKET = "uploads";
+const TABLE = "spec_uploads";
+const POS_TABLE = "spec_positions";
+const PICK_TABLE = "spec_position_picks";
+const ALLOWED_EXTS = ["pdf","docx","xlsx","xls","txt","csv","rtf","doc","ods"];
+const HISTORY_LIMIT_DEFAULT = 30;
+const HISTORY_LIMIT_STEP = 30;
+const REALTIME_ROW_LIMIT = 8;
+const STORAGE_KEY_THEME = "ai-eq-theme";
+
+const supabase = createClient(SUPABASE_URL, SUPABASE_KEY, {
+  auth: { persistSession: true, autoRefreshToken: true, detectSessionInUrl: true }
+});
+window.supabase = supabase;
+
+// ============================================================
+// STATE
+// ============================================================
+const state = {
+  session: null,
+  user: null,
+  profile: null,
+  groupId: null,
+  groups: [],
+  balance: null,
+  history: [],
+  historyLimit: HISTORY_LIMIT_DEFAULT,
+  historyTotalCount: 0,
+  lastStatuses: {},
+  specGroups: {},      // { specId: [positions] }
+  picksByPos: {},      // { posId: [picks] }
+  watchedSpecIds: new Set(),
+  reloadTimers: new Map(),
+  openedSpecId: null,
+  realtimeSub: null,
+  contextSpecContent: null,
+};
+
+// ============================================================
+// HELPERS
+// ============================================================
+const $ = (id) => document.getElementById(id);
+const $$ = (sel, scope = document) => scope.querySelectorAll(sel);
+const sanitize = (s) => s.normalize("NFKD").replace(/[\u0300-\u036f]/g, "").replace(/[^a-z0-9._-]/gi, "_");
+const escapeSearch = (v) => v.replace(/[\\%_]/g, "\\$&");
+const escapeHtml = (s) => String(s ?? "").replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;").replace(/'/g, "&#039;");
+const toPosNum = (v) => { if (typeof v === "number" && Number.isFinite(v)) return v; const m = String(v ?? "").match(/\d+/); return m ? parseInt(m[0], 10) : Number.MAX_SAFE_INTEGER; };
+const delay = (ms) => new Promise(r => setTimeout(r, ms));
+
+function fmtMoney(amount, currency = "USD", digits = 2) {
+  if (amount == null || isNaN(amount)) return "—";
+  const n = parseFloat(amount);
+  const sym = currency === "RUB" ? "₽" : currency === "USD" ? "$" : currency + " ";
+  const s = n.toFixed(digits).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
+  return currency === "RUB" ? `${s} ${sym}` : `${sym}${s}`;
+}
+
+function fmtDate(d) {
+  if (!d) return "";
+  const date = typeof d === "string" ? new Date(d) : d;
+  const day = String(date.getDate()).padStart(2, "0");
+  const mon = String(date.getMonth() + 1).padStart(2, "0");
+  const yr = date.getFullYear();
+  const hh = String(date.getHours()).padStart(2, "0");
+  const mm = String(date.getMinutes()).padStart(2, "0");
+  return `${day}.${mon}.${yr}, ${hh}:${mm}`;
+}
+
+function formatNumeric(v) {
+  if (v == null || v === "") return "";
+  const n = parseFloat(String(v).replace(/\s/g, "").replace(",", "."));
+  if (!Number.isFinite(n)) return String(v);
+  return n.toLocaleString("ru-RU");
+}
+
+function toast(message, kind = "info", ms = 3500) {
+  const c = $("toasts");
+  if (!c) return;
+  const el = document.createElement("div");
+  el.className = `toast ${kind}`;
+  el.textContent = message;
+  c.appendChild(el);
+  setTimeout(() => { el.style.opacity = "0"; setTimeout(() => el.remove(), 250); }, ms);
+}
+
+function showCopyTip(el) {
+  const tip = document.createElement("div");
+  tip.className = "copy-tooltip";
+  tip.textContent = "скопировано";
+  document.body.appendChild(tip);
+  const r = el.getBoundingClientRect();
+  tip.style.left = r.left + r.width/2 - 40 + "px";
+  tip.style.top = r.top - 24 + "px";
+  setTimeout(() => tip.remove(), 1000);
+}
+
+function translateAuthError(msg) {
+  const m = (msg || "").toLowerCase();
+  if (m.includes("invalid login")) return "Неверный email или пароль";
+  if (m.includes("user already")) return "Пользователь уже зарегистрирован";
+  if (m.includes("email not confirmed")) return "Email не подтверждён — проверь почту";
+  if (m.includes("password should")) return "Пароль слишком короткий (мин. 6)";
+  if (m.includes("rate limit")) return "Слишком много попыток — подожди";
+  return msg || "Неизвестная ошибка";
+}
+
+// ============================================================
+// THEME
+// ============================================================
+function applyTheme(key) {
+  const valid = ["bw-light", "bw-dark"];
+  if (!valid.includes(key)) key = "bw-light";
+  document.documentElement.setAttribute("data-theme", key);
+  localStorage.setItem(STORAGE_KEY_THEME, key);
+  $$(".theme-node").forEach(n => n.classList.toggle("active", n.dataset.theme === key));
+  const tc = document.querySelector('meta[name="theme-color"]');
+  if (tc) tc.setAttribute("content", key === "bw-dark" ? "#15171C" : "#FFFFFF");
+}
+
+function switchTheme(key) {
+  const overlay = document.querySelector(".theme-transition-overlay");
+  overlay?.classList.add("active");
+  setTimeout(() => {
+    applyTheme(key);
+    requestAnimationFrame(() => overlay?.classList.remove("active"));
+  }, 300);
+}
+
+// Apply saved theme immediately
+applyTheme(localStorage.getItem(STORAGE_KEY_THEME) || "bw-light");
+
+// ============================================================
+// AUTH
+// ============================================================
+function showSplash(on) { $("preloader").classList.toggle("visible", on); $("preloader").classList.toggle("fade-out", !on); }
+function showLogin() { $("login-wrapper").classList.add("show"); $("main-app").style.display = "none"; }
+function showApp() {
+  $("login-wrapper").classList.remove("show");
+  $("main-app").style.display = "block";
+  $("modal9-container").classList.add("visible");
+}
+
+function toggleLoginOverlay(toSignUp) {
+  const overlay = $("overlay");
+  const signinPane = $("sign-up-info");
+  const signupPane = $("sign-in-info");
+  if (toSignUp) {
+    overlay.classList.add("open-sign-up");
+    signinPane.classList.remove("show");
+    setTimeout(() => signupPane.classList.add("show"), 500);
+  } else {
+    overlay.classList.remove("open-sign-up");
+    signupPane.classList.remove("show");
+    setTimeout(() => signinPane.classList.add("show"), 500);
+  }
+}
+
+async function handleEmailLogin(e) {
+  e.preventDefault();
+  const email = $("loginEmail").value.trim();
+  const pass = $("loginPassword").value.trim();
+  const btn = $("loginBtn");
+  const errEl = $("login-error");
+  errEl.style.display = "none";
+  if (!email || !pass) return;
+  btn.disabled = true; btn.textContent = "Вход...";
+  try {
+    const { error } = await supabase.auth.signInWithPassword({ email, password: pass });
+    if (error) throw error;
+  } catch (err) {
+    errEl.textContent = translateAuthError(err.message);
+    errEl.style.display = "block";
+    btn.disabled = false; btn.textContent = "Войти";
+  }
+}
+
+async function handleSignup(e) {
+  e.preventDefault();
+  const form = e.target;
+  const fd = new FormData(form);
+  const errEl = $("signup-error");
+  const btn = $("regBtn");
+  errEl.style.display = "none";
+  btn.disabled = true; btn.textContent = "Создание...";
+  try {
+    const { error } = await supabase.auth.signUp({
+      email: fd.get("email"),
+      password: fd.get("password"),
+      options: { data: { full_name: fd.get("full_name") } }
+    });
+    if (error) throw error;
+    toast("Аккаунт создан — проверь почту", "success", 6000);
+    toggleLoginOverlay(false);
+  } catch (err) {
+    errEl.textContent = translateAuthError(err.message);
+    errEl.style.display = "block";
+  } finally {
+    btn.disabled = false; btn.textContent = "Создать аккаунт";
+  }
+}
+
+async function handleGoogleSignIn() {
+  try {
+    await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin + window.location.pathname }
+    });
+  } catch (err) {
+    const errEl = $("login-error");
+    errEl.textContent = translateAuthError(err.message);
+    errEl.style.display = "block";
+  }
+}
+
+async function handleSignOut() {
+  if (state.realtimeSub) { try { state.realtimeSub.unsubscribe(); } catch {} state.realtimeSub = null; }
+  await supabase.auth.signOut();
+  state.session = null; state.user = null; state.profile = null; state.groupId = null;
+  showLogin();
+}
+
+async function refreshState() {
+  if (!state.user) return;
+  const { data: profile } = await supabase.from("profiles").select("*").eq("id", state.user.id).maybeSingle();
+  state.profile = profile;
+  const { data: memberships } = await supabase
+    .from("group_members")
+    .select("group_id, role, groups(id, name, status)")
+    .eq("user_id", state.user.id);
+  state.groups = (memberships || []).map(m => ({ id: m.group_id, role: m.role, ...m.groups }));
+  state.groupId = profile?.default_group_id || state.groups[0]?.id || null;
+  if (state.groupId) {
+    const { data: bal } = await supabase.from("billing_balance").select("*").eq("group_id", state.groupId).maybeSingle();
+    state.balance = bal;
+  }
+}
+
+function renderUserHeader() {
+  const name = state.profile?.full_name || state.user?.email || "";
+  $("header-name").textContent = name;
+  $("menu-name").textContent = name;
+  $("menu-email").textContent = state.user?.email || "";
+  const bal = state.balance?.balance_usd;
+  $("menu-balance").textContent = bal != null ? `Баланс: ${fmtMoney(bal, "USD", 4)}` : "Баланс: —";
+  $("current-group-name").textContent = state.groups.find(g => g.id === state.groupId)?.name || "—";
+}
+
+function renderGroupSwitcher() {
+  const menu = $("group-switcher-menu");
+  if (!state.groups.length) { menu.innerHTML = '<div style="padding:12px; color:var(--fg-muted); font-size:12px;">Нет групп</div>'; return; }
+  menu.innerHTML = state.groups.map(g => `
+    <div class="group-switcher-item ${g.id === state.groupId ? 'active' : ''}" data-group-id="${g.id}">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M3 21h18"/><path d="M5 21V7l8-4v18"/><path d="M19 21V11l-6-4"/></svg>
+      <span style="flex:1; overflow:hidden; text-overflow:ellipsis;">${escapeHtml(g.name || g.id)}</span>
+      <span style="font-size:10px; color:var(--fg-muted); text-transform:uppercase;">${g.role || ""}</span>
+    </div>
+  `).join("");
+  menu.querySelectorAll("[data-group-id]").forEach(el => {
+    el.addEventListener("click", async () => {
+      state.groupId = el.dataset.groupId;
+      $("group-switcher-menu").classList.remove("open");
+      await refreshState();
+      renderUserHeader();
+      await loadHistory({ resetLimit: true });
+    });
+  });
+}
+
+// ============================================================
+// HISTORY / UPLOADS
+// ============================================================
+async function loadHistory(options = {}) {
+  const { resetLimit = false } = options;
+  if (resetLimit) state.historyLimit = HISTORY_LIMIT_DEFAULT;
+  if (!state.groupId) return;
+
+  const oldMap = { ...state.lastStatuses };
+  let query = supabase.from(TABLE)
+    .select("id, file_number, uploaded_by, file_name, file_ext, status_parser, status_selector, status_pricer, total_cost_usd_billed, last_error, created_at", { count: "exact" })
+    .eq("group_id", state.groupId)
+    .order("created_at", { ascending: false });
+
+  if ($("my-files-toggle").checked && state.user) {
+    query = query.eq("uploaded_by", state.user.id);
+  }
+  const searchValue = $("file-filter-input").value.trim();
+  if (searchValue) {
+    const pat = `%${escapeSearch(searchValue)}%`;
+    query = query.or([
+      `file_number.ilike.${pat}`,
+      `file_name.ilike.${pat}`,
+      `file_ext.ilike.${pat}`,
+      `status_parser.ilike.${pat}`,
+      `status_selector.ilike.${pat}`,
+      `status_pricer.ilike.${pat}`,
+    ].join(","));
+  }
+  query = query.limit(state.historyLimit);
+
+  const { data, error, count } = await query;
+  if (error) { console.error(error); return; }
+  state.history = data || [];
+  state.historyTotalCount = count || state.history.length;
+  state.lastStatuses = {};
+  state.history.forEach(h => {
+    state.lastStatuses[h.id] = { status_parser: h.status_parser, status_selector: h.status_selector, status_pricer: h.status_pricer };
+  });
+  recomputeWatched();
+  renderHistory(oldMap);
+  updateLoadMoreVisibility();
+  await loadSpecData();
+}
+
+function recomputeWatched() {
+  state.watchedSpecIds.clear();
+  state.history.slice(0, REALTIME_ROW_LIMIT).forEach(h => state.watchedSpecIds.add(String(h.id)));
+  if (state.openedSpecId) state.watchedSpecIds.add(String(state.openedSpecId));
+}
+
+function updateLoadMoreVisibility() {
+  const btn = $("history-load-more");
+  if (!btn) return;
+  btn.style.display = (state.history.length > 0 && state.history.length < state.historyTotalCount) ? "inline-flex" : "none";
+}
+
+function statusIconState(raw) {
+  const v = String(raw ?? "").trim();
+  if (!v || v === "-") return { icon: "clear_all", color: "var(--fg-muted)", glow: false };
+  if (v === "done") return { icon: "done_all", color: "var(--success)", glow: true };
+  if (v === "in_progress" || v === "queued") return { icon: "autorenew", color: "var(--warning)", glow: false };
+  if (v === "error") return { icon: "error", color: "var(--error)", glow: false };
+  return { icon: "text_fields_alt", color: "var(--fg)", glow: false };
+}
+
+function applyStatusIcon(scope, field, value) {
+  const icon = scope.querySelector(`[data-status-icon="${field}"]`);
+  if (!icon) return;
+  const s = statusIconState(value);
+  icon.textContent = s.icon;
+  icon.style.color = s.color;
+  icon.style.textShadow = s.glow ? "0 0 8px rgba(16,185,129,.5)" : "none";
+}
+
+const STATUS_LABELS = { "-": "—", "queued": "ОЧЕРЕДЬ", "in_progress": "В РАБОТЕ", "done": "ГОТОВО", "error": "ОШИБКА" };
+
+function renderHistory(oldMap = {}) {
+  const list = $("history-list");
+  const template = $("history-row-template");
+  const existing = new Map();
+  list.querySelectorAll(".history-item, .spec-container").forEach(el => {
+    const id = el.dataset.specId;
+    if (id) existing.set(id + (el.classList.contains("spec-container") ? "-cont" : ""), el);
+  });
+
+  const processed = new Set();
+  let anchor = list.firstChild;
+  state.history.forEach(item => {
+    const idStr = String(item.id);
+    processed.add(idStr);
+    let rowEl = list.querySelector(`.history-item[data-spec-id="${idStr}"]`);
+    if (!rowEl) {
+      const frag = template.content.cloneNode(true);
+      rowEl = frag.querySelector(".history-item");
+      rowEl.dataset.specId = idStr;
+      rowEl.classList.add("fade-in");
+      rowEl.addEventListener("click", () => toggleSpecOpen(item.id));
+      rowEl.querySelectorAll("[data-field]").forEach(el => {
+        el.addEventListener("click", e => {
+          if (el.dataset.field === "id") return; // handled by row click
+          e.stopPropagation();
+          navigator.clipboard.writeText(el.value || el.textContent || "");
+          showCopyTip(el);
+        });
+      });
+      list.insertBefore(frag, anchor);
+      rowEl = list.querySelector(`.history-item[data-spec-id="${idStr}"]`);
+    }
+
+    rowEl.querySelectorAll("[data-field]").forEach(el => {
+      const f = el.dataset.field;
+      let v = item[f];
+      if (f === "created_at") v = fmtDate(item.created_at);
+      if (f === "cost") v = item.total_cost_usd_billed ? "$" + parseFloat(item.total_cost_usd_billed).toFixed(4) : "—";
+      const display = (["status_parser","status_selector","status_pricer"].includes(f)) ? (STATUS_LABELS[v] || v || "—") : (v ?? "");
+      if (el.tagName === "INPUT") {
+        if (el.value !== display) el.value = display;
+      } else if (el.textContent !== display) el.textContent = display;
+      if (["status_parser","status_selector","status_pricer"].includes(f)) {
+        applyStatusIcon(rowEl, f, v);
+        if (oldMap[item.id] && oldMap[item.id][f] !== v) {
+          el.classList.add("fade");
+          setTimeout(() => el.classList.remove("fade"), 500);
+        }
+      }
+    });
+
+    if (anchor && rowEl !== anchor) list.insertBefore(rowEl, anchor);
+    const specContainer = list.querySelector(`.spec-container[data-spec-id="${idStr}"]`);
+    if (specContainer && specContainer.previousSibling !== rowEl) list.insertBefore(specContainer, rowEl.nextSibling);
+    anchor = specContainer ? specContainer.nextSibling : rowEl.nextSibling;
+  });
+
+  // Remove orphans
+  list.querySelectorAll(".history-item").forEach(el => {
+    if (!processed.has(el.dataset.specId)) {
+      el.remove();
+      const sc = list.querySelector(`.spec-container[data-spec-id="${el.dataset.specId}"]`);
+      if (sc) sc.remove();
+    }
+  });
+}
+
+async function loadSpecData() {
+  const specIds = state.history.map(h => h.id);
+  if (!specIds.length) { state.specGroups = {}; state.picksByPos = {}; return; }
+  const { data: positions } = await supabase
+    .from(POS_TABLE)
+    .select("id, spec_id, group_id, pos_number, pos_number_int, name, category, qty, qty_unit, attrs")
+    .in("spec_id", specIds)
+    .order("spec_id", { ascending: false })
+    .order("pos_number_int", { ascending: true });
+
+  state.specGroups = {};
+  (positions || []).forEach(p => {
+    const k = String(p.spec_id);
+    (state.specGroups[k] = state.specGroups[k] || []).push(p);
+  });
+
+  const posIds = (positions || []).map(p => p.id);
+  state.picksByPos = {};
+  if (posIds.length) {
+    const { data: picks } = await supabase
+      .from(PICK_TABLE)
+      .select("id, pos_id, spec_id, article, model_name, qty, unit, price, sum, pricer_status, price1_amount, price1_currency, price1_store, price1_url, price2_amount, price2_currency, price2_store, price2_url, price3_amount, price3_currency, price3_store, price3_url")
+      .in("pos_id", posIds);
+    (picks || []).forEach(p => { (state.picksByPos[p.pos_id] = state.picksByPos[p.pos_id] || []).push(p); });
+  }
+}
+
+// ============================================================
+// SPEC RENDERING / TOGGLE
+// ============================================================
+function toggleSpecOpen(specId) {
+  const idStr = String(specId);
+  const list = $("history-list");
+
+  // Close previously opened
+  if (state.openedSpecId && state.openedSpecId !== specId) {
+    const prev = list.querySelector(`.spec-container[data-spec-id="${state.openedSpecId}"]`);
+    if (prev) prev.remove();
+    const prevRow = list.querySelector(`.history-item[data-spec-id="${state.openedSpecId}"]`);
+    const prevClose = prevRow?.querySelector(".spec-close-btn-accent");
+    if (prevClose) prevClose.remove();
+  }
+
+  let container = list.querySelector(`.spec-container[data-spec-id="${idStr}"]`);
+  if (container) {
+    container.remove();
+    state.openedSpecId = null;
+    const row = list.querySelector(`.history-item[data-spec-id="${idStr}"]`);
+    const close = row?.querySelector(".spec-close-btn-accent");
+    if (close) close.remove();
+    recomputeWatched();
+    return;
+  }
+
+  // Open new
+  state.openedSpecId = specId;
+  recomputeWatched();
+  const tpl = $("spec-template").content.cloneNode(true);
+  container = tpl.querySelector(".spec-container");
+  container.dataset.specId = idStr;
+  const content = container.querySelector(".spec-content");
+  content.classList.add("visible");
+
+  // Progress steps
+  const progFrag = $("spec-progress-template").content.cloneNode(true);
+  const progressEl = progFrag.querySelector(".spec-progress");
+  progressEl.dataset.specId = idStr;
+  container.insertBefore(progFrag, content);
+  initProgressHandlers(progressEl, specId);
+  updateSpecProgress(idStr);
+
+  // Action buttons
+  const actFrag = $("button-group-spec").content.cloneNode(true);
+  const actRow = actFrag.querySelector(".spec-action-row");
+  actRow.classList.add("visible");
+  actRow.querySelectorAll("[data-action]").forEach(btn => {
+    btn.addEventListener("click", e => { e.stopPropagation(); runSpecAction(btn.dataset.action, specId, content, btn); });
+  });
+  container.insertBefore(actFrag, content);
+
+  // Spec rows
+  renderSpecContent(content, idStr);
+
+  // Insert after the history row
+  const rowEl = list.querySelector(`.history-item[data-spec-id="${idStr}"]`);
+  list.insertBefore(container, rowEl?.nextSibling || null);
+
+  // Add close button to row
+  if (rowEl) {
+    const idCont = rowEl.querySelector('[data-field="id"]')?.closest(".input-container");
+    if (idCont && !idCont.querySelector(".spec-close-btn-accent")) {
+      idCont.style.position = "relative";
+      const closeBtn = document.createElement("button");
+      closeBtn.className = "spec-close-btn-accent";
+      closeBtn.textContent = "×";
+      closeBtn.addEventListener("click", e => { e.stopPropagation(); toggleSpecOpen(specId); });
+      idCont.appendChild(closeBtn);
+    }
+  }
+}
+
+function renderSpecContent(content, specId) {
+  const idStr = String(specId);
+  const rows = (state.specGroups[idStr] || []).slice().sort((a, b) => toPosNum(a.pos_number_int ?? a.pos_number) - toPosNum(b.pos_number_int ?? b.pos_number));
+  content.innerHTML = "";
+  if (!rows.length) {
+    content.innerHTML = '<div style="padding:30px; text-align:center; color:var(--fg-muted); font-size:13px;">Позиции ещё не извлечены</div>';
+    return;
+  }
+  const rowTpl = $("spec-row-template");
+  const attrTpl = $("spec-attr-template");
+  const block2Tpl = $("spec-block2-template");
+  const block3Tpl = $("spec-block3-template");
+
+  rows.forEach(pos => {
+    const rf = rowTpl.content.cloneNode(true);
+    const setField = (f, v) => { const el = rf.querySelector(`[data-field="${f}"]`); if (el) el.value = v || ""; };
+    setField("pos_number", pos.pos_number);
+    setField("name", pos.name);
+    setField("qty", pos.qty);
+    setField("unit", pos.qty_unit);
+
+    // Slide 1: attributes
+    const slide1 = rf.querySelector('.slide[data-slide="1"] .slide-content');
+    if (slide1) {
+      const pairs = parseAttrs(pos.attrs);
+      pairs.forEach(({ param, value }) => {
+        const af = attrTpl.content.cloneNode(true);
+        const inputs = af.querySelectorAll(".styled_input_bar");
+        if (inputs[0]) inputs[0].value = param;
+        if (inputs[1]) inputs[1].value = value;
+        slide1.appendChild(af);
+      });
+      if (!pairs.length) slide1.innerHTML = '<div style="color:var(--fg-muted); font-size:12px; padding:10px;">Без характеристик</div>';
+    }
+
+    // Slide 2: picks (block 2)
+    const slide2 = rf.querySelector('.slide[data-slide="2"] .slide-content');
+    const picks = state.picksByPos[pos.id] || [];
+    if (slide2) {
+      if (picks.length) {
+        picks.forEach(pk => {
+          const bf = block2Tpl.content.cloneNode(true);
+          const setPick = (f, v) => { const el = bf.querySelector(`[data-pick="${f}"]`); if (el) el.value = v != null ? String(v) : ""; };
+          setPick("article", pk.article);
+          setPick("model_name", pk.model_name);
+          setPick("qty", pk.qty);
+          setPick("unit", pk.unit);
+          setPick("price", pk.price ? formatNumeric(pk.price) + " ₽" : "");
+          setPick("sum", pk.sum ? formatNumeric(pk.sum) + " ₽" : "");
+          slide2.appendChild(bf);
+        });
+      } else {
+        slide2.innerHTML = '<div style="color:var(--fg-muted); font-size:12px; padding:10px;">Подбор ещё не выполнен</div>';
+      }
+    }
+
+    // Slide 3: prices (block 3)
+    const slide3 = rf.querySelector('.slide[data-slide="3"] .slide-content');
+    if (slide3) {
+      if (picks.length) {
+        picks.forEach(pk => {
+          const bf = block3Tpl.content.cloneNode(true);
+          const setOffer = (n, amt, curr, store, url) => {
+            const p = bf.querySelector(`[data-offer="${n}-price"]`);
+            const s = bf.querySelector(`[data-offer="${n}-store"]`);
+            const u = bf.querySelector(`[data-offer="${n}-url"]`);
+            if (p) p.value = amt ? `${formatNumeric(amt)}${curr ? ' ' + curr : ''}` : "";
+            if (s) s.value = store || "";
+            if (u) {
+              if (url) { u.href = url; u.style.opacity = "1"; u.style.pointerEvents = "auto"; }
+              else { u.href = "#"; u.style.opacity = "0.3"; u.style.pointerEvents = "none"; }
+            }
+          };
+          setOffer(1, pk.price1_amount, pk.price1_currency, pk.price1_store, pk.price1_url);
+          setOffer(2, pk.price2_amount, pk.price2_currency, pk.price2_store, pk.price2_url);
+          setOffer(3, pk.price3_amount, pk.price3_currency, pk.price3_store, pk.price3_url);
+          slide3.appendChild(bf);
+        });
+      } else {
+        slide3.innerHTML = '<div style="color:var(--fg-muted); font-size:12px; padding:10px;">Цены ещё не получены</div>';
+      }
+    }
+
+    content.appendChild(rf);
+  });
+
+  // Wire slideshows
+  content.querySelectorAll(".slideshow-container").forEach(setupSlideshow);
+}
+
+function parseAttrs(s) {
+  if (!s) return [];
+  return s.split(/[;|]/).map(t => {
+    t = t.trim(); if (!t) return null;
+    const m = t.match(/^([^:=&]+)[:=&]\s*(.+)$/);
+    if (m) return { param: m[1].trim(), value: m[2].trim() };
+    return { param: t, value: "" };
+  }).filter(Boolean);
+}
+
+function setupSlideshow(container) {
+  const slides = container.querySelectorAll(".slide");
+  const dots = container.querySelectorAll(".dot");
+  let idx = 0;
+  const show = (n) => {
+    slides[idx].classList.remove("active");
+    dots[idx].classList.remove("active");
+    idx = (n + slides.length) % slides.length;
+    slides[idx].classList.add("active");
+    dots[idx].classList.add("active");
+  };
+  container.querySelector(".prev")?.addEventListener("click", () => show(idx - 1));
+  container.querySelector(".next")?.addEventListener("click", () => show(idx + 1));
+  dots.forEach(d => d.addEventListener("click", () => show(parseInt(d.dataset.index))));
+}
+
+// ============================================================
+// PROGRESS / RE-RUN STAGES
+// ============================================================
+function updateSpecProgress(specId) {
+  const idStr = String(specId);
+  const item = state.history.find(h => String(h.id) === idStr);
+  if (!item) return;
+  document.querySelectorAll(`.spec-progress[data-spec-id="${idStr}"]`).forEach(el => {
+    const steps = el.querySelectorAll(".step");
+    const apply = (step, status) => {
+      const icon = step.querySelector(".status");
+      const done = status === "done";
+      const prog = status === "in_progress" || status === "queued";
+      if (done) { step.classList.add("active"); if (icon) icon.textContent = "done_all"; }
+      else if (prog) { step.classList.add("active"); if (icon) icon.textContent = "autorenew"; }
+      else { step.classList.remove("active"); if (icon) icon.textContent = "indeterminate_check_box"; }
+    };
+    apply(steps[0], item.status_parser);
+    apply(steps[1], item.status_selector);
+    apply(steps[2], item.status_pricer);
+  });
+}
+
+function initProgressHandlers(progress, specId) {
+  progress.querySelectorAll(".refresh").forEach(btn => {
+    btn.addEventListener("click", async e => {
+      e.stopPropagation();
+      const stage = btn.dataset.stage;
+      btn.classList.add("loading"); btn.disabled = true;
+      try {
+        if (stage === "parser") {
+          await supabase.from(PICK_TABLE).delete().eq("spec_id", specId);
+          await supabase.from(POS_TABLE).delete().eq("spec_id", specId);
+          await supabase.from(TABLE).update({
+            status_parser: "-", status_selector: "-", status_pricer: "-", last_error: null
+          }).eq("id", specId);
+          const { error } = await supabase.functions.invoke("process-spec", { body: { spec_upload_id: specId } });
+          if (error) throw error;
+          toast("Парсер перезапущен", "success");
+        } else if (stage === "selector") {
+          await supabase.from(PICK_TABLE).delete().eq("spec_id", specId);
+          await supabase.from(TABLE).update({ status_selector: "-", status_pricer: "-" }).eq("id", specId);
+          const { error } = await supabase.functions.invoke("select-positions", { body: { spec_upload_id: specId } });
+          if (error) throw error;
+          toast("Селектор перезапущен", "success");
+        } else if (stage === "pricer") {
+          await supabase.from(PICK_TABLE).update({ pricer_status: "queued", price1_amount: null, price2_amount: null, price3_amount: null, price: null, sum: null }).eq("spec_id", specId);
+          await supabase.from(TABLE).update({ status_pricer: "-" }).eq("id", specId);
+          const { error } = await supabase.functions.invoke("price-picks", { body: { spec_upload_id: specId } });
+          if (error) throw error;
+          toast("Прайсер перезапущен", "success");
+        }
+        await loadHistory();
+      } catch (err) {
+        toast("Ошибка: " + (err.message || err), "error", 6000);
+      } finally {
+        btn.classList.remove("loading"); btn.disabled = false;
+      }
+    });
+  });
+}
+
+// ============================================================
+// UPLOAD
+// ============================================================
+async function handleFileUpload(file) {
+  if (!file || !state.groupId) { toast("Нет активной группы", "error"); return; }
+  const ext = file.name.split(".").pop().toLowerCase();
+  if (!ALLOWED_EXTS.includes(ext)) { toast("Неподдерживаемый формат: " + ALLOWED_EXTS.join(", "), "error"); return; }
+  if (file.size > 50 * 1024 * 1024) { toast("Файл больше 50 МБ", "error"); return; }
+
+  const btn = $("upload-btn");
+  const progress = $("upload-progress");
+  const status = $("upload-status");
+  btn.classList.add("loading"); btn.disabled = true;
+  progress.style.display = "block"; progress.value = 0;
+  status.textContent = "Создаю запись…";
+
+  // 1. Insert spec_uploads row
+  const { data: spec, error: insErr } = await supabase.from(TABLE).insert({
+    group_id: state.groupId,
+    uploaded_by: state.user.id,
+    file_name: file.name,
+    file_ext: ext,
+    file_size: file.size,
+  }).select("id, group_id").single();
+
+  if (insErr) {
+    status.textContent = "Ошибка: " + insErr.message;
+    btn.classList.remove("loading"); btn.disabled = false;
+    return;
+  }
+
+  // 2. Upload to storage
+  const safeName = sanitize(file.name);
+  const filePath = `${spec.group_id}/${spec.id}/${Date.now()}_${safeName}`;
+  status.textContent = "Загрузка файла…";
+  const { error: upErr } = await supabase.storage.from(BUCKET).upload(filePath, file, { upsert: true, contentType: file.type });
+  if (upErr) {
+    await supabase.from(TABLE).update({ status_parser: "error", last_error: "upload: " + upErr.message }).eq("id", spec.id);
+    status.textContent = "Ошибка загрузки";
+    btn.classList.remove("loading"); btn.disabled = false;
+    progress.style.display = "none";
+    return;
+  }
+  progress.value = 100;
+
+  // 3. Update with file_path
+  await supabase.from(TABLE).update({ file_path: filePath }).eq("id", spec.id);
+
+  status.textContent = "Файл загружен — запускаю парсер…";
+  $("js-file-input").value = "";
+
+  // 4. Trigger parser (which chains → selector → pricer)
+  const { data: result, error: invErr } = await supabase.functions.invoke("process-spec", {
+    body: { spec_upload_id: spec.id }
+  });
+  if (invErr) {
+    await supabase.from(TABLE).update({ status_parser: "error", last_error: "invoke: " + invErr.message }).eq("id", spec.id);
+    toast("Парсер не запустился: " + invErr.message, "error", 6000);
+  } else if (result?.ok === false) {
+    toast("Парсер отклонил: " + result.error, "error", 6000);
+  } else {
+    toast("Парсер запущен", "success");
+  }
+
+  setTimeout(() => { progress.style.display = "none"; status.textContent = ""; }, 2500);
+  btn.classList.remove("loading"); btn.disabled = false;
+  await loadHistory();
+}
+
+// ============================================================
+// EXPORT (copy / excel)
+// ============================================================
+function collectSpecData(specId) {
+  const idStr = String(specId);
+  const item = state.history.find(h => String(h.id) === idStr);
+  const positions = (state.specGroups[idStr] || []).slice().sort((a, b) => toPosNum(a.pos_number_int) - toPosNum(b.pos_number_int));
+  return {
+    id: idStr,
+    header: {
+      file_number: item?.file_number || "",
+      file_name: item?.file_name || "",
+      created_at: item?.created_at ? fmtDate(item.created_at) : "",
+    },
+    positions: positions.map(p => ({
+      pos_number: p.pos_number,
+      name: p.name,
+      qty: p.qty,
+      unit: p.qty_unit,
+      attrs: parseAttrs(p.attrs),
+      picks: state.picksByPos[p.id] || [],
+    })),
+  };
+}
+
+function formatSpecForClipboard(data) {
+  const lines = [];
+  lines.push(`Спецификация ${data.header.file_number} | ${data.header.file_name}`);
+  lines.push(`Дата: ${data.header.created_at}`);
+  lines.push("");
+  data.positions.forEach(p => {
+    lines.push(`${p.pos_number}. ${p.name} (${p.qty} ${p.unit})`);
+    p.attrs.forEach(a => lines.push(`\t${a.param}: ${a.value}`));
+    p.picks.forEach(pk => lines.push(`\t→ ${pk.article} | ${pk.model_name} | цена: ${pk.price || "—"} ₽ | сумма: ${pk.sum || "—"} ₽`));
+    lines.push("");
+  });
+  return lines.join("\n");
+}
+
+function createExcelBlob(data) {
+  const rows = [];
+  rows.push(`<tr><th>№</th><th>Наименование</th><th>Кол-во</th><th>Ед.</th><th>Артикул</th><th>Модель</th><th>Цена</th><th>Сумма</th></tr>`);
+  data.positions.forEach(p => {
+    if (p.picks.length) {
+      p.picks.forEach((pk, i) => {
+        rows.push(`<tr><td>${i === 0 ? escapeHtml(p.pos_number) : ""}</td><td>${i === 0 ? escapeHtml(p.name) : ""}</td><td>${escapeHtml(p.qty)}</td><td>${escapeHtml(p.unit)}</td><td>${escapeHtml(pk.article)}</td><td>${escapeHtml(pk.model_name)}</td><td>${pk.price || ""}</td><td>${pk.sum || ""}</td></tr>`);
+      });
+    } else {
+      rows.push(`<tr><td>${escapeHtml(p.pos_number)}</td><td>${escapeHtml(p.name)}</td><td>${escapeHtml(p.qty)}</td><td>${escapeHtml(p.unit)}</td><td colspan="4">—</td></tr>`);
+    }
+  });
+  const html = `<table border="1" cellspacing="0" cellpadding="4">${rows.join("")}</table>`;
+  return new Blob(["\uFEFF" + html], { type: "application/vnd.ms-excel" });
+}
+
+async function runSpecAction(action, specId, content, button) {
+  const data = collectSpecData(specId);
+  try {
+    if (action === "copy") {
+      await navigator.clipboard.writeText(formatSpecForClipboard(data));
+      showCopyTip(button);
+    } else if (action === "excel") {
+      const blob = createExcelBlob(data);
+      const url = URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = `spec_${data.header.file_number || specId}.xls`;
+      document.body.appendChild(link);
+      link.click();
+      setTimeout(() => { URL.revokeObjectURL(url); link.remove(); }, 100);
+    }
+  } catch (err) { console.error(err); toast("Ошибка экспорта", "error"); }
+}
+
+// ============================================================
+// CONTEXT MENU
+// ============================================================
+function setupContextMenu() {
+  const menu = document.querySelector(".spec-context-menu");
+  document.addEventListener("contextmenu", e => {
+    const content = e.target.closest(".spec-content");
+    if (!content) { menu.classList.remove("visible"); return; }
+    const specId = content.closest(".spec-container")?.dataset.specId;
+    if (!specId) return;
+    e.preventDefault();
+    state.contextSpecContent = content;
+    menu.dataset.specId = specId;
+    menu.style.left = e.pageX + "px";
+    menu.style.top = e.pageY + "px";
+    menu.classList.add("visible");
+  });
+  document.addEventListener("click", e => {
+    if (!menu.contains(e.target)) menu.classList.remove("visible");
+  });
+  menu.querySelectorAll("[data-action]").forEach(btn => {
+    btn.addEventListener("click", () => {
+      const specId = menu.dataset.specId;
+      if (specId) runSpecAction(btn.dataset.action, specId, state.contextSpecContent, btn);
+      menu.classList.remove("visible");
+    });
+  });
+}
+
+// ============================================================
+// REALTIME
+// ============================================================
+function setupRealtime() {
+  if (state.realtimeSub) { try { state.realtimeSub.unsubscribe(); } catch {} state.realtimeSub = null; }
+  state.realtimeSub = supabase.channel("ai-eq-realtime")
+    .on("postgres_changes", { event: "*", schema: "public", table: TABLE, filter: `group_id=eq.${state.groupId}` },
+      (payload) => {
+        const id = payload.new?.id ?? payload.old?.id;
+        if (payload.eventType === "UPDATE" && state.watchedSpecIds.has(String(id))) {
+          applyRealtimeRegistryUpdate(payload.new);
+        } else if (payload.eventType === "INSERT" || payload.eventType === "DELETE") {
+          loadHistory();
+        }
+      })
+    .on("postgres_changes", { event: "*", schema: "public", table: POS_TABLE },
+      (payload) => {
+        const id = payload.new?.spec_id ?? payload.old?.spec_id;
+        if (state.watchedSpecIds.has(String(id))) scheduleSpecReload(id);
+      })
+    .on("postgres_changes", { event: "*", schema: "public", table: PICK_TABLE },
+      (payload) => {
+        const id = payload.new?.spec_id ?? payload.old?.spec_id;
+        if (state.watchedSpecIds.has(String(id))) scheduleSpecReload(id);
+      })
+    .subscribe();
+}
+
+function applyRealtimeRegistryUpdate(row) {
+  if (!row) return;
+  const idx = state.history.findIndex(h => h.id === row.id);
+  if (idx === -1) return;
+  state.history[idx] = { ...state.history[idx], ...row };
+  state.lastStatuses[row.id] = { status_parser: row.status_parser, status_selector: row.status_selector, status_pricer: row.status_pricer };
+  const rowEl = document.querySelector(`.history-item[data-spec-id="${row.id}"]`);
+  if (!rowEl) return;
+  rowEl.querySelectorAll("[data-field]").forEach(el => {
+    const f = el.dataset.field;
+    let v = row[f];
+    if (f === "created_at") v = fmtDate(row.created_at);
+    if (f === "cost") v = row.total_cost_usd_billed ? "$" + parseFloat(row.total_cost_usd_billed).toFixed(4) : "—";
+    const display = (["status_parser","status_selector","status_pricer"].includes(f)) ? (STATUS_LABELS[v] || v || "—") : (v ?? "");
+    if (el.tagName === "INPUT" && el.value !== display) { el.classList.add("fade"); setTimeout(() => { el.value = display; el.classList.remove("fade"); }, 250); }
+    if (["status_parser","status_selector","status_pricer"].includes(f)) applyStatusIcon(rowEl, f, v);
+  });
+  updateSpecProgress(row.id);
+}
+
+function scheduleSpecReload(specId) {
+  const key = String(specId);
+  if (state.reloadTimers.has(key)) return;
+  const t = setTimeout(async () => {
+    state.reloadTimers.delete(key);
+    await loadSpecData();
+    if (state.openedSpecId === specId || String(state.openedSpecId) === key) {
+      const content = document.querySelector(`.spec-container[data-spec-id="${key}"] .spec-content`);
+      if (content) renderSpecContent(content, key);
+    }
+  }, 500);
+  state.reloadTimers.set(key, t);
+}
+
+// ============================================================
+// WIRING
+// ============================================================
+function wireUI() {
+  // Login slide
+  $("slide-right-button").addEventListener("click", () => toggleLoginOverlay(true));
+  $("slide-left-button").addEventListener("click", () => toggleLoginOverlay(false));
+  $("login-form").addEventListener("submit", handleEmailLogin);
+  $("registration-form").addEventListener("submit", handleSignup);
+  $("google-signin-btn").addEventListener("click", handleGoogleSignIn);
+  $("btn-signout-main").addEventListener("click", handleSignOut);
+
+  // Profile menu
+  $("btn-profile").addEventListener("click", e => { e.stopPropagation(); $("profile-menu").classList.toggle("open"); $("group-switcher-menu").classList.remove("open"); });
+  $("btn-group-switcher").addEventListener("click", e => { e.stopPropagation(); $("group-switcher-menu").classList.toggle("open"); $("profile-menu").classList.remove("open"); });
+  document.addEventListener("click", () => { $("profile-menu").classList.remove("open"); $("group-switcher-menu").classList.remove("open"); });
+
+  // Theme
+  const btnTheme = $("btn-theme");
+  const themeLine = $("theme-line");
+  btnTheme.addEventListener("click", e => {
+    e.stopPropagation();
+    const open = btnTheme.classList.toggle("active");
+    themeLine.classList.toggle("active", open);
+  });
+  $$(".theme-node").forEach(n => {
+    n.addEventListener("click", e => {
+      e.stopPropagation();
+      btnTheme.classList.remove("active");
+      themeLine.classList.remove("active");
+      switchTheme(n.dataset.theme);
+    });
+  });
+  document.addEventListener("click", e => {
+    if (!e.target.closest(".theme-switcher")) {
+      btnTheme.classList.remove("active");
+      themeLine.classList.remove("active");
+    }
+  });
+
+  // Upload
+  $("upload-btn").addEventListener("click", () => $("js-file-input").click());
+  $("js-file-input").addEventListener("change", e => { if (e.target.files[0]) handleFileUpload(e.target.files[0]); });
+
+  // Drag & drop (whole window)
+  ["dragover", "drop"].forEach(ev => window.addEventListener(ev, e => e.preventDefault()));
+  window.addEventListener("drop", e => {
+    if (!$("main-app").style.display || $("main-app").style.display === "none") return;
+    const f = e.dataTransfer?.files?.[0];
+    if (f) handleFileUpload(f);
+  });
+
+  // Search
+  let searchTimer = null;
+  $("file-filter-input").addEventListener("input", () => {
+    const v = $("file-filter-input").value.trim();
+    $("file-filter-clear").style.display = v ? "block" : "none";
+    if (searchTimer) clearTimeout(searchTimer);
+    searchTimer = setTimeout(() => loadHistory(), 350);
+  });
+  $("file-filter-clear").addEventListener("click", () => {
+    $("file-filter-input").value = "";
+    $("file-filter-clear").style.display = "none";
+    loadHistory({ resetLimit: true });
+  });
+
+  // My files toggle
+  $("my-files-toggle").addEventListener("change", e => {
+    $("toggle-text").textContent = e.target.checked ? "только мои файлы" : "все файлы";
+    loadHistory({ resetLimit: true });
+  });
+
+  // Load more
+  $("history-load-more").addEventListener("click", async () => {
+    state.historyLimit += HISTORY_LIMIT_STEP;
+    await loadHistory();
+  });
+}
+
+// ============================================================
+// BOOTSTRAP
+// ============================================================
+async function bootstrap() {
+  $("preloader").classList.add("visible");
+  wireUI();
+  setupContextMenu();
+
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    state.session = session;
+    state.user = session.user;
+    await refreshState();
+    renderUserHeader();
+    renderGroupSwitcher();
+    showApp();
+    await loadHistory({ resetLimit: true });
+    setupRealtime();
+  } else {
+    showLogin();
+  }
+  setTimeout(() => { $("preloader").classList.remove("visible"); $("preloader").classList.add("fade-out"); }, 800);
+
+  supabase.auth.onAuthStateChange(async (event, session) => {
+    if (event === "SIGNED_IN" && session) {
+      state.session = session;
+      state.user = session.user;
+      await refreshState();
+      renderUserHeader();
+      renderGroupSwitcher();
+      showApp();
+      await loadHistory({ resetLimit: true });
+      setupRealtime();
+    } else if (event === "SIGNED_OUT") {
+      state.session = null; state.user = null; state.profile = null;
+      showLogin();
+    } else if (event === "TOKEN_REFRESHED" && session) {
+      state.session = session;
+    }
+  });
+
+  // DB connection check
+  setInterval(async () => {
+    const { error } = await supabase.from(TABLE).select("id", { count: "exact", head: true }).limit(1);
+    $("db-disconnect-overlay").classList.toggle("show", !!error);
+  }, 15000);
+}
+
+document.addEventListener("DOMContentLoaded", bootstrap);
+</script>
+
+</body>
+</html>
