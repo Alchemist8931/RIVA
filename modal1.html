@@ -1,25 +1,17 @@
 <!-- modal1.html — Страница "Снабжение". Подстраницы: Склад, Заказы снабжения. -->
 <!-- Доступ: admin, supply, management. -->
 
-<section id="m1" class="space-y-6">
+<section id="m1">
 
-  <div class="flex items-center justify-between gap-4 flex-wrap">
-    <div>
-      <h1 class="text-2xl font-medium tracking-tight">Снабжение</h1>
-      <p class="text-sm text-fg-muted mt-1" id="m1-subtitle">—</p>
+  <div class="flex items-center justify-between gap-4 flex-wrap mb-6">
+    <div class="leading-tight">
+      <h1 class="text-[17px] font-medium tracking-tight">Снабжение</h1>
+      <p class="text-xs text-fg-muted mt-0.5" id="m1-subtitle">—</p>
     </div>
-    <div id="m1-chat-btn-wrap"></div>
-  </div>
-
-  <div class="flex items-center gap-1 border-b border-line overflow-x-auto">
-    <button class="m1-tab px-4 py-3 text-sm text-fg-muted hover:text-fg transition-colors relative whitespace-nowrap" data-tab="warehouse">
-      Склад
-      <span class="m1-tab-bar"></span>
-    </button>
-    <button class="m1-tab px-4 py-3 text-sm text-fg-muted hover:text-fg transition-colors relative whitespace-nowrap" data-tab="orders">
-      Заказы снабжения
-      <span class="m1-tab-bar"></span>
-    </button>
+    <nav class="m1-subnav" id="m1-subnav">
+      <button class="m1-tab active" data-tab="warehouse">Склад</button>
+      <button class="m1-tab" data-tab="orders">Заказы снабжения</button>
+    </nav>
   </div>
 
   <!-- =========================
@@ -196,10 +188,12 @@
       <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
         <label class="block md:col-span-2">
           <span class="text-xs text-fg-muted block mb-1.5">Поставщик</span>
-          <input id="m1-ord-f-supplier" list="m1-suppliers-dl" type="text" maxlength="200"
-            placeholder="Начните вводить или выберите…"
-            class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-          <datalist id="m1-suppliers-dl"></datalist>
+          <div class="m1-combo" id="m1-supplier-combo">
+            <input id="m1-ord-f-supplier" type="text" maxlength="200" autocomplete="off" spellcheck="false"
+              placeholder="Начните вводить или выберите…"
+              class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+            <div class="m1-combo-menu hidden" id="m1-supplier-menu"></div>
+          </div>
         </label>
         <label class="block">
           <span class="text-xs text-fg-muted block mb-1.5">Статус оплаты</span>
@@ -237,6 +231,8 @@
         <div id="m1-ord-items" class="divide-y divide-line-light">
           <!-- позиции подставляются динамически -->
         </div>
+        <datalist id="m1-item-article-dl"></datalist>
+        <datalist id="m1-item-name-dl"></datalist>
         <div class="px-4 py-3 border-t border-line">
           <button id="m1-ord-add-item" class="text-sm text-fg-muted hover:text-fg transition-colors">
             + Добавить позицию
@@ -271,13 +267,37 @@
 </div>
 
 <style>
-  .m1-tab .m1-tab-bar {
-    content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 1px;
-    background: var(--fg); transform: scaleX(0); transform-origin: center;
-    transition: transform .2s ease;
+  /* Подстраничная навигация — segmented control как в шапке приложения */
+  .m1-subnav {
+    height: var(--ctrl-h, 38px);
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: var(--ctrl-radius, 12px);
+    padding: 4px;
+    display: inline-flex;
+    align-items: stretch;
+    gap: 0;
   }
-  .m1-tab.active { color: var(--fg); }
-  .m1-tab.active .m1-tab-bar { transform: scaleX(1); }
+  .m1-subnav .m1-tab {
+    padding: 0 14px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: calc(var(--ctrl-radius, 12px) - 4px);
+    color: var(--fg-muted);
+    font-size: 13px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    transition: all .15s ease-in-out;
+  }
+  .m1-subnav .m1-tab:hover { color: var(--fg); }
+  .m1-subnav .m1-tab.active {
+    background: var(--bg);
+    color: var(--fg);
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 0 0 1px rgba(0,0,0,.04);
+  }
 
   .m1-wh-filter.active { background: var(--bg); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,.04); }
   .m1-wh-filter:not(.active) { color: var(--fg-muted); }
@@ -448,6 +468,95 @@
   .m1-badge-partial    { --badge-c: #D97706; }
   .m1-badge-unpaid     { --badge-c: #DC2626; }
 
+  /* ============================================================
+     КАСТОМНЫЙ КОМБОБОКС ПОСТАВЩИКА
+  ============================================================ */
+  .m1-combo { position: relative; }
+  .m1-combo-menu {
+    position: absolute;
+    left: 0; right: 0; top: calc(100% + 4px);
+    z-index: 30;
+    max-height: 220px;
+    overflow-y: auto;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    padding: 4px;
+  }
+  /* кастомный скролл 4px */
+  .m1-combo-menu::-webkit-scrollbar { width: 4px; }
+  .m1-combo-menu::-webkit-scrollbar-track { background: transparent; }
+  .m1-combo-menu::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
+  .m1-combo-menu:hover::-webkit-scrollbar-thumb { background: var(--fg-muted); }
+  .m1-combo-menu { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+
+  .m1-combo-opt {
+    padding: 8px 10px;
+    border-radius: 7px;
+    font-size: 13px;
+    color: var(--fg);
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background .12s ease;
+  }
+  .m1-combo-opt:hover,
+  .m1-combo-opt.active { background: var(--bg-alt); }
+  .m1-combo-opt--empty { color: var(--fg-muted); cursor: default; font-style: italic; }
+
+  /* ============================================================
+     СТРОКА ПОЗИЦИИ ЗАКАЗА (в одну линию)
+       артикул · наименование · кол-во · ед. · цена · сумма · ×
+  ============================================================ */
+  .m1-oi-row {
+    display: grid;
+    grid-template-columns:
+      /* артикул (на треть меньше) */ 90px
+      /* наименование              */ minmax(0, 1fr)
+      /* кол-во (на четверть меньше)*/ 72px
+      /* ед. изм                   */ 64px
+      /* цена                      */ 96px
+      /* сумма                     */ 96px
+      /* удалить                   */ 32px;
+    gap: 8px;
+    align-items: center;
+    padding: 8px 16px;
+  }
+  .m1-oi-input {
+    width: 100%;
+    padding: 6px 8px;
+    border-radius: 8px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    font-size: 13px;
+    color: var(--fg);
+    outline: none;
+    transition: border-color .15s ease;
+  }
+  .m1-oi-input:focus { border-color: var(--fg); }
+  .m1-oi-input::placeholder { color: var(--fg-muted); }
+  .m1-oi-input--center { text-align: center; }
+  .m1-oi-input--right { text-align: right; }
+  .m1-oi-input--readonly {
+    background: var(--bg-alt);
+    color: var(--fg-secondary);
+    cursor: default;
+  }
+  /* убрать стрелки у number-инпутов, если вдруг останутся */
+  .m1-oi-input::-webkit-outer-spin-button,
+  .m1-oi-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  .m1-oi-input[type=number] { -moz-appearance: textfield; }
+
+  .m1-oi-remove {
+    display: inline-flex; align-items: center; justify-content: center;
+    width: 28px; height: 28px;
+    border-radius: 8px;
+    transition: background .15s ease;
+  }
+  .m1-oi-remove:hover { background: var(--bg-alt); }
+
   /* Адаптив */
   @media (max-width: 1024px) {
     .m1-row--warehouse,
@@ -465,6 +574,7 @@
       padding: 12px 14px;
     }
     .m1-row__total, .m1-row__date, .m1-row__comment { text-align: left; }
+    .m1-oi-row { grid-template-columns: 1fr 1fr; gap: 6px; }
   }
 </style>
 
@@ -691,11 +801,25 @@ const ord = {
   items: [],           // локально — позиции текущего открытого заказа
   attachments: [],     // локально — вложения текущего заказа
   pendingFiles: [],    // файлы, которые только что загрузили в новый заказ (до первого сохранения)
-  suppliersCache: []
+  suppliersCache: [],
+  warehouseLookup: []  // справочник складских позиций для автозаполнения позиций заказа
 };
 
 const STATUS_LABEL = { draft: 'В работе', placed: 'Заказ размещён', in_transit: 'Товар в пути', received: 'На складе' };
 const PAYMENT_LABEL = { unpaid: 'Не оплачено', paid: 'Оплачено' };
+
+// ---- Парсинг и форматирование чисел в полях позиций ----
+function parseDecimalInput(str) {
+  if (str == null) return null;
+  const cleaned = String(str).replace(',', '.').replace(/[^\d.]/g, '');
+  if (cleaned === '' || cleaned === '.') return null;
+  const num = parseFloat(cleaned);
+  return Number.isFinite(num) ? num : null;
+}
+function formatDecimal2(num) {
+  if (num == null || num === '') return '';
+  return Number(num).toFixed(2).replace('.', ',');
+}
 
 $('m1-ord-search').addEventListener('input', (e) => { ord.search = e.target.value.trim().toLowerCase(); renderOrders(); });
 $('m1-ord-status-filter').addEventListener('change', (e) => { ord.statusFilter = e.target.value; renderOrders(); });
@@ -703,12 +827,84 @@ $('m1-ord-status-filter').addEventListener('change', (e) => { ord.statusFilter =
 async function loadSuppliersCache() {
   const { data } = await sb.from('suppliers').select('id, name').order('name');
   ord.suppliersCache = data || [];
-  // Наполняем datalist
-  $('m1-suppliers-dl').innerHTML = ord.suppliersCache.map(s => `<option value="${esc(s.name)}"></option>`).join('');
 }
+
+async function loadWarehouseLookup() {
+  const { data } = await sb.from('warehouse_items').select('id, article, name, unit, price').order('name');
+  ord.warehouseLookup = data || [];
+  // datalist подсказок для позиций
+  $('m1-item-article-dl').innerHTML = ord.warehouseLookup
+    .filter(w => w.article)
+    .map(w => `<option value="${esc(w.article)}"></option>`).join('');
+  $('m1-item-name-dl').innerHTML = ord.warehouseLookup
+    .map(w => `<option value="${esc(w.name)}"></option>`).join('');
+}
+
+// ---- Кастомный комбобокс поставщика ----
+(function initSupplierCombo() {
+  const input = $('m1-ord-f-supplier');
+  const menu  = $('m1-supplier-menu');
+  if (!input || !menu) return;
+
+  let activeIdx = -1;
+
+  function renderMenu(filter = '') {
+    const q = filter.trim().toLowerCase();
+    let list = ord.suppliersCache;
+    if (q) list = list.filter(s => (s.name || '').toLowerCase().includes(q));
+
+    menu.innerHTML = list.length === 0
+      ? `<div class="m1-combo-opt m1-combo-opt--empty">Поставщики не найдены</div>`
+      : list.map(s => `<div class="m1-combo-opt" data-value="${esc(s.name)}">${esc(s.name)}</div>`).join('');
+    activeIdx = -1;
+  }
+
+  const open  = () => { renderMenu(input.value); menu.classList.remove('hidden'); };
+  const close = () => menu.classList.add('hidden');
+
+  input.addEventListener('focus', open);
+  input.addEventListener('input', open);
+
+  // mousedown — чтобы сработать раньше blur поля
+  menu.addEventListener('mousedown', (e) => {
+    const opt = e.target.closest('.m1-combo-opt[data-value]');
+    if (!opt) return;
+    e.preventDefault();
+    input.value = opt.dataset.value;
+    close();
+    input.dispatchEvent(new Event('change'));
+  });
+
+  input.addEventListener('keydown', (e) => {
+    const opts = Array.from(menu.querySelectorAll('.m1-combo-opt[data-value]'));
+    if (e.key === 'Escape') { close(); return; }
+    if (e.key === 'ArrowDown') {
+      e.preventDefault();
+      if (menu.classList.contains('hidden')) return open();
+      activeIdx = Math.min(activeIdx + 1, opts.length - 1);
+    } else if (e.key === 'ArrowUp') {
+      e.preventDefault();
+      activeIdx = Math.max(activeIdx - 1, 0);
+    } else if (e.key === 'Enter') {
+      if (activeIdx >= 0 && opts[activeIdx]) {
+        e.preventDefault();
+        input.value = opts[activeIdx].dataset.value;
+        close();
+      }
+      return;
+    } else { return; }
+    opts.forEach((o, i) => o.classList.toggle('active', i === activeIdx));
+    opts[activeIdx]?.scrollIntoView({ block: 'nearest' });
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#m1-supplier-combo')) close();
+  });
+})();
 
 async function loadOrders() {
   await loadSuppliersCache();
+  await loadWarehouseLookup();
 
   const { data, error } = await sb
     .from('supply_orders')
@@ -847,61 +1043,115 @@ function renderOrderItems() {
     updateOrderTotal();
     return;
   }
-  el.innerHTML = ord.items.map((it, i) => `
-    <div class="px-4 py-3 grid grid-cols-12 gap-2 items-start" data-item-index="${i}">
-      <div class="col-span-5">
-        <input type="text" placeholder="Название позиции" maxlength="300"
-          class="w-full px-2 py-1.5 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm"
-          data-field="name" value="${esc(it.name || '')}">
-        <div class="mt-1 flex gap-1">
-          <input type="text" placeholder="Артикул" maxlength="100"
-            class="flex-1 px-2 py-1 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-xs text-fg-muted"
-            data-field="article" value="${esc(it.article || '')}">
-          <input type="text" placeholder="ед." maxlength="20"
-            class="w-16 px-2 py-1 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-xs text-fg-muted"
-            data-field="unit" value="${esc(it.unit || '')}">
-        </div>
-      </div>
-      <div class="col-span-2">
-        <input type="number" step="0.001" min="0" placeholder="Кол-во"
-          class="w-full px-2 py-1.5 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm text-right"
-          data-field="quantity" value="${it.quantity ?? ''}">
-      </div>
-      <div class="col-span-2">
-        <input type="number" step="0.01" min="0" placeholder="Цена"
-          class="w-full px-2 py-1.5 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm text-right"
-          data-field="price" value="${it.price ?? ''}">
-      </div>
-      <div class="col-span-2 text-sm text-right pt-1.5" data-item-sum>
-        ${esc(formatMoney(Number(it.quantity || 0) * Number(it.price || 0)))}
-      </div>
-      <div class="col-span-1 flex justify-end">
-        <button class="p-1.5 rounded-lg hover:bg-surface-alt transition-colors" data-remove-item>
-          <svg class="w-4 h-4 text-state-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
-        </button>
-      </div>
+
+  el.innerHTML = ord.items.map((it, i) => {
+    const sum = Number(it.quantity || 0) * Number(it.price || 0);
+    return `
+    <div class="m1-oi-row" data-item-index="${i}">
+      <input type="text" list="m1-item-article-dl" placeholder="Артикул" maxlength="100" autocomplete="off"
+        class="m1-oi-input" data-field="article" value="${esc(it.article || '')}">
+      <input type="text" list="m1-item-name-dl" placeholder="Наименование" maxlength="300" autocomplete="off"
+        class="m1-oi-input" data-field="name" value="${esc(it.name || '')}">
+      <input type="text" inputmode="decimal" placeholder="Кол-во"
+        class="m1-oi-input m1-oi-input--center" data-field="quantity" value="${it.quantity != null ? formatDecimal2(it.quantity) : ''}">
+      <input type="text" placeholder="ед." maxlength="20"
+        class="m1-oi-input m1-oi-input--center" data-field="unit" value="${esc(it.unit || '')}">
+      <input type="text" inputmode="decimal" placeholder="Цена"
+        class="m1-oi-input m1-oi-input--right" data-field="price" value="${it.price != null ? formatDecimal2(it.price) : ''}">
+      <input type="text" tabindex="-1" readonly
+        class="m1-oi-input m1-oi-input--right m1-oi-input--readonly" data-field="sum" value="${formatDecimal2(sum)}">
+      <button class="m1-oi-remove" data-remove-item title="Удалить позицию">
+        <svg class="w-4 h-4 text-state-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
+      </button>
     </div>
-  `).join('');
+    `;
+  }).join('');
 
   el.querySelectorAll('[data-item-index]').forEach(row => {
     const idx = Number(row.dataset.itemIndex);
-    row.querySelectorAll('[data-field]').forEach(input => {
-      input.addEventListener('input', () => {
-        const field = input.dataset.field;
-        let val = input.value;
-        if (field === 'quantity' || field === 'price') val = val === '' ? null : Number(val);
-        ord.items[idx][field] = val;
-        // Обновить сумму в строке
-        const sum = Number(ord.items[idx].quantity || 0) * Number(ord.items[idx].price || 0);
-        row.querySelector('[data-item-sum]').textContent = formatMoney(sum);
-        updateOrderTotal();
+    const get = (f) => row.querySelector(`[data-field="${f}"]`);
+
+    const recalcSum = () => {
+      const sum = Number(ord.items[idx].quantity || 0) * Number(ord.items[idx].price || 0);
+      get('sum').value = formatDecimal2(sum);
+      updateOrderTotal();
+    };
+
+    // --- Артикул: автозаполнение по складу ---
+    get('article').addEventListener('input', (e) => {
+      ord.items[idx].article = e.target.value;
+      autofillFromLookup(idx, row, 'article');
+    });
+
+    // --- Наименование: автозаполнение по складу ---
+    get('name').addEventListener('input', (e) => {
+      ord.items[idx].name = e.target.value;
+      autofillFromLookup(idx, row, 'name');
+    });
+
+    // --- Ед. изм ---
+    get('unit').addEventListener('input', (e) => { ord.items[idx].unit = e.target.value; });
+
+    // --- Кол-во и Цена: точка→запятая на лету, округление на blur ---
+    ['quantity', 'price'].forEach(field => {
+      const input = get(field);
+      input.addEventListener('input', (e) => {
+        if (e.target.value.includes('.')) {
+          const pos = e.target.selectionStart;
+          e.target.value = e.target.value.replace(/\./g, ',');
+          try { e.target.setSelectionRange(pos, pos); } catch (_) {}
+        }
+        ord.items[idx][field] = parseDecimalInput(e.target.value);
+        recalcSum();
+      });
+      input.addEventListener('blur', (e) => {
+        const n = parseDecimalInput(e.target.value);
+        ord.items[idx][field] = n;
+        e.target.value = n == null ? '' : formatDecimal2(n);
+        recalcSum();
       });
     });
+
     row.querySelector('[data-remove-item]').addEventListener('click', () => {
       ord.items.splice(idx, 1);
       renderOrderItems();
     });
   });
+
+  updateOrderTotal();
+}
+
+// Предзаполнение полей позиции из справочника склада по точному совпадению
+// артикула или наименования (без учёта регистра).
+function autofillFromLookup(idx, row, byField) {
+  const val = (ord.items[idx][byField] || '').trim().toLowerCase();
+  if (!val) return;
+  const match = ord.warehouseLookup.find(w =>
+    byField === 'article'
+      ? (w.article || '').toLowerCase() === val
+      : (w.name || '').toLowerCase() === val
+  );
+  if (!match) return;
+
+  // Заполняем недостающие поля, не затирая то, что пользователь уже вписал вручную
+  if (byField === 'article') {
+    ord.items[idx].name = match.name;
+    row.querySelector('[data-field="name"]').value = match.name || '';
+  } else {
+    ord.items[idx].article = match.article;
+    row.querySelector('[data-field="article"]').value = match.article || '';
+  }
+  ord.items[idx].unit = match.unit;
+  row.querySelector('[data-field="unit"]').value = match.unit || '';
+
+  if (ord.items[idx].price == null) {
+    ord.items[idx].price = match.price;
+    row.querySelector('[data-field="price"]').value = match.price != null ? formatDecimal2(match.price) : '';
+  }
+  ord.items[idx].warehouse_item_id = match.id;
+
+  const sum = Number(ord.items[idx].quantity || 0) * Number(ord.items[idx].price || 0);
+  row.querySelector('[data-field="sum"]').value = formatDecimal2(sum);
   updateOrderTotal();
 }
 
