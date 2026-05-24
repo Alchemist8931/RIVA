@@ -178,13 +178,8 @@
         </div>
       </div>
 
-      <!-- Комментарий + тип -->
+      <!-- Тип + категория -->
       <div class="m1-wh-cm-row">
-        <label class="block">
-          <span class="text-xs text-fg-muted block mb-1.5">Комментарий</span>
-          <textarea id="m1-wh-f-comment" rows="2" maxlength="1000"
-            class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm resize-none"></textarea>
-        </label>
         <label class="block">
           <span class="text-xs text-fg-muted block mb-1.5">Тип позиции *</span>
           <div class="m1-dd m1-dd--block" id="m1-wh-type-dd">
@@ -194,11 +189,24 @@
             </button>
             <div class="m1-dd-menu hidden" id="m1-wh-type-menu">
               <div class="m1-dd-opt" data-value="material">Материал</div>
-              <div class="m1-dd-opt" data-value="product">Готовая продукция</div>
             </div>
           </div>
         </label>
+        <label class="block">
+          <span class="text-xs text-fg-muted block mb-1.5">Категория</span>
+          <input id="m1-wh-f-category" list="m1-wh-category-dl" type="text" maxlength="100" autocomplete="off"
+            placeholder="Выберите или создайте…"
+            class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+          <datalist id="m1-wh-category-dl"></datalist>
+        </label>
       </div>
+
+      <!-- Комментарий -->
+      <label class="block">
+        <span class="text-xs text-fg-muted block mb-1.5">Комментарий</span>
+        <textarea id="m1-wh-f-comment" rows="2" maxlength="1000"
+          class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm resize-none"></textarea>
+      </label>
 
     </div>
     
@@ -387,18 +395,11 @@
     box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 0 0 1px rgba(0,0,0,.04);
   }
 
+  /* Скрытие контролов тулбара БЕЗ перестроения флекса (режим «Остатки») */
+  .m1-toolbar-hidden { visibility: hidden; pointer-events: none; }
+
   /* ============================================================
      ШАБЛОН СТРОКИ (modal1 — Склад и Заказы снабжения)
-     Связан с <template id="m1-wh-row-tpl"> и <template id="m1-ord-row-tpl">.
-
-     Главные настройки:
-       --m1-accent     — акцентный цвет темы (по умолчанию = основной текст)
-       --m1-bg-pct     — насыщенность фона карточки   (3%)
-       --m1-bg-hover   — насыщенность на hover        (6%)
-       --m1-border-pct — насыщенность бордера         (8%)
-       --m1-badge-pct  — насыщенность фона чипов     (13% = +10% к карточке)
-       --m1-blur       — размытие фона карточки      (3px)
-       --m1-badge-blur — размытие фона чипов         (6px)
   ============================================================ */
   .m1-row {
     --m1-accent: var(--fg);
@@ -428,41 +429,34 @@
   }
   .m1-row.is-empty { opacity: 0.45; }
 
-  /* Грид для склада: тип-чип · название · кол-во · цена · сумма · комментарий · дата.
-     Числовые колонки (кол-во/цена/сумма) идут плотной группой — между ними gap уменьшен вдвое. */
   .m1-row--warehouse {
     grid-template-columns:
-      /* тип (чип)     */ 120px
-      /* название      */ minmax(0, 1fr)
-      /* кол-во        */ 110px
-      /* цена          */ 100px
-      /* сумма         */ 120px
-      /* комментарий   */ minmax(0, 1fr)
-      /* дата          */ 130px;
+      120px
+      minmax(0, 1fr)
+      110px
+      100px
+      120px
+      minmax(0, 1fr)
+      130px;
     column-gap: 12px;
   }
-  /* Между числовыми колонками — половинный отступ (6px вместо 12px).
-     Сдвигаем цену и сумму влево на 6px, чтобы визуально сжать группу. */
   .m1-row--warehouse .m1-row__stat--num { margin-left: -6px; }
   .m1-row--warehouse .m1-row__stat--num:first-of-type { margin-left: 0; }
 
-  /* Чип типа позиции склада */
   .m1-badge-material { --badge-c: #2563EB; }
   .m1-badge-product  { --badge-c: #15803D; }
 
-  /* Грид для заказа снабжения (как у продаж: номер · статус · оплата · поставщик · поз. · сумма · дата) */
   .m1-row--order {
     grid-template-columns:
-      /* номер заказа    */ 150px
-      /* статус заказа   */ 130px
-      /* статус оплаты   */ 130px
-      /* поставщик       */ minmax(0, 1fr)
-      /* кол-во позиций  */ 70px
-      /* сумма           */ 130px
-      /* дата            */ 170px;
+      150px
+      130px
+      130px
+      minmax(0, 1fr)
+      70px
+      130px
+      170px;
   }
 
-  /* Двустрочный блок "тип сверху + название снизу" для склада */
   .m1-row__head {
     display: flex;
     flex-direction: column;
@@ -485,7 +479,6 @@
     text-overflow: ellipsis;
   }
 
-  /* Общие ячейки строк */
   .m1-row__code {
     font-size: 13px;
     font-weight: 500;
@@ -536,7 +529,7 @@
   }
 
   /* ============================================================
-     БЕЙДЖИ СТАТУСОВ — фон/размытие на +10% сильнее карточки
+     БЕЙДЖИ СТАТУСОВ
   ============================================================ */
   .m1-badge {
     --m1-badge-pct: 13%;
@@ -556,12 +549,10 @@
     backdrop-filter: blur(var(--m1-badge-blur));
     -webkit-backdrop-filter: blur(var(--m1-badge-blur));
   }
-  /* Статусы заказа снабжения */
   .m1-badge-draft      { --badge-c: #6B7280; }
   .m1-badge-placed     { --badge-c: #2563EB; }
   .m1-badge-in_transit { --badge-c: #D97706; }
   .m1-badge-received   { --badge-c: #15803D; }
-  /* Статусы оплаты */
   .m1-badge-paid       { --badge-c: #15803D; }
   .m1-badge-partial    { --badge-c: #D97706; }
   .m1-badge-unpaid     { --badge-c: #DC2626; }
@@ -582,7 +573,6 @@
     box-shadow: 0 8px 24px rgba(0,0,0,.08);
     padding: 4px;
   }
-  /* кастомный скролл 4px */
   .m1-combo-menu::-webkit-scrollbar { width: 4px; }
   .m1-combo-menu::-webkit-scrollbar-track { background: transparent; }
   .m1-combo-menu::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
@@ -654,9 +644,8 @@
   .m1-picker-opt small { color: var(--fg-muted); font-weight: 400; }
   .m1-picker-opt--empty { color: var(--fg-muted); cursor: default; font-style: italic; }
 
-  /* Чипы типа позиции в пикере/строке порога */
-  .m1-chip-prod { --badge-c: #D97706; }   /* рецепт-продукт — янтарный */
-  .m1-chip-wh   { --badge-c: #2563EB; }   /* склад-товар — синий */
+  .m1-chip-prod { --badge-c: #D97706; }
+  .m1-chip-wh   { --badge-c: #2563EB; }
 
   /* ============================================================
      СТРОКА «МИН. ОСТАТКА» со шкалой заполнения
@@ -670,12 +659,12 @@
     border-radius: 12px;
     display: grid;
     grid-template-columns:
-      90px            /* чип типа */
-      minmax(0, 1fr)  /* название */
-      180px           /* поле минимума */
-      minmax(160px, 1.2fr) /* шкала */
-      130px           /* статус-текст */
-      36px;           /* удалить */
+      90px
+      minmax(0, 1fr)
+      180px
+      minmax(160px, 1.2fr)
+      130px
+      36px;
     align-items: center;
     gap: 12px;
     padding: 10px 16px;
@@ -734,18 +723,17 @@
 
   /* ============================================================
      СТРОКА ПОЗИЦИИ ЗАКАЗА (в одну линию)
-       артикул · наименование · кол-во · ед. · цена · сумма · ×
   ============================================================ */
   .m1-oi-row {
     display: grid;
     grid-template-columns:
-      /* артикул (на треть меньше) */ 90px
-      /* наименование              */ minmax(0, 1fr)
-      /* кол-во (на четверть меньше)*/ 72px
-      /* ед. изм                   */ 64px
-      /* цена                      */ 96px
-      /* сумма                     */ 96px
-      /* удалить                   */ 32px;
+      90px
+      minmax(0, 1fr)
+      72px
+      64px
+      96px
+      96px
+      32px;
     gap: 8px;
     align-items: center;
     padding: 8px 16px;
@@ -770,7 +758,6 @@
     color: var(--fg-secondary);
     cursor: default;
   }
-  /* убрать стрелки у number-инпутов, если вдруг останутся */
   .m1-oi-input::-webkit-outer-spin-button,
   .m1-oi-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
   .m1-oi-input[type=number] { -moz-appearance: textfield; }
@@ -804,8 +791,7 @@
   }
 
   /* ============================================================
-     ТУЛБАР ПОДСТРАНИЦ — единая высота контролов = высоте группы фильтра
-     Группа фильтра: padding 4px + кнопки 28px = 36px (--m1-bar-h)
+     ТУЛБАР ПОДСТРАНИЦ
   ============================================================ */
   :root { --m1-bar-h: 36px; }
 
@@ -817,7 +803,6 @@
   .m1-bar-ctrl:not(select):not(button) { /* инпуты */ }
   input.m1-bar-ctrl { padding-left: 14px; padding-right: 14px; }
 
-  /* Select в стиле приложения (убираем дефолтную стрелку, рисуем свою) */
   .m1-select {
     appearance: none;
     -webkit-appearance: none;
@@ -833,7 +818,7 @@
   .m1-select:focus { border-color: var(--fg); }
 
   /* ============================================================
-     ЧЕКБОКС (uiverse) — адаптирован под тему приложения
+     ЧЕКБОКС (uiverse)
   ============================================================ */
   .uiverse-wrapper {
     --size: 22px;
@@ -897,7 +882,7 @@
   }
 
   /* ============================================================
-     КАСТОМНЫЙ ДРОПДАУН (фильтр статуса заказа) — раскрытие снизу
+     КАСТОМНЫЙ ДРОПДАУН
   ============================================================ */
   .m1-dd { position: relative; display: inline-flex; }
   .m1-dd-btn {
@@ -952,19 +937,16 @@
     font-weight: 600;
   }
 
-  /* Строка позиции в редакторе склада — те же колонки, что у заказа,
-     но без «суммы» и «×» (артикул · наименование · кол-во · ед. · цена) */
   .m1-oi-row--wh {
     grid-template-columns:
-      90px            /* артикул */
-      minmax(0, 1fr)  /* наименование */
-      72px            /* кол-во */
-      64px            /* ед. */
-      96px            /* цена */
-      96px;           /* сумма */
+      90px
+      minmax(0, 1fr)
+      72px
+      64px
+      96px
+      96px;
   }
 
-  /* Дропдаун на всю ширину (в формах модалок, вместо block-select) */
   .m1-dd--block { display: block; }
   .m1-dd-btn--block { width: 100%; justify-content: space-between; }
   
@@ -994,7 +976,6 @@ function switchTab(name) {
 }
 document.querySelectorAll('.m1-tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
 
-// Делегирование клика — однократно для обоих списков карточек.
 $('m1-wh-grid').addEventListener('click', (e) => {
   const card = e.target.closest('[data-wh-id]');
   if (card && card.dataset.whId) openWarehouseEditor(card.dataset.whId);
@@ -1004,7 +985,6 @@ $('m1-ord-list').addEventListener('click', (e) => {
   if (card && card.dataset.ordId) openOrderEditor(card.dataset.ordId);
 });
 
-// Скрываем write-кнопки, если у пользователя нет прав
 if (!canWrite) {
   $('m1-wh-add')?.setAttribute('disabled', 'disabled');
   $('m1-ord-new')?.setAttribute('disabled', 'disabled');
@@ -1019,11 +999,12 @@ const wh = {
   search: '',
   typeFilter: 'all',
   onlyInStock: false,
-  editing: null,        // id редактируемой позиции
-  recipes: [],          // кэш рецептов (для режима «Мин. остатки»)
-  thresholds: [],       // строки reorder_thresholds
+  editing: null,
+  recipes: [],
+  thresholds: [],
   pickerOpen: false,
-  pickerActive: -1
+  pickerActive: -1,
+  typeValue: 'material'
 };
 
 $('m1-wh-search').addEventListener('input', (e) => { wh.search = e.target.value.trim().toLowerCase(); renderWarehouse(); });
@@ -1040,7 +1021,6 @@ document.querySelectorAll('.m1-wh-filter').forEach(btn => {
     }
   });
 });
-// Активируем "Все" по умолчанию
 document.querySelector('.m1-wh-filter[data-type="all"]').classList.add('active');
 
 async function loadWarehouse() {
@@ -1055,7 +1035,7 @@ async function loadWarehouse() {
 
 function renderWarehouse() {
   let list = wh.cached;
-  if (wh.typeFilter !== 'all') list = list.filter(x => x.type === wh.typeFilter);
+  if (wh.typeFilter !== 'all' && wh.typeFilter !== 'reorder') list = list.filter(x => x.type === wh.typeFilter);
   if (wh.onlyInStock) list = list.filter(x => Number(x.quantity) > 0);
   if (wh.search) list = list.filter(x =>
     (x.name || '').toLowerCase().includes(wh.search) ||
@@ -1078,31 +1058,29 @@ function renderWarehouse() {
   container.appendChild(frag);
 }
 
-  // ================================================================
+// ================================================================
 // РЕЖИМ «МИН. ОСТАТКИ» (reorder thresholds)
 // ================================================================
 
-// Управление видимостью обычного склада vs режима порогов
 function enterReorderMode() {
   $('m1-wh-grid').classList.add('hidden');
   $('m1-reorder-wrap').classList.remove('hidden');
-  // скрываем нерелевантные контролы тулбара
-  $('m1-wh-only-in-stock').closest('label').style.display = 'none';
-  $('m1-wh-add').style.display = 'none';
+  // прячем нерелевантные контролы БЕЗ перестроения флекса (место сохраняется)
+  $('m1-wh-only-in-stock').closest('label').classList.add('m1-toolbar-hidden');
+  $('m1-wh-add').classList.add('m1-toolbar-hidden');
   loadReorder();
 }
 function exitReorderMode() {
   $('m1-reorder-wrap').classList.add('hidden');
   $('m1-wh-grid').classList.remove('hidden');
-  $('m1-wh-only-in-stock').closest('label').style.display = '';
-  $('m1-wh-add').style.display = '';
+  $('m1-wh-only-in-stock').closest('label').classList.remove('m1-toolbar-hidden');
+  $('m1-wh-add').classList.remove('m1-toolbar-hidden');
   closeReorderPicker();
 }
 
 async function loadReorder() {
   $('m1-reorder-grid').innerHTML = '<div class="flex items-center justify-center py-16"><div class="w-6 h-6 loader"></div></div>';
 
-  // тянем склад, рецепты и пороги параллельно
   const [whRes, rcRes, thRes] = await Promise.all([
     wh.cached.length ? Promise.resolve({ data: wh.cached }) : sb.from('warehouse_items').select('*').order('name'),
     sb.from('recipes').select('id, code, name, output_unit').order('name'),
@@ -1115,14 +1093,12 @@ async function loadReorder() {
   renderReorder();
 }
 
-// Текущий остаток продукта-рецепта = сумма позиций склада type='product' с именем рецепта
 function recipeStock(recipeName) {
   return wh.cached
     .filter(w => w.type === 'product' && w.name === recipeName)
     .reduce((s, w) => s + Number(w.quantity || 0), 0);
 }
 
-// Метаданные строки порога: имя, ед., остаток
 function thresholdMeta(t) {
   if (t.recipe_id) {
     const r = wh.recipes.find(x => x.id === t.recipe_id);
@@ -1142,9 +1118,8 @@ function thresholdMeta(t) {
   };
 }
 
-// Процент заполнения остаток/минимум (для шкалы и сортировки)
 function fillRatio(stock, min) {
-  if (!min || min <= 0) return 1;          // минимум не задан/0 → считаем заполненным
+  if (!min || min <= 0) return 1;
   return Math.max(0, stock / min);
 }
 
@@ -1156,7 +1131,6 @@ function renderReorder() {
     return;
   }
 
-  // считаем заполнение и сортируем: меньше заполнение → выше
   const rows = wh.thresholds.map(t => {
     const m = thresholdMeta(t);
     const ratio = fillRatio(m.stock, Number(t.min_quantity || 0));
@@ -1166,7 +1140,6 @@ function renderReorder() {
   grid.innerHTML = rows.map(({ t, m, ratio }) => {
     const min = Number(t.min_quantity || 0);
     const pct = Math.min(100, Math.round(ratio * 100));
-    // цвет шкалы: <50% красный, <100% янтарный, иначе зелёный
     const color = ratio >= 1 ? '#15803D' : (ratio >= 0.5 ? '#D97706' : '#DC2626');
     const deficit = Math.max(0, min - m.stock);
     const statusText = ratio >= 1
@@ -1194,11 +1167,9 @@ function renderReorder() {
       </div>`;
   }).join('');
 
-  // обработчики строк
   grid.querySelectorAll('.m1-ro-row').forEach(row => {
     const id = row.dataset.thId;
 
-    // изменение минимума (с дебаунсом по blur)
     const input = row.querySelector('[data-th-min]');
     const commit = async () => {
       const n = parseDecimalInput(input.value) || 0;
@@ -1208,7 +1179,7 @@ function renderReorder() {
       try {
         const { error } = await sb.from('reorder_thresholds').update({ min_quantity: n, updated_at: new Date().toISOString() }).eq('id', id);
         if (error) throw error;
-        renderReorder();  // пересортировать
+        renderReorder();
       } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
     };
     input.addEventListener('input', (e) => {
@@ -1221,7 +1192,6 @@ function renderReorder() {
     input.addEventListener('blur', commit);
     input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); });
 
-    // удаление порога
     row.querySelector('[data-th-del]').addEventListener('click', async () => {
       if (!confirm('Убрать позицию из списка минимальных остатков?')) return;
       try {
@@ -1235,7 +1205,6 @@ function renderReorder() {
   });
 }
 
-// ---- Пикер добавления позиции в список порогов ----
 $('m1-reorder-add').addEventListener('click', () => {
   if (wh.pickerOpen) { closeReorderPicker(); return; }
   wh.pickerOpen = true;
@@ -1254,7 +1223,6 @@ function closeReorderPicker() {
   $('m1-reorder-list').innerHTML = '';
 }
 
-// id уже добавленных позиций — чтобы не дублировать
 function reorderTakenIds() {
   return {
     wh: new Set(wh.thresholds.filter(t => t.warehouse_item_id).map(t => t.warehouse_item_id)),
@@ -1363,7 +1331,6 @@ function renderWarehouseRow(x) {
 
   if (qty === 0) node.classList.add('is-empty');
 
-  // Тип позиции — чип (как статусы в заказах)
   const tp = fld('type');
   tp.textContent = x.type === 'material' ? 'Материал' : 'Продукция';
   tp.classList.add('m1-badge-' + (x.type === 'material' ? 'material' : 'product'));
@@ -1377,9 +1344,13 @@ function renderWarehouseRow(x) {
   fld('sum').textContent = formatMoney(sum);
 
   const cm = fld('comment');
-  if (commentText) {
-    cm.textContent = commentText;
-    cm.title = commentText;
+  // Показываем категорию (если есть) + комментарий
+  const parts = [];
+  if (x.category) parts.push(x.category);
+  if (commentText) parts.push(commentText);
+  if (parts.length) {
+    cm.textContent = parts.join(' · ');
+    cm.title = parts.join(' · ');
   } else {
     cm.innerHTML = '&nbsp;';
   }
@@ -1387,6 +1358,14 @@ function renderWarehouseRow(x) {
   fld('date').textContent = formatDate(new Date(x.updated_at || x.created_at));
 
   return node;
+}
+
+// Собирает существующие категории из склада → datalist подсказок
+function refreshCategoryDatalist() {
+  const cats = Array.from(new Set(
+    wh.cached.map(x => (x.category || '').trim()).filter(Boolean)
+  )).sort((a, b) => a.localeCompare(b, 'ru'));
+  $('m1-wh-category-dl').innerHTML = cats.map(c => `<option value="${esc(c)}"></option>`).join('');
 }
 
 // ---- Warehouse editor modal ----
@@ -1401,23 +1380,25 @@ function openWarehouseEditor(id) {
   $('m1-wh-f-qty').value = item?.quantity != null ? formatDecimal2(item.quantity) : '';
   $('m1-wh-f-price').value = item?.price != null ? formatDecimal2(item.price) : '';
   $('m1-wh-f-comment').value = item?.comment || '';
+  $('m1-wh-f-category').value = item?.category || '';
+  refreshCategoryDatalist();
   $('m1-wh-delete').classList.toggle('hidden', !id);
   validateWhForm();
   $('m1-wh-modal').classList.remove('hidden');
   setTimeout(() => $('m1-wh-f-name').focus(), 50);
+  // Тип: для существующей позиции — её тип; для новой по умолчанию «Материал».
+  // Опции в меню теперь только «Материал» (продукция — через рецепты на стр. Производство).
   wh.typeValue = item?.type || 'material';
   whTypeSelect.set(wh.typeValue);
   recalcWhSum();
 }
 
-// Пересчёт автосуммы в редакторе позиции склада
 function recalcWhSum() {
   const qty = parseDecimalInput($('m1-wh-f-qty').value) || 0;
   const price = parseDecimalInput($('m1-wh-f-price').value) || 0;
   $('m1-wh-f-sum').value = formatDecimal2(qty * price);
 }
 
-// Кол-во и цена: точка→запятая на лету, округление на blur, пересчёт суммы
 ['m1-wh-f-qty', 'm1-wh-f-price'].forEach(id => {
   const input = $(id);
   input.addEventListener('input', (e) => {
@@ -1456,6 +1437,7 @@ $('m1-wh-save').addEventListener('click', async () => {
       unit: $('m1-wh-f-unit').value.trim(),
       quantity: parseDecimalInput($('m1-wh-f-qty').value) ?? 0,
       price: parseDecimalInput($('m1-wh-f-price').value),
+      category: $('m1-wh-f-category').value.trim() || null,
       comment: $('m1-wh-f-comment').value.trim() || null
     };
 
@@ -1498,20 +1480,17 @@ const ord = {
   cached: [],
   search: '',
   statusFilter: 'all',
-  editing: null,       // id редактируемого заказа или null (новый)
-  items: [],           // локально — позиции текущего открытого заказа
-  attachments: [],     // локально — вложения текущего заказа
-  pendingFiles: [],    // файлы, которые только что загрузили в новый заказ (до первого сохранения)
+  editing: null,
+  items: [],
+  attachments: [],
+  pendingFiles: [],
   suppliersCache: [],
-  warehouseLookup: []  // справочник складских позиций для автозаполнения позиций заказа
+  warehouseLookup: []
 };
 
 const STATUS_LABEL = { draft: 'В работе', placed: 'Заказ размещён', in_transit: 'Товар в пути', received: 'На складе' };
 const PAYMENT_LABEL = { unpaid: 'Не оплачено', paid: 'Оплачено' };
 
-// ---- Универсальный кастомный select (раскрытие снизу) ----
-// ids: { dd, btn, menu, label }. onChange(value) вызывается при выборе.
-// Возвращает { set(value) } для программной установки значения.
 function initCustomSelect(ids, onChange) {
   const dd    = $(ids.dd);
   const btn   = $(ids.btn);
@@ -1550,7 +1529,6 @@ function initCustomSelect(ids, onChange) {
   return { set };
 }
 
-// ---- Парсинг и форматирование чисел в полях позиций ----
 function parseDecimalInput(str) {
   if (str == null) return null;
   const cleaned = String(str).replace(',', '.').replace(/[^\d.]/g, '');
@@ -1564,12 +1542,10 @@ function formatDecimal2(num) {
 }
 
 $('m1-ord-search').addEventListener('input', (e) => { ord.search = e.target.value.trim().toLowerCase(); renderOrders(); });
-// ---- Фильтр статуса (тулбар) ----
 initCustomSelect(
   { dd: 'm1-ord-status-dd', btn: 'm1-ord-status-btn', menu: 'm1-ord-status-menu', label: 'm1-ord-status-label' },
   (value) => { ord.statusFilter = value; renderOrders(); }
 );
-// ---- Кастомные select в формах ----
 const whTypeSelect = initCustomSelect(
   { dd: 'm1-wh-type-dd', btn: 'm1-wh-type-btn', menu: 'm1-wh-type-menu', label: 'm1-wh-type-label' },
   (value) => { wh.typeValue = value; }
@@ -1591,7 +1567,6 @@ async function loadSuppliersCache() {
 async function loadWarehouseLookup() {
   const { data } = await sb.from('warehouse_items').select('id, article, name, unit, price').order('name');
   ord.warehouseLookup = data || [];
-  // datalist подсказок для позиций
   $('m1-item-article-dl').innerHTML = ord.warehouseLookup
     .filter(w => w.article)
     .map(w => `<option value="${esc(w.article)}"></option>`).join('');
@@ -1599,7 +1574,6 @@ async function loadWarehouseLookup() {
     .map(w => `<option value="${esc(w.name)}"></option>`).join('');
 }
 
-// ---- Кастомный комбобокс поставщика ----
 (function initSupplierCombo() {
   const input = $('m1-ord-f-supplier');
   const menu  = $('m1-supplier-menu');
@@ -1624,7 +1598,6 @@ async function loadWarehouseLookup() {
   input.addEventListener('focus', open);
   input.addEventListener('input', open);
 
-  // mousedown — чтобы сработать раньше blur поля
   menu.addEventListener('mousedown', (e) => {
     const opt = e.target.closest('.m1-combo-opt[data-value]');
     if (!opt) return;
@@ -1745,7 +1718,6 @@ function renderOrderRow(o) {
   return node;
 }
 
-// ---- Order editor ----
 async function openOrderEditor(id) {
   if (!canWrite) return;
   ord.editing = id;
@@ -1795,7 +1767,6 @@ function renderOrderStatusBadges(current) {
   `).join('');
 }
 
-// ---- Items editor ----
 function renderOrderItems() {
   const el = $('m1-ord-items');
   if (ord.items.length === 0) {
@@ -1837,22 +1808,18 @@ function renderOrderItems() {
       updateOrderTotal();
     };
 
-    // --- Артикул: автозаполнение по складу ---
     get('article').addEventListener('input', (e) => {
       ord.items[idx].article = e.target.value;
       autofillFromLookup(idx, row, 'article');
     });
 
-    // --- Наименование: автозаполнение по складу ---
     get('name').addEventListener('input', (e) => {
       ord.items[idx].name = e.target.value;
       autofillFromLookup(idx, row, 'name');
     });
 
-    // --- Ед. изм ---
     get('unit').addEventListener('input', (e) => { ord.items[idx].unit = e.target.value; });
 
-    // --- Кол-во и Цена: точка→запятая на лету, округление на blur ---
     ['quantity', 'price'].forEach(field => {
       const input = get(field);
       input.addEventListener('input', (e) => {
@@ -1881,8 +1848,6 @@ function renderOrderItems() {
   updateOrderTotal();
 }
 
-// Предзаполнение полей позиции из справочника склада по точному совпадению
-// артикула или наименования (без учёта регистра).
 function autofillFromLookup(idx, row, byField) {
   const val = (ord.items[idx][byField] || '').trim().toLowerCase();
   if (!val) return;
@@ -1893,7 +1858,6 @@ function autofillFromLookup(idx, row, byField) {
   );
   if (!match) return;
 
-  // Заполняем недостающие поля, не затирая то, что пользователь уже вписал вручную
   if (byField === 'article') {
     ord.items[idx].name = match.name;
     row.querySelector('[data-field="name"]').value = match.name || '';
@@ -1925,7 +1889,6 @@ $('m1-ord-add-item').addEventListener('click', () => {
   renderOrderItems();
 });
 
-// ---- Attachments ----
 async function loadAttachments(orderId) {
   const { data } = await sb.from('attachments')
     .select('*')
@@ -1987,7 +1950,6 @@ $('m1-ord-file-input').addEventListener('change', async (e) => {
   e.target.value = '';
   if (files.length === 0) return;
 
-  // Если заказа ещё нет — сохраним заказ, а потом загрузим
   if (!ord.editing) {
     toast('Сначала сохраните заказ, затем прикрепите файлы', 'warning');
     return;
@@ -2022,7 +1984,6 @@ $('m1-ord-file-input').addEventListener('change', async (e) => {
   }
 });
 
-// ---- Save order ----
 $('m1-ord-save').addEventListener('click', async () => {
   const btn = $('m1-ord-save');
   btn.disabled = true;
@@ -2031,11 +1992,9 @@ $('m1-ord-save').addEventListener('click', async () => {
     const supplierName = $('m1-ord-f-supplier').value.trim();
     let supplierId = null;
     if (supplierName) {
-      // Ищем по имени в кэше
       const match = ord.suppliersCache.find(s => s.name.toLowerCase() === supplierName.toLowerCase());
       if (match) supplierId = match.id;
       else {
-        // Создаём нового
         const { data: newSup, error: supErr } = await sb.from('suppliers').insert({
           group_id: groupId, name: supplierName
         }).select().single();
@@ -2047,8 +2006,6 @@ $('m1-ord-save').addEventListener('click', async () => {
 
     const payment = ord.paymentValue;
     const desiredStatus = ord.editing ? ord.statusValue : 'draft';
-
-    // Выбрасываем статус 'received' — переход в него идёт через отдельную функцию
     const safeStatus = desiredStatus === 'received' ? null : desiredStatus;
 
     let orderId = ord.editing;
@@ -2063,7 +2020,6 @@ $('m1-ord-save').addEventListener('click', async () => {
       const { error } = await sb.from('supply_orders').update(patch).eq('id', ord.editing);
       if (error) throw error;
     } else {
-      // Создаём новый заказ
       const { data: newOrd, error } = await sb.from('supply_orders').insert({
         group_id: groupId, supplier_id: supplierId, status: 'draft', payment_status: payment
       }).select().single();
@@ -2071,7 +2027,6 @@ $('m1-ord-save').addEventListener('click', async () => {
       orderId = newOrd.id;
     }
 
-    // Синхронизируем позиции: удаляем все и заново вставляем
     await sb.from('supply_order_items').delete().eq('order_id', orderId);
     const itemsPayload = ord.items
       .filter(it => (it.name || '').trim())
@@ -2089,7 +2044,6 @@ $('m1-ord-save').addEventListener('click', async () => {
       if (iErr) throw iErr;
     }
 
-    // Если статус сменили на 'received' и он не был таким до — вызываем RPC
     if (desiredStatus === 'received' && !wasReceived) {
       if (itemsPayload.length === 0) {
         toast('Нельзя оприходовать пустой заказ', 'warning');
@@ -2117,11 +2071,9 @@ $('m1-ord-delete').addEventListener('click', async () => {
   if (!ord.editing) return;
   if (!confirm('Удалить заказ? Все позиции и вложения будут удалены.')) return;
   try {
-    // Удаляем файлы из storage
     if (ord.attachments.length) {
       await sb.storage.from('attachments').remove(ord.attachments.map(a => a.storage_path));
     }
-    // Каскадом удалятся позиции; attachments удаляем отдельно
     await sb.from('attachments').delete().eq('entity_type', 'supply_order').eq('entity_id', ord.editing);
     const { error } = await sb.from('supply_orders').delete().eq('id', ord.editing);
     if (error) throw error;
