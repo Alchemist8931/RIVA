@@ -861,7 +861,7 @@ function renderWarehouseRow(x) {
   tp.classList.add('m1-badge-' + (x.type === 'material' ? 'material' : 'product'));
 
   const name = fld('name');
-  name.textContent = x.article ? `${x.name} · ${x.article}` : (x.name || '—');
+  name.textContent = x.article ? `${x.article} · ${x.name}` : (x.name || '—');
   name.title = x.name || '';
 
   fld('quantity').textContent = formatQuantity(qty, x.unit);
