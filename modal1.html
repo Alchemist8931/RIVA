@@ -20,21 +20,30 @@
   <div class="m1-panel" data-panel="warehouse">
 
     <!-- Toolbar -->
-    <div class="bg-surface rounded-2xl border border-line p-4 mb-5 flex flex-wrap items-center gap-3">
+    <div class="bg-surface rounded-2xl border border-line mb-5 flex flex-wrap items-center" style="padding:10px; gap:10px;">
       <div class="flex-1 min-w-[180px]">
         <input id="m1-wh-search" type="search" placeholder="Поиск по артикулу или названию…"
-          class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors text-sm">
+          class="m1-bar-ctrl w-full rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors text-sm">
       </div>
-      <div class="flex items-center gap-1 rounded-xl bg-surface-alt p-1 border border-line">
-        <button class="m1-wh-filter px-3 py-1.5 text-xs rounded-lg transition-colors" data-type="all">Все</button>
-        <button class="m1-wh-filter px-3 py-1.5 text-xs rounded-lg transition-colors" data-type="material">Материалы</button>
-        <button class="m1-wh-filter px-3 py-1.5 text-xs rounded-lg transition-colors" data-type="product">Продукция</button>
+      <div class="m1-filter-group flex items-center gap-1 rounded-xl bg-surface-alt p-1 border border-line">
+        <button class="m1-wh-filter px-3 text-xs rounded-lg transition-colors" data-type="all">Все</button>
+        <button class="m1-wh-filter px-3 text-xs rounded-lg transition-colors" data-type="material">Материалы</button>
+        <button class="m1-wh-filter px-3 text-xs rounded-lg transition-colors" data-type="product">Продукция</button>
       </div>
       <label class="flex items-center gap-2 text-xs text-fg-secondary cursor-pointer select-none">
-        <input type="checkbox" id="m1-wh-only-in-stock" class="rounded border-line">
+        <div class="uiverse-wrapper">
+          <span class="cb-container">
+            <input type="checkbox" id="m1-wh-only-in-stock" />
+            <span class="checkmark">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </span>
+          </span>
+        </div>
         <span>Только с остатком</span>
       </label>
-      <button id="m1-wh-add" class="btn-primary px-4 py-2.5 rounded-xl text-sm font-medium ml-auto">
+      <button id="m1-wh-add" class="btn-primary m1-bar-ctrl rounded-xl text-sm font-medium ml-auto" style="padding-left:16px; padding-right:16px;">
         + Добавить позицию
       </button>
     </div>
@@ -52,19 +61,19 @@
   ========================== -->
   <div class="m1-panel hidden" data-panel="orders">
 
-    <div class="bg-surface rounded-2xl border border-line p-4 mb-5 flex flex-wrap items-center gap-3">
+    <div class="bg-surface rounded-2xl border border-line mb-5 flex flex-wrap items-center" style="padding:10px; gap:10px;">
       <div class="flex-1 min-w-[180px]">
         <input id="m1-ord-search" type="search" placeholder="Поиск по номеру или поставщику…"
-          class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors text-sm">
+          class="m1-bar-ctrl w-full rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors text-sm">
       </div>
-      <select id="m1-ord-status-filter" class="px-3 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+      <select id="m1-ord-status-filter" class="m1-select m1-bar-ctrl rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
         <option value="all">Все статусы</option>
         <option value="draft">В работе</option>
         <option value="placed">Заказ размещён</option>
         <option value="in_transit">Товар в пути</option>
         <option value="received">На складе</option>
       </select>
-      <button id="m1-ord-new" class="btn-primary px-4 py-2.5 rounded-xl text-sm font-medium ml-auto">
+      <button id="m1-ord-new" class="btn-primary m1-bar-ctrl rounded-xl text-sm font-medium ml-auto" style="padding-left:16px; padding-right:16px;">
         + Новый заказ
       </button>
     </div>
@@ -576,6 +585,107 @@
     .m1-row__total, .m1-row__date, .m1-row__comment { text-align: left; }
     .m1-oi-row { grid-template-columns: 1fr 1fr; gap: 6px; }
   }
+
+  /* ============================================================
+     ТУЛБАР ПОДСТРАНИЦ — единая высота контролов = высоте группы фильтра
+     Группа фильтра: padding 4px + кнопки 28px = 36px (--m1-bar-h)
+  ============================================================ */
+  :root { --m1-bar-h: 36px; }
+
+  .m1-filter-group { height: var(--m1-bar-h); }
+  .m1-filter-group .m1-wh-filter {
+    height: 28px;
+    display: inline-flex;
+    align-items: center;
+  }
+
+  .m1-bar-ctrl {
+    height: var(--m1-bar-h);
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  .m1-bar-ctrl:not(select):not(button) { /* инпуты */ }
+  input.m1-bar-ctrl { padding-left: 14px; padding-right: 14px; }
+
+  /* Select в стиле приложения (убираем дефолтную стрелку, рисуем свою) */
+  .m1-select {
+    appearance: none;
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    padding-left: 14px;
+    padding-right: 34px;
+    cursor: pointer;
+    color: var(--fg);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23737373' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+  .m1-select:focus { border-color: var(--fg); }
+
+  /* ============================================================
+     ЧЕКБОКС (uiverse) — адаптирован под тему приложения
+  ============================================================ */
+  .uiverse-wrapper {
+    --size: 22px;
+    --color-default: var(--line);
+    --color-active: var(--fg);
+    --transition: 0.4s cubic-bezier(0.68, -0.6, 0.32, 1.6);
+    display: inline-flex;
+  }
+  .cb-container {
+    display: block;
+    position: relative;
+    cursor: pointer;
+    width: var(--size);
+    height: var(--size);
+    user-select: none;
+  }
+  .cb-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+  .checkmark {
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%; width: 100%;
+    background-color: var(--bg);
+    border: 3px solid var(--color-default);
+    border-radius: 7px;
+    transition: var(--transition);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 2px 2px 0px var(--color-default);
+  }
+  .checkmark svg {
+    width: 15px;
+    height: 15px;
+    color: var(--bg);
+    transform: scale(0) rotate(-45deg);
+    transition: var(--transition);
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+  }
+  .cb-container:hover .checkmark {
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0px var(--color-default);
+  }
+  .cb-container input:checked ~ .checkmark {
+    background-color: var(--color-active);
+    border-color: var(--color-active);
+    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.15);
+    transform: scale(1.1) rotate(5deg);
+  }
+  .cb-container input:checked ~ .checkmark svg {
+    transform: scale(1) rotate(0deg);
+  }
+  .cb-container:active .checkmark {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px var(--color-default);
+  }
+  
 </style>
 
 <script type="module">
