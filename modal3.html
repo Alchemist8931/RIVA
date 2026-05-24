@@ -1,42 +1,45 @@
 <!-- modal3.html — Страница "Продажи". Подстраницы: Активные, Завершённые. -->
 <!-- Доступ: admin, sales, management. -->
 
-<section id="m3" class="space-y-6">
+<section id="m3">
 
-  <div class="flex items-center justify-between gap-4 flex-wrap">
-    <div>
-      <h1 class="text-2xl font-medium tracking-tight">Продажи</h1>
-      <p class="text-sm text-fg-muted mt-1" id="m3-subtitle">—</p>
+  <div class="flex items-center justify-between gap-4 flex-wrap mb-6">
+    <div class="leading-tight">
+      <h1 class="text-[17px] font-medium tracking-tight">Продажи</h1>
+      <p class="text-xs text-fg-muted mt-0.5" id="m3-subtitle">—</p>
     </div>
-    <div id="m3-chat-btn-wrap"></div>
-  </div>
-
-  <div class="flex items-center gap-1 border-b border-line overflow-x-auto">
-    <button class="m3-tab px-4 py-3 text-sm text-fg-muted hover:text-fg transition-colors relative whitespace-nowrap" data-tab="active">
-      Активные продажи
-      <span class="m3-tab-bar"></span>
-    </button>
-    <button class="m3-tab px-4 py-3 text-sm text-fg-muted hover:text-fg transition-colors relative whitespace-nowrap" data-tab="completed">
-      Завершённые заказы
-      <span class="m3-tab-bar"></span>
-    </button>
+    <div class="flex items-center gap-3">
+      <nav class="m3-subnav" id="m3-subnav">
+        <button class="m3-tab active" data-tab="active">Активные</button>
+        <button class="m3-tab" data-tab="completed">Завершённые</button>
+      </nav>
+      <div id="m3-chat-btn-wrap"></div>
+    </div>
   </div>
 
   <!-- =========================
        ACTIVE
   ========================== -->
   <div class="m3-panel" data-panel="active">
-    <div class="bg-surface rounded-2xl border border-line p-4 mb-5 flex flex-wrap items-center gap-3">
-      <input id="m3-act-search" type="search" placeholder="Поиск по номеру или клиенту…"
-        class="flex-1 min-w-[180px] px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-      <select id="m3-act-status-filter" class="px-3 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-        <option value="all">Все статусы</option>
-        <option value="draft">Черновик</option>
-        <option value="confirmed">Подтверждён</option>
-        <option value="shipped">Отгружен</option>
-        <option value="cancelled">Отменён</option>
-      </select>
-      <button id="m3-order-new" class="btn-primary px-4 py-2.5 rounded-xl text-sm font-medium ml-auto">
+    <div class="bg-surface rounded-2xl border border-line mb-5 flex flex-wrap items-center" style="padding:10px; gap:10px;">
+      <div class="flex-1 min-w-[180px]">
+        <input id="m3-act-search" type="search" placeholder="Поиск по номеру или клиенту…"
+          class="m3-bar-ctrl w-full rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors text-sm">
+      </div>
+      <div class="m3-dd m3-bar-ctrl" id="m3-act-status-dd">
+        <button type="button" class="m3-dd-btn" id="m3-act-status-btn">
+          <span id="m3-act-status-label">Все статусы</span>
+          <svg class="m3-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="m3-dd-menu hidden" id="m3-act-status-menu">
+          <div class="m3-dd-opt" data-value="all">Все статусы</div>
+          <div class="m3-dd-opt" data-value="draft">Черновик</div>
+          <div class="m3-dd-opt" data-value="confirmed">Подтверждён</div>
+          <div class="m3-dd-opt" data-value="shipped">Отгружен</div>
+          <div class="m3-dd-opt" data-value="cancelled">Отменён</div>
+        </div>
+      </div>
+      <button id="m3-order-new" class="btn-primary m3-bar-ctrl rounded-xl text-sm font-medium ml-auto" style="padding-left:16px; padding-right:16px;">
         + Новый заказ
       </button>
     </div>
@@ -49,9 +52,11 @@
        COMPLETED
   ========================== -->
   <div class="m3-panel hidden" data-panel="completed">
-    <div class="bg-surface rounded-2xl border border-line p-4 mb-5 flex flex-wrap items-center gap-3">
-      <input id="m3-cmp-search" type="search" placeholder="Поиск по номеру или клиенту…"
-        class="flex-1 min-w-[180px] px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+    <div class="bg-surface rounded-2xl border border-line mb-5 flex flex-wrap items-center" style="padding:10px; gap:10px;">
+      <div class="flex-1 min-w-[180px]">
+        <input id="m3-cmp-search" type="search" placeholder="Поиск по номеру или клиенту…"
+          class="m3-bar-ctrl w-full rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors text-sm">
+      </div>
       <span id="m3-cmp-count" class="text-xs text-fg-muted ml-auto">—</span>
     </div>
     <div id="m3-cmp-list" class="space-y-3">
@@ -62,10 +67,6 @@
 
 <!-- ============================================================
      ШАБЛОН СТРОКИ ЗАКАЗА — используется и в активных, и в завершённых.
-     Структура контента: 7 колонок CSS Grid (см. .m3-row в стилях ниже).
-     При желании поля можно менять местами / переименовывать —
-     главное, чтобы у каждого поля был data-field="<имя>", на которое
-     ссылается JS-функция renderOrderCard().
 ============================================================ -->
 <template id="m3-order-row-tpl">
   <article class="m3-row" data-ord-id="">
@@ -106,11 +107,17 @@
         </label>
         <label class="block">
           <span class="text-xs text-fg-muted block mb-1.5">Статус оплаты</span>
-          <select id="m3-order-f-payment" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-            <option value="unpaid">Не оплачено</option>
-            <option value="partial">Частично оплачено</option>
-            <option value="paid">Оплачено</option>
-          </select>
+          <div class="m3-dd m3-dd--block" id="m3-order-payment-dd">
+            <button type="button" class="m3-dd-btn m3-dd-btn--block" id="m3-order-payment-btn">
+              <span id="m3-order-payment-label" class="truncate">Не оплачено</span>
+              <svg class="m3-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="m3-dd-menu hidden" id="m3-order-payment-menu">
+              <div class="m3-dd-opt" data-value="unpaid">Не оплачено</div>
+              <div class="m3-dd-opt" data-value="partial">Частично оплачено</div>
+              <div class="m3-dd-opt" data-value="paid">Оплачено</div>
+            </div>
+          </div>
         </label>
       </div>
 
@@ -167,26 +174,40 @@
 </div>
 
 <style>
-  .m3-tab .m3-tab-bar {
-    content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 1px;
-    background: var(--fg); transform: scaleX(0); transform-origin: center;
-    transition: transform .2s ease;
+  /* Подстраничная навигация — segmented control как в шапке приложения */
+  .m3-subnav {
+    height: var(--ctrl-h, 38px);
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: var(--ctrl-radius, 12px);
+    padding: 4px;
+    display: inline-flex;
+    align-items: stretch;
+    gap: 0;
   }
-  .m3-tab.active { color: var(--fg); }
-  .m3-tab.active .m3-tab-bar { transform: scaleX(1); }
+  .m3-subnav .m3-tab {
+    padding: 0 14px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: calc(var(--ctrl-radius, 12px) - 4px);
+    color: var(--fg-muted);
+    font-size: 13px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    transition: all .15s ease-in-out;
+  }
+  .m3-subnav .m3-tab:hover { color: var(--fg); }
+  .m3-subnav .m3-tab.active {
+    background: var(--bg);
+    color: var(--fg);
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 0 0 1px rgba(0,0,0,.04);
+  }
 
   /* ============================================================
      ШАБЛОН СТРОКИ ЗАКАЗА (modal3 — Активные и Завершённые)
-     Стили изолированы, легко правятся. Связаны с <template id="m3-order-row-tpl">.
-
-     Главные настройки:
-       --m3-accent   — акцентный цвет темы (по умолчанию = основной текст)
-       --m3-bg-pct   — насыщенность фона карточки   (3% по умолчанию)
-       --m3-bg-hover — насыщенность фона на hover  (6%)
-       --m3-border-pct — насыщенность бордера     (8%)
-       --m3-badge-pct — насыщенность фона чипов   (13% = +10% к карточке)
-       --m3-blur     — размытие фона карточки     (3px)
-       --m3-badge-blur — размытие фона чипов     (6px)
   ============================================================ */
   .m3-row {
     --m3-accent: var(--fg);
@@ -201,7 +222,6 @@
     border: 1px solid color-mix(in srgb, var(--m3-accent) var(--m3-border-pct), transparent);
     border-radius: 12px;
 
-    /* Сетка: фиксированные ширины для всех колонок, кроме клиента */
     display: grid;
     grid-template-columns:
       /* номер заказа    */ 150px
@@ -214,6 +234,7 @@
     align-items: center;
     gap: 12px;
     padding: 10px 16px;
+    min-height: 44px;
 
     transition: background .15s ease, border-color .15s ease;
     cursor: pointer;
@@ -261,8 +282,6 @@
 
   /* ============================================================
      ЧИПЫ СТАТУСОВ
-     Фон/размытие на ~10% сильнее, чем у карточки. Цвет задаётся
-     переменной --badge-c (свой для каждого статуса).
   ============================================================ */
   .m3-badge {
     --m3-badge-pct: 13%;
@@ -270,7 +289,7 @@
 
     display: inline-flex;
     align-items: center;
-    justify-self: start; /* не растягивать на всю ширину grid-ячейки */
+    justify-self: start;
     padding: 3px 9px;
     border-radius: 7px;
     font-size: 11px;
@@ -293,14 +312,95 @@
   .m3-badge-partial   { --badge-c: #D97706; }
   .m3-badge-unpaid    { --badge-c: #DC2626; }
 
-  /* Адаптив: ужимаем колонки на средних экранах */
+  /* ============================================================
+     ТУЛБАР ПОДСТРАНИЦ — единая высота контролов
+  ============================================================ */
+  :root { --m3-bar-h: 36px; }
+
+  .m3-bar-ctrl {
+    height: var(--m3-bar-h);
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  input.m3-bar-ctrl { padding-left: 14px; padding-right: 14px; }
+
+  /* ============================================================
+     КАСТОМНЫЙ ДРОПДАУН — раскрытие снизу (как в modal1/modal2)
+  ============================================================ */
+  .m3-dd { position: relative; display: inline-flex; }
+  .m3-dd-btn {
+    height: var(--m3-bar-h, 36px);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px 0 14px;
+    border-radius: 12px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    color: var(--fg);
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color .15s ease;
+  }
+  .m3-dd-btn:hover { border-color: var(--fg-muted); }
+  .m3-dd.is-open .m3-dd-btn { border-color: var(--fg); }
+  .m3-dd-chev {
+    width: 16px; height: 16px;
+    color: var(--fg-muted);
+    transition: transform .18s ease;
+    flex-shrink: 0;
+  }
+  .m3-dd.is-open .m3-dd-chev { transform: rotate(180deg); }
+
+  .m3-dd-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 100%;
+    z-index: 30;
+    max-height: 260px;
+    overflow-y: auto;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    padding: 4px;
+  }
+  .m3-dd-menu::-webkit-scrollbar { width: 4px; }
+  .m3-dd-menu::-webkit-scrollbar-track { background: transparent; }
+  .m3-dd-menu::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
+  .m3-dd-menu:hover::-webkit-scrollbar-thumb { background: var(--fg-muted); }
+  .m3-dd-menu { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+
+  .m3-dd-opt {
+    padding: 8px 10px;
+    border-radius: 7px;
+    font-size: 13px;
+    color: var(--fg);
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background .12s ease;
+  }
+  .m3-dd-opt:hover { background: var(--bg-alt); }
+  .m3-dd-opt.is-selected {
+    background: var(--bg-alt);
+    font-weight: 600;
+  }
+
+  .m3-dd--block { display: block; }
+  .m3-dd-btn--block { width: 100%; justify-content: space-between; }
+  .m3-dd-btn--block > span { overflow: hidden; text-overflow: ellipsis; }
+
+  /* Адаптив */
   @media (max-width: 1024px) {
     .m3-row {
       grid-template-columns: auto auto auto minmax(0, 1fr) auto auto auto;
       gap: 10px;
     }
   }
-  /* Узкие экраны: в столбик */
   @media (max-width: 700px) {
     .m3-row {
       grid-template-columns: 1fr;
@@ -329,6 +429,46 @@ if (!canWrite) {
   $('m3-order-new')?.setAttribute('disabled', 'disabled');
 }
 
+// ---- Универсальный кастомный select (раскрытие снизу) ----
+function initCustomSelect(ids, onChange) {
+  const dd    = $(ids.dd);
+  const btn   = $(ids.btn);
+  const menu  = $(ids.menu);
+  const label = $(ids.label);
+  if (!dd || !btn || !menu) return { set() {}, setOptions() {} };
+
+  const open  = () => { dd.classList.add('is-open'); menu.classList.remove('hidden'); };
+  const close = () => { dd.classList.remove('is-open'); menu.classList.add('hidden'); };
+
+  function mark(value) {
+    menu.querySelectorAll('.m3-dd-opt').forEach(o =>
+      o.classList.toggle('is-selected', o.dataset.value === value));
+  }
+  function set(value) {
+    const opt = menu.querySelector(`.m3-dd-opt[data-value="${(value ?? '').replace(/"/g, '\\"')}"]`);
+    if (opt) label.textContent = opt.textContent;
+    mark(value ?? '');
+  }
+  function setOptions(html) { menu.innerHTML = html; }
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dd.classList.contains('is-open') ? close() : open();
+  });
+  menu.addEventListener('click', (e) => {
+    const opt = e.target.closest('.m3-dd-opt');
+    if (!opt) return;
+    set(opt.dataset.value);
+    close();
+    onChange?.(opt.dataset.value);
+  });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#' + ids.dd)) close();
+  });
+
+  return { set, setOptions };
+}
+
 function switchTab(name) {
   document.querySelectorAll('.m3-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
   document.querySelectorAll('.m3-panel').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== name));
@@ -337,8 +477,7 @@ function switchTab(name) {
 }
 document.querySelectorAll('.m3-tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
 
-// Делегирование клика на карточки — однократная привязка для обеих подстраниц.
-// Шаблон <template id="m3-order-row-tpl"> ставит data-ord-id на корневой элемент.
+// Делегирование клика на карточки
 ['m3-act-list', 'm3-cmp-list'].forEach(id => {
   $(id).addEventListener('click', (e) => {
     const card = e.target.closest('[data-ord-id]');
@@ -348,7 +487,7 @@ document.querySelectorAll('.m3-tab').forEach(t => t.addEventListener('click', ()
 
 // ---- Кэш справочников ----
 const cache = {
-  products: [],       // warehouse_items type='product'
+  products: [],
   customers: []
 };
 
@@ -373,7 +512,11 @@ const active = {
 };
 
 $('m3-act-search').addEventListener('input', (e) => { active.search = e.target.value.trim().toLowerCase(); renderActive(); });
-$('m3-act-status-filter').addEventListener('change', (e) => { active.statusFilter = e.target.value; renderActive(); });
+
+initCustomSelect(
+  { dd: 'm3-act-status-dd', btn: 'm3-act-status-btn', menu: 'm3-act-status-menu', label: 'm3-act-status-label' },
+  (value) => { active.statusFilter = value; renderActive(); }
+);
 
 async function loadActive() {
   await refreshCache();
@@ -441,33 +584,26 @@ function renderOrderCard(o) {
 
   const fld = (name) => node.querySelector(`[data-field="${name}"]`);
 
-  // Номер
   fld('number').textContent = o.order_number || '—';
 
-  // Статус заказа
   const st = fld('status');
   st.textContent = STATUS_LABEL[o.status] || o.status;
   st.classList.add('m3-badge-' + o.status);
 
-  // Статус оплаты
   const pm = fld('payment');
   pm.textContent = PAYMENT_LABEL[o.payment_status] || o.payment_status;
   pm.classList.add('m3-badge-' + o.payment_status);
 
-  // Клиент (с тултипом полного имени)
   const customerName = o.customers?.name || 'Клиент не указан';
   const cu = fld('customer');
   cu.textContent = customerName;
   cu.title = customerName;
 
-  // Позиции
   const itemsCount = o.sales_order_items?.length || 0;
   fld('items').textContent = `${itemsCount} поз.`;
 
-  // Сумма
   fld('total').textContent = formatMoney(orderTotal(o));
 
-  // Дата (контекст зависит от статуса)
   fld('date').textContent = o.completed_at
     ? `Завершён ${formatDate(new Date(o.completed_at))}`
     : o.shipped_at
@@ -534,10 +670,16 @@ function renderCompleted() {
 
 const ord = {
   editing: null,
-  current: null,   // полный объект заказа из БД
+  current: null,
   items: [],
   attachments: []
 };
+
+// Кастомный select статуса оплаты в модалке
+const paymentSelect = initCustomSelect(
+  { dd: 'm3-order-payment-dd', btn: 'm3-order-payment-btn', menu: 'm3-order-payment-menu', label: 'm3-order-payment-label' },
+  () => {}
+);
 
 document.querySelectorAll('.m3-order-close').forEach(b => b.addEventListener('click', () => $('m3-order-modal').classList.add('hidden')));
 $('m3-order-new').addEventListener('click', () => openOrderEditor(null));
@@ -555,7 +697,6 @@ async function openOrderEditor(id) {
 
   let order = null;
   if (id) {
-    // Берём из кэша любой подстраницы, иначе подгружаем
     order = active.cached.find(x => x.id === id) || completed.cached.find(x => x.id === id);
     if (!order) {
       const { data } = await sb.from('sales_orders').select(`
@@ -563,7 +704,6 @@ async function openOrderEditor(id) {
       `).eq('id', id).maybeSingle();
       order = data;
     } else if (!order.sales_order_items || typeof order.sales_order_items[0] === 'undefined' || !('warehouse_item_id' in (order.sales_order_items[0] || {warehouse_item_id: null}))) {
-      // Проверка на случай, если у нас неполные поля в уже кэшированном объекте
       const { data } = await sb.from('sales_orders').select(`*, customers(id, name), sales_order_items(*)`).eq('id', id).maybeSingle();
       order = data;
     }
@@ -576,12 +716,14 @@ async function openOrderEditor(id) {
     : '';
 
   $('m3-order-f-customer').value = order?.customers?.name || '';
-  $('m3-order-f-payment').value = order?.payment_status || 'unpaid';
+  paymentSelect.set(order?.payment_status || 'unpaid');
 
-  // Read-only состояние для отменённых и завершённых заказов
   const readOnly = order && ['completed','cancelled'].includes(order.status);
   $('m3-order-f-customer').disabled = readOnly;
-  $('m3-order-f-payment').disabled = readOnly && order?.status === 'cancelled';  // при completed оплата уже paid, менять незачем, но не блокируем для истории
+  const payDisabled = readOnly && order?.status === 'cancelled';
+  $('m3-order-payment-btn').disabled = payDisabled;
+  $('m3-order-payment-dd').style.opacity = payDisabled ? '0.6' : '';
+  $('m3-order-payment-dd').style.pointerEvents = payDisabled ? 'none' : '';
 
   if (order) {
     $('m3-order-status-row').classList.remove('hidden');
@@ -685,7 +827,6 @@ function renderOrderItems() {
         if (field === 'quantity' || field === 'price') val = val === '' ? null : Number(val);
         if (field === 'warehouse_item_id') {
           ord.items[idx].warehouse_item_id = val || null;
-          // Автоподстановка цены из склада, если цена ещё пустая
           const prod = cache.products.find(p => p.id === val);
           if (prod && !ord.items[idx].price) {
             ord.items[idx].price = prod.price;
@@ -825,23 +966,19 @@ function renderOrderActions() {
 
   const buttons = [];
 
-  // Переход черновик → подтверждён
   if (o.status === 'draft') {
     buttons.push(`<button id="m3-btn-confirm" class="btn-secondary px-4 py-2 rounded-lg text-sm">Подтвердить</button>`);
   }
 
-  // Подтверждён или черновик → можно отгружать
   if (['draft','confirmed'].includes(o.status)) {
     buttons.push(`<button id="m3-btn-ship" class="btn-primary px-4 py-2 rounded-lg text-sm">Отгрузить</button>`);
   }
 
-  // Отгружен + оплачено → завершить
   if (o.status === 'shipped') {
     const disabled = o.payment_status !== 'paid';
     buttons.push(`<button id="m3-btn-complete" class="btn-primary px-4 py-2 rounded-lg text-sm" ${disabled ? 'disabled title="Сначала отметьте оплату"' : ''}>Закрыть заказ</button>`);
   }
 
-  // Отмена: для всего, кроме completed и cancelled
   if (!['completed','cancelled'].includes(o.status)) {
     const label = o.status === 'shipped' ? 'Отменить (вернуть на склад)' : 'Отменить';
     buttons.push(`<button id="m3-btn-cancel" class="btn-secondary px-4 py-2 rounded-lg text-sm">${label}</button>`);
@@ -861,7 +998,6 @@ function validateOrderForm() {
     $('m3-order-save').disabled = true;
     return;
   }
-  // Для сохранения достаточно хотя бы наличия клиента или позиций, но ок и без всего — разрешаем драфт
   $('m3-order-save').disabled = false;
 }
 
@@ -871,7 +1007,6 @@ async function resolveCustomerId() {
   if (!name) return null;
   const match = cache.customers.find(c => c.name.toLowerCase() === name.toLowerCase());
   if (match) return match.id;
-  // Создаём нового
   const { data, error } = await sb.from('customers').insert({ group_id: groupId, name }).select().single();
   if (error) throw error;
   cache.customers.push({ id: data.id, name: data.name });
@@ -880,24 +1015,24 @@ async function resolveCustomerId() {
 
 async function persistOrder(afterStatus) {
   const customerId = await resolveCustomerId();
-  const payment = $('m3-order-f-payment').value;
+  const payment = $('m3-order-payment-label').textContent;
+  const paymentValue = paymentValueFromLabel();
 
   let orderId = ord.editing;
 
   if (orderId) {
-    const patch = { customer_id: customerId, payment_status: payment };
+    const patch = { customer_id: customerId, payment_status: paymentValue };
     const { error } = await sb.from('sales_orders').update(patch).eq('id', orderId);
     if (error) throw error;
   } else {
     const { data, error } = await sb.from('sales_orders').insert({
-      group_id: groupId, customer_id: customerId, status: 'draft', payment_status: payment
+      group_id: groupId, customer_id: customerId, status: 'draft', payment_status: paymentValue
     }).select().single();
     if (error) throw error;
     orderId = data.id;
     ord.editing = orderId;
   }
 
-  // Синхронизируем позиции
   await sb.from('sales_order_items').delete().eq('order_id', orderId);
   const payload = ord.items
     .filter(it => it.warehouse_item_id && Number(it.quantity) > 0)
@@ -913,6 +1048,12 @@ async function persistOrder(afterStatus) {
   }
 
   return orderId;
+}
+
+// Текущее значение статуса оплаты из кастомного селекта
+function paymentValueFromLabel() {
+  const opt = $('m3-order-payment-menu').querySelector('.m3-dd-opt.is-selected');
+  return opt?.dataset.value || 'unpaid';
 }
 
 $('m3-order-save').addEventListener('click', async () => {
@@ -948,7 +1089,6 @@ $('m3-order-delete').addEventListener('click', async () => {
   } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
 });
 
-// Подтвердить
 async function confirmOrder() {
   try {
     await persistOrder();
@@ -960,11 +1100,9 @@ async function confirmOrder() {
   } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
 }
 
-// Отгрузить
 async function shipOrder() {
   try {
     $('m3-order-deficit').classList.add('hidden');
-    // Сохраняем актуальное состояние (позиции могли измениться)
     await persistOrder();
     const { data, error } = await sb.rpc('ship_sales_order', { p_order_id: ord.editing });
     if (error) throw error;
@@ -988,11 +1126,9 @@ async function shipOrder() {
   } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
 }
 
-// Завершить
 async function completeOrder() {
   try {
-    // Сохраняем текущий статус оплаты, если пользователь только что отметил paid
-    await sb.from('sales_orders').update({ payment_status: $('m3-order-f-payment').value }).eq('id', ord.editing);
+    await sb.from('sales_orders').update({ payment_status: paymentValueFromLabel() }).eq('id', ord.editing);
     const { data, error } = await sb.rpc('complete_sales_order', { p_order_id: ord.editing });
     if (error) throw error;
     if (!data?.ok) {
@@ -1005,7 +1141,6 @@ async function completeOrder() {
   } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
 }
 
-// Отменить
 async function cancelOrder() {
   const wasShipped = ord.current?.status === 'shipped';
   const msg = wasShipped
