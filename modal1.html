@@ -1,4 +1,4 @@
-<!-- modal1.html — Страница "Снабжение". Подстраницы: Склад, Заказы снабжения. -->
+<!-- modal1.html — Страница "Снабжение". Подстраницы: Склад, Заказы снабжения, Журнал. -->
 <!-- Доступ: admin, supply, management. -->
 
 <section id="m1">
@@ -11,6 +11,7 @@
     <nav class="m1-subnav" id="m1-subnav">
       <button class="m1-tab active" data-tab="warehouse">Склад</button>
       <button class="m1-tab" data-tab="orders">Заказы снабжения</button>
+      <button class="m1-tab" data-tab="journal">Журнал</button>
     </nav>
   </div>
 
@@ -108,6 +109,42 @@
     </div>
   </div>
 
+  <!-- =========================
+       JOURNAL (движения склада)
+  ========================== -->
+  <div class="m1-panel hidden" data-panel="journal">
+
+    <div class="bg-surface rounded-2xl border border-line mb-5 flex flex-wrap items-center" style="padding:10px; gap:10px;">
+      <div class="flex-1 min-w-[180px]">
+        <input id="m1-jr-search" type="search" placeholder="Поиск по позиции или описанию…"
+          class="m1-bar-ctrl w-full rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors text-sm">
+      </div>
+      <div class="m1-dd m1-bar-ctrl" id="m1-jr-type-dd">
+        <button type="button" class="m1-dd-btn" id="m1-jr-type-btn">
+          <span id="m1-jr-type-label">Все движения</span>
+          <svg class="m1-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="m1-dd-menu hidden" id="m1-jr-type-menu">
+          <div class="m1-dd-opt" data-value="all">Все движения</div>
+          <div class="m1-dd-opt" data-value="supply_in">Поступление (снабжение)</div>
+          <div class="m1-dd-opt" data-value="production_in">Выпуск продукции</div>
+          <div class="m1-dd-opt" data-value="sale_out">Списание (продажа)</div>
+          <div class="m1-dd-opt" data-value="return_in">Возврат на склад</div>
+          <div class="m1-dd-opt" data-value="adjustment">Корректировка</div>
+        </div>
+      </div>
+      <button id="m1-jr-refresh" class="btn-secondary m1-bar-ctrl rounded-xl text-sm font-medium ml-auto" style="padding-left:16px; padding-right:16px;">
+        Обновить
+      </button>
+    </div>
+
+    <div id="m1-jr-list" class="space-y-2">
+      <div class="flex items-center justify-center py-16">
+        <div class="w-6 h-6 loader"></div>
+      </div>
+    </div>
+  </div>
+
 </section>
 
 <!-- ============================================================
@@ -137,6 +174,21 @@
     <span class="m1-row__items"    data-field="items"></span>
     <span class="m1-row__total"    data-field="total"></span>
     <span class="m1-row__date"     data-field="date"></span>
+  </article>
+</template>
+
+<!-- ============================================================
+     ШАБЛОН СТРОКИ ЖУРНАЛА — движение склада.
+============================================================ -->
+<template id="m1-jr-row-tpl">
+  <article class="m1-row m1-row--journal">
+    <span class="m1-badge"          data-field="mtype"></span>
+    <span class="m1-row__name"      data-field="item"></span>
+    <span class="m1-jr-delta"       data-field="delta"></span>
+    <span class="m1-row__stat m1-row__stat--num" data-field="balance"></span>
+    <span class="m1-row__title"     data-field="desc"></span>
+    <span class="m1-row__items"     data-field="user"></span>
+    <span class="m1-row__date"      data-field="date"></span>
   </article>
 </template>
 
@@ -457,6 +509,19 @@
       170px;
   }
 
+  /* Грид журнала: тип · позиция · дельта · остаток · описание · автор · дата */
+  .m1-row--journal {
+    grid-template-columns:
+      150px
+      minmax(0, 1.2fr)
+      110px
+      110px
+      minmax(0, 1.4fr)
+      130px
+      150px;
+    cursor: default;
+  }
+
   .m1-row__head {
     display: flex;
     flex-direction: column;
@@ -528,6 +593,16 @@
     white-space: nowrap;
   }
 
+  /* Дельта в журнале */
+  .m1-jr-delta {
+    font-size: 13px;
+    font-weight: 600;
+    white-space: nowrap;
+    text-align: right;
+  }
+  .m1-jr-delta--in  { color: #15803D; }
+  .m1-jr-delta--out { color: #DC2626; }
+
   /* ============================================================
      БЕЙДЖИ СТАТУСОВ
   ============================================================ */
@@ -556,6 +631,14 @@
   .m1-badge-paid       { --badge-c: #15803D; }
   .m1-badge-partial    { --badge-c: #D97706; }
   .m1-badge-unpaid     { --badge-c: #DC2626; }
+
+  /* Бейджи типов движения журнала */
+  .m1-badge-supply_in     { --badge-c: #2563EB; }
+  .m1-badge-production_in { --badge-c: #15803D; }
+  .m1-badge-sale_out      { --badge-c: #DC2626; }
+  .m1-badge-return_in     { --badge-c: #0891B2; }
+  .m1-badge-adjustment    { --badge-c: #D97706; }
+  .m1-badge-other         { --badge-c: #6B7280; }
 
   /* ============================================================
      КАСТОМНЫЙ КОМБОБОКС ПОСТАВЩИКА
@@ -773,7 +856,8 @@
   /* Адаптив */
   @media (max-width: 1024px) {
     .m1-row--warehouse,
-    .m1-row--order {
+    .m1-row--order,
+    .m1-row--journal {
       grid-template-columns: minmax(0, 1fr) auto auto auto;
       gap: 10px;
     }
@@ -781,12 +865,14 @@
   }
   @media (max-width: 700px) {
     .m1-row--warehouse,
-    .m1-row--order {
+    .m1-row--order,
+    .m1-row--journal {
       grid-template-columns: 1fr;
       gap: 4px;
       padding: 12px 14px;
     }
     .m1-row__total, .m1-row__date, .m1-row__comment { text-align: left; }
+    .m1-jr-delta { text-align: left; }
     .m1-oi-row { grid-template-columns: 1fr 1fr; gap: 6px; }
   }
 
@@ -973,6 +1059,7 @@ function switchTab(name) {
   document.querySelectorAll('.m1-panel').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== name));
   if (name === 'warehouse') loadWarehouse();
   if (name === 'orders') loadOrders();
+  if (name === 'journal') loadJournal();
 }
 document.querySelectorAll('.m1-tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
 
@@ -1000,6 +1087,7 @@ const wh = {
   typeFilter: 'all',
   onlyInStock: false,
   editing: null,
+  editingQtyBefore: null,   // кол-во до правки (для записи корректировки в журнал)
   recipes: [],
   thresholds: [],
   pickerOpen: false,
@@ -1065,7 +1153,6 @@ function renderWarehouse() {
 function enterReorderMode() {
   $('m1-wh-grid').classList.add('hidden');
   $('m1-reorder-wrap').classList.remove('hidden');
-  // прячем нерелевантные контролы БЕЗ перестроения флекса (место сохраняется)
   $('m1-wh-only-in-stock').closest('label').classList.add('m1-toolbar-hidden');
   $('m1-wh-add').classList.add('m1-toolbar-hidden');
   loadReorder();
@@ -1344,7 +1431,6 @@ function renderWarehouseRow(x) {
   fld('sum').textContent = formatMoney(sum);
 
   const cm = fld('comment');
-  // Показываем категорию (если есть) + комментарий
   const parts = [];
   if (x.category) parts.push(x.category);
   if (commentText) parts.push(commentText);
@@ -1360,7 +1446,6 @@ function renderWarehouseRow(x) {
   return node;
 }
 
-// Собирает существующие категории из склада → datalist подсказок
 function refreshCategoryDatalist() {
   const cats = Array.from(new Set(
     wh.cached.map(x => (x.category || '').trim()).filter(Boolean)
@@ -1373,6 +1458,8 @@ function openWarehouseEditor(id) {
   if (!canWrite) return;
   wh.editing = id;
   const item = id ? wh.cached.find(x => x.id === id) : null;
+  // запоминаем кол-во до правки — чтобы записать корректировку в журнал
+  wh.editingQtyBefore = item ? Number(item.quantity || 0) : 0;
   $('m1-wh-modal-title').textContent = item ? 'Редактирование позиции' : 'Новая позиция';
   $('m1-wh-f-article').value = item?.article || '';
   $('m1-wh-f-name').value = item?.name || '';
@@ -1386,8 +1473,6 @@ function openWarehouseEditor(id) {
   validateWhForm();
   $('m1-wh-modal').classList.remove('hidden');
   setTimeout(() => $('m1-wh-f-name').focus(), 50);
-  // Тип: для существующей позиции — её тип; для новой по умолчанию «Материал».
-  // Опции в меню теперь только «Материал» (продукция — через рецепты на стр. Производство).
   wh.typeValue = item?.type || 'material';
   whTypeSelect.set(wh.typeValue);
   recalcWhSum();
@@ -1430,12 +1515,13 @@ $('m1-wh-save').addEventListener('click', async () => {
   btn.disabled = true;
   btn.textContent = 'Сохраняем…';
   try {
+    const newQty = parseDecimalInput($('m1-wh-f-qty').value) ?? 0;
     const payload = {
       article: $('m1-wh-f-article').value.trim() || null,
       type: wh.typeValue,
       name: $('m1-wh-f-name').value.trim(),
       unit: $('m1-wh-f-unit').value.trim(),
-      quantity: parseDecimalInput($('m1-wh-f-qty').value) ?? 0,
+      quantity: newQty,
       price: parseDecimalInput($('m1-wh-f-price').value),
       category: $('m1-wh-f-category').value.trim() || null,
       comment: $('m1-wh-f-comment').value.trim() || null
@@ -1444,10 +1530,23 @@ $('m1-wh-save').addEventListener('click', async () => {
     if (wh.editing) {
       const { error } = await sb.from('warehouse_items').update(payload).eq('id', wh.editing);
       if (error) throw error;
+      // Ручная корректировка количества → запись в журнал движений
+      const before = Number(wh.editingQtyBefore || 0);
+      const delta = newQty - before;
+      if (delta !== 0) {
+        await logManualAdjustment(wh.editing, delta, newQty, payload.name, payload.type, payload.unit);
+      }
       toast('Позиция обновлена', 'success');
     } else {
-      const { error } = await sb.from('warehouse_items').insert({ ...payload, group_id: groupId });
+      const { data: created, error } = await sb.from('warehouse_items')
+        .insert({ ...payload, group_id: groupId })
+        .select()
+        .single();
       if (error) throw error;
+      // Стартовый остаток новой позиции (если задан) тоже фиксируем как корректировку
+      if (created && Number(newQty) !== 0) {
+        await logManualAdjustment(created.id, newQty, newQty, payload.name, payload.type, payload.unit, true);
+      }
       toast('Позиция добавлена', 'success');
     }
     $('m1-wh-modal').classList.add('hidden');
@@ -1460,6 +1559,30 @@ $('m1-wh-save').addEventListener('click', async () => {
   }
 });
 
+// Запись ручной корректировки количества в журнал движений
+async function logManualAdjustment(itemId, delta, balanceAfter, name, type, unit, isInitial = false) {
+  try {
+    await sb.from('stock_movements').insert({
+      group_id: groupId,
+      warehouse_item_id: itemId,
+      item_name: name || '—',
+      item_type: type || null,
+      unit: unit || null,
+      movement_type: 'adjustment',
+      delta: delta,
+      balance_after: balanceAfter,
+      source_type: 'manual',
+      source_id: null,
+      description: isInitial ? 'Начальный остаток при создании позиции' : 'Ручная корректировка количества',
+      user_id: state.authUser.id,
+      user_name: state.authUser.user_metadata?.name || state.authUser.email || null
+    });
+  } catch (e) {
+    // Журнал не должен ломать основное сохранение — только предупреждаем
+    console.warn('Не удалось записать движение в журнал:', e.message);
+  }
+}
+
 $('m1-wh-delete').addEventListener('click', async () => {
   if (!wh.editing) return;
   if (!confirm('Удалить позицию со склада?')) return;
@@ -1471,6 +1594,101 @@ $('m1-wh-delete').addEventListener('click', async () => {
     await loadWarehouse();
   } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
 });
+
+// ================================================================
+// JOURNAL (движения склада)
+// ================================================================
+
+const jr = {
+  cached: [],
+  search: '',
+  typeFilter: 'all'
+};
+
+const MOVEMENT_LABEL = {
+  supply_in: 'Поступление',
+  production_in: 'Выпуск',
+  sale_out: 'Списание (продажа)',
+  return_in: 'Возврат',
+  adjustment: 'Корректировка',
+  other: 'Прочее'
+};
+
+$('m1-jr-search').addEventListener('input', (e) => { jr.search = e.target.value.trim().toLowerCase(); renderJournal(); });
+$('m1-jr-refresh').addEventListener('click', () => loadJournal());
+
+async function loadJournal() {
+  $('m1-jr-list').innerHTML = '<div class="flex items-center justify-center py-16"><div class="w-6 h-6 loader"></div></div>';
+  const { data, error } = await sb
+    .from('stock_movements')
+    .select('*')
+    .order('created_at', { ascending: false })
+    .limit(300);
+  if (error) {
+    $('m1-jr-list').innerHTML = `<div class="text-sm text-state-error p-6">${esc(error.message)}</div>`;
+    return;
+  }
+  jr.cached = data || [];
+  renderJournal();
+}
+
+function renderJournal() {
+  let list = jr.cached;
+  if (jr.typeFilter !== 'all') list = list.filter(x => x.movement_type === jr.typeFilter);
+  if (jr.search) list = list.filter(x =>
+    (x.item_name || '').toLowerCase().includes(jr.search) ||
+    (x.description || '').toLowerCase().includes(jr.search) ||
+    (x.user_name || '').toLowerCase().includes(jr.search)
+  );
+
+  if (list.length === 0) {
+    $('m1-jr-list').innerHTML = `
+      <div class="text-center py-16 text-sm text-fg-muted">
+        ${jr.search || jr.typeFilter !== 'all' ? 'Ничего не найдено' : 'Пока нет движений по складу.'}
+      </div>
+    `;
+    return;
+  }
+
+  const container = $('m1-jr-list');
+  container.innerHTML = '';
+  const frag = document.createDocumentFragment();
+  list.forEach(m => frag.appendChild(renderJournalRow(m)));
+  container.appendChild(frag);
+}
+
+function renderJournalRow(m) {
+  const tpl = document.getElementById('m1-jr-row-tpl');
+  const node = tpl.content.firstElementChild.cloneNode(true);
+  const fld = (name) => node.querySelector(`[data-field="${name}"]`);
+
+  const mt = fld('mtype');
+  mt.textContent = MOVEMENT_LABEL[m.movement_type] || m.movement_type;
+  mt.classList.add('m1-badge-' + (MOVEMENT_LABEL[m.movement_type] ? m.movement_type : 'other'));
+
+  const item = fld('item');
+  item.textContent = m.item_name || '—';
+  item.title = m.item_name || '';
+
+  const delta = Number(m.delta || 0);
+  const d = fld('delta');
+  const sign = delta > 0 ? '+' : '';
+  d.textContent = `${sign}${formatNumber(delta)}${m.unit ? ' ' + m.unit : ''}`;
+  d.classList.add(delta >= 0 ? 'm1-jr-delta--in' : 'm1-jr-delta--out');
+
+  const bal = fld('balance');
+  bal.textContent = m.balance_after != null ? formatNumber(Number(m.balance_after)) : '—';
+
+  const desc = fld('desc');
+  desc.textContent = m.description || '';
+  desc.title = m.description || '';
+
+  fld('user').textContent = m.user_name || '';
+
+  fld('date').textContent = formatDateTime(new Date(m.created_at));
+
+  return node;
+}
 
 // ================================================================
 // ORDERS
@@ -1545,6 +1763,11 @@ $('m1-ord-search').addEventListener('input', (e) => { ord.search = e.target.valu
 initCustomSelect(
   { dd: 'm1-ord-status-dd', btn: 'm1-ord-status-btn', menu: 'm1-ord-status-menu', label: 'm1-ord-status-label' },
   (value) => { ord.statusFilter = value; renderOrders(); }
+);
+// Фильтр типа движения в журнале
+initCustomSelect(
+  { dd: 'm1-jr-type-dd', btn: 'm1-jr-type-btn', menu: 'm1-jr-type-menu', label: 'm1-jr-type-label' },
+  (value) => { jr.typeFilter = value; renderJournal(); }
 );
 const whTypeSelect = initCustomSelect(
   { dd: 'm1-wh-type-dd', btn: 'm1-wh-type-btn', menu: 'm1-wh-type-menu', label: 'm1-wh-type-label' },
