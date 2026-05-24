@@ -144,10 +144,10 @@
           <span class="text-xs text-fg-muted">артикул · название · кол-во · ед. · цена</span>
         </div>
         <div class="p-4">
-          <div class="m1-wh-oi-row">
+          <div class="m1-oi-row m1-oi-row--wh">
             <input id="m1-wh-f-article" type="text" maxlength="100" placeholder="Артикул"
               class="m1-oi-input" autocomplete="off">
-            <input id="m1-wh-f-name" type="text" maxlength="300" placeholder="Название *"
+            <input id="m1-wh-f-name" type="text" maxlength="300" placeholder="Наименование *"
               class="m1-oi-input">
             <input id="m1-wh-f-qty" type="text" inputmode="decimal" placeholder="Кол-во"
               class="m1-oi-input m1-oi-input--center">
@@ -168,10 +168,16 @@
         </label>
         <label class="block">
           <span class="text-xs text-fg-muted block mb-1.5">Тип позиции *</span>
-          <select id="m1-wh-f-type" class="m1-select w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-            <option value="material">Материал</option>
-            <option value="product">Готовая продукция</option>
-          </select>
+          <div class="m1-dd m1-dd--block" id="m1-wh-type-dd">
+            <button type="button" class="m1-dd-btn m1-dd-btn--block" id="m1-wh-type-btn">
+              <span id="m1-wh-type-label">Материал</span>
+              <svg class="m1-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="m1-dd-menu hidden" id="m1-wh-type-menu">
+              <div class="m1-dd-opt" data-value="material">Материал</div>
+              <div class="m1-dd-opt" data-value="product">Готовая продукция</div>
+            </div>
+          </div>
         </label>
       </div>
 
@@ -216,10 +222,16 @@
         </label>
         <label class="block">
           <span class="text-xs text-fg-muted block mb-1.5">Статус оплаты</span>
-          <select id="m1-ord-f-payment" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-            <option value="unpaid">Не оплачено</option>
-            <option value="paid">Оплачено</option>
-          </select>
+          <div class="m1-dd m1-dd--block" id="m1-ord-payment-dd">
+            <button type="button" class="m1-dd-btn m1-dd-btn--block" id="m1-ord-payment-btn">
+              <span id="m1-ord-payment-label">Не оплачено</span>
+              <svg class="m1-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="m1-dd-menu hidden" id="m1-ord-payment-menu">
+              <div class="m1-dd-opt" data-value="unpaid">Не оплачено</div>
+              <div class="m1-dd-opt" data-value="paid">Оплачено</div>
+            </div>
+          </div>
         </label>
       </div>
 
@@ -229,12 +241,18 @@
         <div class="flex items-center gap-2 flex-wrap">
           <div id="m1-ord-status-badges" class="flex items-center gap-1"></div>
           <div class="text-fg-muted">→</div>
-          <select id="m1-ord-f-status" class="px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-            <option value="draft">В работе</option>
-            <option value="placed">Заказ размещён</option>
-            <option value="in_transit">Товар в пути</option>
-            <option value="received">На складе</option>
-          </select>
+          <div class="m1-dd" id="m1-ord-fstatus-dd">
+            <button type="button" class="m1-dd-btn" id="m1-ord-fstatus-btn">
+              <span id="m1-ord-fstatus-label">В работе</span>
+              <svg class="m1-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="m1-dd-menu hidden" id="m1-ord-fstatus-menu">
+              <div class="m1-dd-opt" data-value="draft">В работе</div>
+              <div class="m1-dd-opt" data-value="placed">Заказ размещён</div>
+              <div class="m1-dd-opt" data-value="in_transit">Товар в пути</div>
+              <div class="m1-dd-opt" data-value="received">На складе</div>
+            </div>
+          </div>
         </div>
         <p class="text-xs text-fg-muted mt-2">
           При переходе в «На складе» содержимое заказа автоматически придёт на склад.
@@ -731,24 +749,6 @@
     box-shadow: 2px 2px 0px var(--color-default);
   }
 
-  /* Редактор позиции склада: строка полей + строка "комментарий | тип" */
-  .m1-wh-oi-row {
-    display: grid;
-    grid-template-columns: 90px minmax(0,1fr) 72px 64px 96px;
-    gap: 8px;
-    align-items: center;
-  }
-  .m1-wh-cm-row {
-    display: grid;
-    grid-template-columns: minmax(0,1fr) 200px;
-    gap: 12px;
-    align-items: start;
-  }
-  @media (max-width: 600px) {
-    .m1-wh-oi-row { grid-template-columns: 1fr 1fr; }
-    .m1-wh-cm-row { grid-template-columns: 1fr; }
-  }
-
   /* ============================================================
      КАСТОМНЫЙ ДРОПДАУН (фильтр статуса заказа) — раскрытие снизу
   ============================================================ */
@@ -804,6 +804,21 @@
     background: var(--bg-alt);
     font-weight: 600;
   }
+
+  /* Строка позиции в редакторе склада — те же колонки, что у заказа,
+     но без «суммы» и «×» (артикул · наименование · кол-во · ед. · цена) */
+  .m1-oi-row--wh {
+    grid-template-columns:
+      90px            /* артикул */
+      minmax(0, 1fr)  /* наименование */
+      72px            /* кол-во */
+      64px            /* ед. */
+      96px;           /* цена */
+  }
+
+  /* Дропдаун на всю ширину (в формах модалок, вместо block-select) */
+  .m1-dd--block { display: block; }
+  .m1-dd-btn--block { width: 100%; justify-content: space-between; }
   
 </style>
 
@@ -953,7 +968,6 @@ function openWarehouseEditor(id) {
   const item = id ? wh.cached.find(x => x.id === id) : null;
   $('m1-wh-modal-title').textContent = item ? 'Редактирование позиции' : 'Новая позиция';
   $('m1-wh-f-article').value = item?.article || '';
-  $('m1-wh-f-type').value = item?.type || 'material';
   $('m1-wh-f-name').value = item?.name || '';
   $('m1-wh-f-unit').value = item?.unit || 'шт';
   $('m1-wh-f-qty').value = item?.quantity != null ? formatDecimal2(item.quantity) : '';
@@ -963,6 +977,8 @@ function openWarehouseEditor(id) {
   validateWhForm();
   $('m1-wh-modal').classList.remove('hidden');
   setTimeout(() => $('m1-wh-f-name').focus(), 50);
+  wh.typeValue = item?.type || 'material';
+  whTypeSelect.set(wh.typeValue);
 }
 
 $('m1-wh-add').addEventListener('click', () => openWarehouseEditor(null));
@@ -981,7 +997,7 @@ $('m1-wh-save').addEventListener('click', async () => {
   try {
     const payload = {
       article: $('m1-wh-f-article').value.trim() || null,
-      type: $('m1-wh-f-type').value,
+      type: wh.typeValue,
       name: $('m1-wh-f-name').value.trim(),
       unit: $('m1-wh-f-unit').value.trim(),
       quantity: parseDecimalInput($('m1-wh-f-qty').value) ?? 0,
@@ -1039,6 +1055,47 @@ const ord = {
 const STATUS_LABEL = { draft: 'В работе', placed: 'Заказ размещён', in_transit: 'Товар в пути', received: 'На складе' };
 const PAYMENT_LABEL = { unpaid: 'Не оплачено', paid: 'Оплачено' };
 
+// ---- Универсальный кастомный select (раскрытие снизу) ----
+// ids: { dd, btn, menu, label }. onChange(value) вызывается при выборе.
+// Возвращает { set(value) } для программной установки значения.
+function initCustomSelect(ids, onChange) {
+  const dd    = $(ids.dd);
+  const btn   = $(ids.btn);
+  const menu  = $(ids.menu);
+  const label = $(ids.label);
+  if (!dd || !btn || !menu) return { set() {} };
+
+  const open  = () => { dd.classList.add('is-open'); menu.classList.remove('hidden'); };
+  const close = () => { dd.classList.remove('is-open'); menu.classList.add('hidden'); };
+
+  function mark(value) {
+    menu.querySelectorAll('.m1-dd-opt').forEach(o =>
+      o.classList.toggle('is-selected', o.dataset.value === value));
+  }
+  function set(value) {
+    const opt = menu.querySelector(`.m1-dd-opt[data-value="${value}"]`);
+    if (opt) label.textContent = opt.textContent;
+    mark(value);
+  }
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dd.classList.contains('is-open') ? close() : open();
+  });
+  menu.addEventListener('click', (e) => {
+    const opt = e.target.closest('.m1-dd-opt');
+    if (!opt) return;
+    set(opt.dataset.value);
+    close();
+    onChange?.(opt.dataset.value);
+  });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#' + ids.dd)) close();
+  });
+
+  return { set };
+}
+
 // ---- Парсинг и форматирование чисел в полях позиций ----
 function parseDecimalInput(str) {
   if (str == null) return null;
@@ -1053,39 +1110,24 @@ function formatDecimal2(num) {
 }
 
 $('m1-ord-search').addEventListener('input', (e) => { ord.search = e.target.value.trim().toLowerCase(); renderOrders(); });
-// ---- Кастомный дропдаун фильтра статуса ----
-(function initStatusDropdown() {
-  const dd    = $('m1-ord-status-dd');
-  const btn   = $('m1-ord-status-btn');
-  const menu  = $('m1-ord-status-menu');
-  const label = $('m1-ord-status-label');
-  if (!dd || !btn || !menu) return;
-
-  const open  = () => { dd.classList.add('is-open'); menu.classList.remove('hidden'); };
-  const close = () => { dd.classList.remove('is-open'); menu.classList.add('hidden'); };
-  const toggle = () => dd.classList.contains('is-open') ? close() : open();
-
-  function markSelected() {
-    menu.querySelectorAll('.m1-dd-opt').forEach(o =>
-      o.classList.toggle('is-selected', o.dataset.value === ord.statusFilter));
-  }
-
-  btn.addEventListener('click', (e) => { e.stopPropagation(); markSelected(); toggle(); });
-
-  menu.addEventListener('click', (e) => {
-    const opt = e.target.closest('.m1-dd-opt');
-    if (!opt) return;
-    ord.statusFilter = opt.dataset.value;
-    label.textContent = opt.textContent;
-    markSelected();
-    close();
-    renderOrders();
-  });
-
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('#m1-ord-status-dd')) close();
-  });
-})();
+// ---- Фильтр статуса (тулбар) ----
+initCustomSelect(
+  { dd: 'm1-ord-status-dd', btn: 'm1-ord-status-btn', menu: 'm1-ord-status-menu', label: 'm1-ord-status-label' },
+  (value) => { ord.statusFilter = value; renderOrders(); }
+);
+// ---- Кастомные select в формах ----
+const whTypeSelect = initCustomSelect(
+  { dd: 'm1-wh-type-dd', btn: 'm1-wh-type-btn', menu: 'm1-wh-type-menu', label: 'm1-wh-type-label' },
+  (value) => { wh.typeValue = value; }
+);
+const ordPaymentSelect = initCustomSelect(
+  { dd: 'm1-ord-payment-dd', btn: 'm1-ord-payment-btn', menu: 'm1-ord-payment-menu', label: 'm1-ord-payment-label' },
+  (value) => { ord.paymentValue = value; }
+);
+const ordStatusSelect = initCustomSelect(
+  { dd: 'm1-ord-fstatus-dd', btn: 'm1-ord-fstatus-btn', menu: 'm1-ord-fstatus-menu', label: 'm1-ord-fstatus-label' },
+  (value) => { ord.statusValue = value; renderOrderStatusBadges(value); }
+);
 
 async function loadSuppliersCache() {
   const { data } = await sb.from('suppliers').select('id, name').order('name');
@@ -1253,6 +1295,7 @@ function renderOrderRow(o) {
 async function openOrderEditor(id) {
   if (!canWrite) return;
   ord.editing = id;
+  ord.statusValue = 'draft';
   ord.items = [];
   ord.attachments = [];
   ord.pendingFiles = [];
@@ -1264,11 +1307,13 @@ async function openOrderEditor(id) {
     : '';
 
   $('m1-ord-f-supplier').value = order?.suppliers?.name || '';
-  $('m1-ord-f-payment').value = order?.payment_status || 'unpaid';
+  ord.paymentValue = order?.payment_status || 'unpaid';
+  ordPaymentSelect.set(ord.paymentValue);
 
   if (order) {
     $('m1-ord-status-row').classList.remove('hidden');
-    $('m1-ord-f-status').value = order.status;
+    ord.statusValue = order.status;
+    ordStatusSelect.set(order.status);
     renderOrderStatusBadges(order.status);
     ord.items = [...(order.supply_order_items || [])];
     await loadAttachments(id);
@@ -1295,8 +1340,6 @@ function renderOrderStatusBadges(current) {
     ${i < flow.length - 1 ? '<span class="text-fg-muted text-xs">→</span>' : ''}
   `).join('');
 }
-
-$('m1-ord-f-status').addEventListener('change', (e) => renderOrderStatusBadges(e.target.value));
 
 // ---- Items editor ----
 function renderOrderItems() {
@@ -1548,8 +1591,8 @@ $('m1-ord-save').addEventListener('click', async () => {
       }
     }
 
-    const payment = $('m1-ord-f-payment').value;
-    const desiredStatus = ord.editing ? $('m1-ord-f-status').value : 'draft';
+    const payment = ord.paymentValue;
+    const desiredStatus = ord.editing ? ord.statusValue : 'draft';
 
     // Выбрасываем статус 'received' — переход в него идёт через отдельную функцию
     const safeStatus = desiredStatus === 'received' ? null : desiredStatus;
