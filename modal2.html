@@ -127,28 +127,15 @@
         </label>
       </div>
 
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-        <label class="block md:col-span-2">
-          <span class="text-xs text-fg-muted block mb-1.5">Готовая продукция *</span>
-          <div class="m2-dd m2-dd--block" id="m2-rec-output-dd">
-            <button type="button" class="m2-dd-btn m2-dd-btn--block" id="m2-rec-output-btn">
-              <span id="m2-rec-output-label" class="truncate">— выберите со склада —</span>
-              <svg class="m2-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="m2-dd-menu hidden" id="m2-rec-output-menu"></div>
-          </div>
-          <p class="text-xs text-fg-muted mt-1.5">
-            Сначала добавьте продукцию на Склад (тип «Готовая продукция»).
-          </p>
-        </label>
+      <div class="grid grid-cols-2 gap-3">
         <label class="block">
           <span class="text-xs text-fg-muted block mb-1.5">Выход за цикл *</span>
           <input id="m2-rec-f-output-qty" type="text" inputmode="decimal" value="1" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
         </label>
-        <div>
-          <span class="text-xs text-fg-muted block mb-1.5">Ед. изм.</span>
-          <div id="m2-rec-f-output-unit" class="px-3 py-2 rounded-lg bg-surface-alt border border-line text-sm text-fg-muted">—</div>
-        </div>
+        <label class="block">
+          <span class="text-xs text-fg-muted block mb-1.5">Ед. изм. *</span>
+          <input id="m2-rec-f-output-unit" type="text" maxlength="20" value="шт" placeholder="шт" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+        </label>
       </div>
 
       <div class="grid grid-cols-2 gap-3">
@@ -233,7 +220,7 @@
         </div>
       </label>
 
-      <div class="grid grid-cols-2 gap-3">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
         <label class="block">
           <span class="text-xs text-fg-muted block mb-1.5">Плановое кол-во *</span>
           <div class="relative">
@@ -247,6 +234,14 @@
             <input id="m2-run-f-actual" type="text" inputmode="decimal" class="w-full px-3 py-2 pr-12 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
             <span id="m2-run-f-actual-unit" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-fg-muted">—</span>
           </div>
+        </label>
+        <label class="block">
+          <span class="text-xs text-fg-muted block mb-1.5">Дата готовности</span>
+          <input id="m2-run-f-ready-date" type="date" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+        </label>
+        <label class="block">
+          <span class="text-xs text-fg-muted block mb-1.5">Время</span>
+          <input id="m2-run-f-ready-time" type="time" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
         </label>
       </div>
 
@@ -566,8 +561,6 @@ if (!canWrite) {
 }
 
 // ---- Универсальный кастомный select (раскрытие снизу) ----
-// ids: { dd, btn, menu, label }. Опции живут в menu как .m2-dd-opt[data-value].
-// onChange(value) вызывается при выборе. Возвращает { set(value), setOptions(html) }.
 function initCustomSelect(ids, onChange) {
   const dd    = $(ids.dd);
   const btn   = $(ids.btn);
@@ -646,7 +639,7 @@ const cache = {
 async function refreshCache() {
   const [wh, rc] = await Promise.all([
     sb.from('warehouse_items').select('id, article, name, unit, type, quantity, price').order('name'),
-    sb.from('recipes').select('id, code, name, output_item_id, output_quantity').order('name')
+    sb.from('recipes').select('id, code, name, output_quantity, output_unit').order('name')
   ]);
   cache.warehouse = wh.data || [];
   cache.recipes = rc.data || [];
@@ -659,7 +652,6 @@ async function refreshCache() {
 const recState = {
   cached: [],
   editing: null,
-  outputValue: '',
   ingredients: []
 };
 
@@ -705,7 +697,6 @@ function renderRecipeRow(r) {
 
   const fld = (name) => node.querySelector(`[data-field="${name}"]`);
 
-  const out = cache.warehouse.find(w => w.id === r.output_item_id);
   const ingCount = r.recipe_ingredients?.length || 0;
   const hasSub = (r.recipe_ingredients || []).some(i => i.sub_recipe_id);
   const hours = Number(r.labor_hours || 0);
@@ -716,11 +707,12 @@ function renderRecipeRow(r) {
   name.textContent = r.name || '—';
   name.title = r.name || '';
 
-  fld('output').textContent = `${formatNumber(r.output_quantity)} ${out?.unit || ''}`;
+  fld('output').textContent = `${formatNumber(r.output_quantity)} ${r.output_unit || ''}`;
   fld('ingredients').textContent = `${ingCount} ингр.`;
   fld('hours').textContent = hours > 0 ? `${formatNumber(hours)} ч` : '—';
 
-  const productName = out?.name || '—';
+  // Рецепт = продукт: показываем имя рецепта как наименование продукта
+  const productName = r.name || '—';
   const pr = fld('product');
   pr.textContent = productName;
   pr.title = productName;
@@ -733,19 +725,6 @@ function renderRecipeRow(r) {
   }
 
   return node;
-}
-
-// ---- Кастомный select готовой продукции ----
-const recOutputSelect = initCustomSelect(
-  { dd: 'm2-rec-output-dd', btn: 'm2-rec-output-btn', menu: 'm2-rec-output-menu', label: 'm2-rec-output-label' },
-  (value) => { recState.outputValue = value; updateOutputUnit(); updateCycleOut(); validateRecipeForm(); }
-);
-
-function fillRecOutputOptions() {
-  const products = cache.warehouse.filter(w => w.type === 'product');
-  const opts = ['<div class="m2-dd-opt" data-value="">— выберите со склада —</div>']
-    .concat(products.map(p => `<div class="m2-dd-opt" data-value="${esc(p.id)}">${esc(p.name)}${p.article ? ' (' + esc(p.article) + ')' : ''}</div>`));
-  recOutputSelect.setOptions(opts.join(''));
 }
 
 // ---- Recipe editor ----
@@ -764,15 +743,10 @@ async function openRecipeEditor(id) {
   $('m2-rec-f-code').value = recipe?.code || '';
   $('m2-rec-f-name').value = recipe?.name || '';
   $('m2-rec-f-output-qty').value = recipe?.output_quantity || 1;
+  $('m2-rec-f-output-unit').value = recipe?.output_unit || 'шт';
   $('m2-rec-f-hours').value = recipe?.labor_hours || 0;
   $('m2-rec-f-rate').value = recipe?.labor_rate || 0;
   $('m2-rec-f-desc').value = recipe?.description || '';
-
-  // Селект готовой продукции (только type='product')
-  fillRecOutputOptions();
-  recState.outputValue = recipe?.output_item_id || '';
-  recOutputSelect.set(recState.outputValue);
-  updateOutputUnit();
 
   // Ингредиенты
   recState.ingredients = (recipe?.recipe_ingredients || []).map(i => ({
@@ -798,23 +772,23 @@ async function openRecipeEditor(id) {
 document.querySelectorAll('.m2-rec-close').forEach(b => b.addEventListener('click', () => $('m2-rec-modal').classList.add('hidden')));
 $('m2-rec-new').addEventListener('click', () => openRecipeEditor(null));
 
-function updateOutputUnit() {
-  const p = cache.warehouse.find(w => w.id === recState.outputValue);
-  $('m2-rec-f-output-unit').textContent = p ? p.unit : '—';
-}
 $('m2-rec-f-output-qty').addEventListener('input', () => { updateCycleOut(); validateRecipeForm(); });
-['m2-rec-f-name'].forEach(id => $(id).addEventListener('input', validateRecipeForm));
+$('m2-rec-f-output-unit').addEventListener('input', () => { updateCycleOut(); validateRecipeForm(); });
+$('m2-rec-f-name').addEventListener('input', () => { updateCycleOut(); validateRecipeForm(); });
 
 function updateCycleOut() {
-  const p = cache.warehouse.find(w => w.id === recState.outputValue);
-  const qty = $('m2-rec-f-output-qty').value;
-  $('m2-rec-cycle-out').textContent = p && qty
-    ? `${formatNumber(parseDecimalInput(qty))} ${p.unit} «${p.name}»`
+  const qty = parseDecimalInput($('m2-rec-f-output-qty').value);
+  const unit = $('m2-rec-f-output-unit').value.trim() || 'шт';
+  const name = $('m2-rec-f-name').value.trim();
+  $('m2-rec-cycle-out').textContent = qty && name
+    ? `${formatNumber(qty)} ${unit} «${name}»`
     : '—';
 }
 
 function validateRecipeForm() {
-  const ok = $('m2-rec-f-name').value.trim() && recState.outputValue && (parseDecimalInput($('m2-rec-f-output-qty').value) || 0) > 0;
+  const ok = $('m2-rec-f-name').value.trim()
+    && (parseDecimalInput($('m2-rec-f-output-qty').value) || 0) > 0
+    && $('m2-rec-f-output-unit').value.trim();
   $('m2-rec-save').disabled = !ok;
 }
 
@@ -835,8 +809,7 @@ function renderIngredients() {
     } else {
       const r = cache.recipes.find(x => x.id === ing.sub_recipe_id);
       label = r ? r.name : '(удалено)';
-      const outw = r ? cache.warehouse.find(w => w.id === r.output_item_id) : null;
-      unit = outw?.unit || '';
+      unit = r?.output_unit || '';
       chipClass = 'm2-chip-sub';
       chipText = 'рецепт';
     }
@@ -917,8 +890,7 @@ async function loadRecipeCost(recipeId) {
   const lab = Number(data.labor_cost || 0);
   const total = Number(data.total_cost || 0);
   const unit = Number(data.unit_cost || 0);
-  const p = cache.warehouse.find(w => w.id === recState.outputValue);
-  const unitLabel = p ? p.unit : '';
+  const unitLabel = $('m2-rec-f-output-unit').value.trim() || '';
   $('m2-rec-cost').innerHTML = `
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
       <div>
@@ -950,8 +922,8 @@ $('m2-rec-save').addEventListener('click', async () => {
     const payload = {
       code: $('m2-rec-f-code').value.trim() || null,
       name: $('m2-rec-f-name').value.trim(),
-      output_item_id: recState.outputValue,
       output_quantity: parseDecimalInput($('m2-rec-f-output-qty').value) || 0,
+      output_unit: $('m2-rec-f-output-unit').value.trim() || 'шт',
       labor_hours: parseDecimalInput($('m2-rec-f-hours').value) || 0,
       labor_rate: parseDecimalInput($('m2-rec-f-rate').value) || 0,
       description: $('m2-rec-f-desc').value.trim() || null
@@ -1017,8 +989,8 @@ $('m2-rec-duplicate').addEventListener('click', async () => {
       group_id: groupId,
       code: orig.code ? orig.code + ' (копия)' : null,
       name: orig.name + ' (копия)',
-      output_item_id: orig.output_item_id,
       output_quantity: orig.output_quantity,
+      output_unit: orig.output_unit,
       labor_hours: orig.labor_hours,
       labor_rate: orig.labor_rate,
       description: orig.description
@@ -1080,7 +1052,7 @@ async function loadRuns() {
 
   const { data, error } = await sb
     .from('production_runs')
-    .select('*, recipes(id, name, code, output_item_id, output_quantity)')
+    .select('*, recipes(id, name, code, output_quantity, output_unit)')
     .order('created_at', { ascending: false });
 
   if (error) {
@@ -1126,8 +1098,7 @@ function renderRunRow(r) {
   node.dataset.runId = r.id;
 
   const fld = (name) => node.querySelector(`[data-field="${name}"]`);
-  const out = r.recipes ? cache.warehouse.find(w => w.id === r.recipes.output_item_id) : null;
-  const unit = out?.unit || '';
+  const unit = r.recipes?.output_unit || '';
 
   fld('number').textContent = r.run_number || '—';
 
@@ -1170,7 +1141,6 @@ async function openRunEditor(id) {
   fillRunRecipeOptions();
   runState.recipeValue = run?.recipe_id || '';
   runRecipeSelect.set(runState.recipeValue);
-  // После создания менять рецепт нельзя — блокируем кнопку дропдауна
   $('m2-run-recipe-btn').disabled = !!run;
   $('m2-run-recipe-dd').style.opacity = run ? '0.6' : '';
   $('m2-run-recipe-dd').style.pointerEvents = run ? 'none' : '';
@@ -1181,6 +1151,20 @@ async function openRunEditor(id) {
   $('m2-run-f-actual').value = run?.actual_quantity ?? '';
   $('m2-run-f-actual').disabled = !(run && run.status === 'in_progress');
   $('m2-run-actual-wrap').style.display = (run && ['in_progress','done','cancelled'].includes(run.status)) ? '' : 'none';
+
+  // Плановые дата/время готовности (planned_ready_at)
+  if (run?.planned_ready_at) {
+    const d = new Date(run.planned_ready_at);
+    const pad = (n) => String(n).padStart(2, '0');
+    $('m2-run-f-ready-date').value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
+    $('m2-run-f-ready-time').value = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  } else {
+    $('m2-run-f-ready-date').value = '';
+    $('m2-run-f-ready-time').value = '';
+  }
+  const readyDisabled = run && run.status !== 'planned';
+  $('m2-run-f-ready-date').disabled = readyDisabled;
+  $('m2-run-f-ready-time').disabled = readyDisabled;
 
   $('m2-run-f-comment').value = run?.comment || '';
 
@@ -1202,8 +1186,7 @@ $('m2-run-f-planned').addEventListener('input', async () => { await refreshRequi
 
 function updateRunUnits() {
   const r = cache.recipes.find(x => x.id === runState.recipeValue);
-  const out = r ? cache.warehouse.find(w => w.id === r.output_item_id) : null;
-  const unit = out?.unit || '—';
+  const unit = r?.output_unit || '—';
   $('m2-run-f-planned-unit').textContent = unit;
   $('m2-run-f-actual-unit').textContent = unit;
 }
@@ -1292,6 +1275,16 @@ function validateRunForm() {
   $('m2-run-save').disabled = !ok;
 }
 
+// Собирает planned_ready_at из двух полей (дата+время) в ISO или null
+function collectReadyAt() {
+  const d = $('m2-run-f-ready-date').value;
+  const t = $('m2-run-f-ready-time').value;
+  if (!d) return null;
+  const time = t || '00:00';
+  const dt = new Date(`${d}T${time}`);
+  return Number.isNaN(dt.getTime()) ? null : dt.toISOString();
+}
+
 $('m2-run-save').addEventListener('click', async () => {
   const btn = $('m2-run-save');
   btn.disabled = true;
@@ -1300,6 +1293,7 @@ $('m2-run-save').addEventListener('click', async () => {
     const payload = {
       recipe_id: runState.recipeValue,
       planned_quantity: parseDecimalInput($('m2-run-f-planned').value) || 0,
+      planned_ready_at: collectReadyAt(),
       comment: $('m2-run-f-comment').value.trim() || null
     };
 
