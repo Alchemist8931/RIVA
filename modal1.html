@@ -92,13 +92,11 @@
 ============================================================ -->
 <template id="m1-wh-row-tpl">
   <article class="m1-row m1-row--warehouse" data-wh-id="">
-    <span class="m1-row__head">
-      <span class="m1-row__type"   data-field="type"></span>
-      <span class="m1-row__name"   data-field="name"></span>
-    </span>
-    <span class="m1-row__stat"      data-field="quantity"></span>
-    <span class="m1-row__stat"      data-field="price"></span>
-    <span class="m1-row__stat m1-row__total" data-field="sum"></span>
+    <span class="m1-badge"          data-field="type"></span>
+    <span class="m1-row__name"      data-field="name"></span>
+    <span class="m1-row__stat m1-row__stat--num"   data-field="quantity"></span>
+    <span class="m1-row__stat m1-row__stat--num"   data-field="price"></span>
+    <span class="m1-row__stat m1-row__stat--num m1-row__total" data-field="sum"></span>
     <span class="m1-row__comment"   data-field="comment"></span>
     <span class="m1-row__date"      data-field="date"></span>
   </article>
@@ -130,20 +128,41 @@
         <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
       </button>
     </div>
+    
     <div class="p-5 space-y-3">
-      <div class="grid grid-cols-2 gap-3">
+      
+      <div class="p-5 space-y-3">
+      <!-- Позиция в одну строку: артикул · название · кол-во · ед. · цена -->
+      <div class="m1-wh-oi-row">
+        <input id="m1-wh-f-article" type="text" maxlength="100" placeholder="Артикул"
+          class="m1-oi-input" autocomplete="off">
+        <input id="m1-wh-f-name" type="text" maxlength="300" placeholder="Название *"
+          class="m1-oi-input">
+        <input id="m1-wh-f-qty" type="text" inputmode="decimal" placeholder="Кол-во"
+          class="m1-oi-input m1-oi-input--center">
+        <input id="m1-wh-f-unit" type="text" maxlength="20" placeholder="ед."
+          class="m1-oi-input m1-oi-input--center">
+        <input id="m1-wh-f-price" type="text" inputmode="decimal" placeholder="Цена"
+          class="m1-oi-input m1-oi-input--right">
+      </div>
+
+      <!-- Комментарий + тип позиции справа -->
+      <div class="m1-wh-cm-row">
         <label class="block">
-          <span class="text-xs text-fg-muted block mb-1.5">Артикул</span>
-          <input id="m1-wh-f-article" type="text" maxlength="100" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+          <span class="text-xs text-fg-muted block mb-1.5">Комментарий</span>
+          <textarea id="m1-wh-f-comment" rows="2" maxlength="1000"
+            class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm resize-none"></textarea>
         </label>
         <label class="block">
-          <span class="text-xs text-fg-muted block mb-1.5">Тип *</span>
-          <select id="m1-wh-f-type" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+          <span class="text-xs text-fg-muted block mb-1.5">Тип позиции *</span>
+          <select id="m1-wh-f-type" class="m1-select w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
             <option value="material">Материал</option>
             <option value="product">Готовая продукция</option>
           </select>
         </label>
       </div>
+    </div>
+      
       <label class="block">
         <span class="text-xs text-fg-muted block mb-1.5">Название *</span>
         <input id="m1-wh-f-name" type="text" maxlength="300" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
@@ -167,6 +186,7 @@
         <textarea id="m1-wh-f-comment" rows="2" maxlength="1000" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm resize-none"></textarea>
       </label>
     </div>
+    
     <div class="px-5 py-4 border-t border-line flex items-center justify-between gap-2">
       <button id="m1-wh-delete" class="hidden px-4 py-2 rounded-lg text-sm text-state-error hover:bg-surface-alt transition-colors">Удалить</button>
       <div class="flex items-center gap-2 ml-auto">
@@ -352,16 +372,27 @@
   }
   .m1-row.is-empty { opacity: 0.45; }
 
-  /* Грид для склада: head · остаток · цена · сумма · комментарий · дата */
+  /* Грид для склада: тип-чип · название · кол-во · цена · сумма · комментарий · дата.
+     Числовые колонки (кол-во/цена/сумма) идут плотной группой — между ними gap уменьшен вдвое. */
   .m1-row--warehouse {
     grid-template-columns:
-      /* тип + название */ minmax(0, 1fr)
-      /* остаток       */ 120px
-      /* цена          */ 110px
-      /* сумма         */ 130px
+      /* тип (чип)     */ 120px
+      /* название      */ minmax(0, 1fr)
+      /* кол-во        */ 110px
+      /* цена          */ 100px
+      /* сумма         */ 120px
       /* комментарий   */ minmax(0, 1fr)
       /* дата          */ 130px;
+    column-gap: 12px;
   }
+  /* Между числовыми колонками — половинный отступ (6px вместо 12px).
+     Сдвигаем цену и сумму влево на 6px, чтобы визуально сжать группу. */
+  .m1-row--warehouse .m1-row__stat--num { margin-left: -6px; }
+  .m1-row--warehouse .m1-row__stat--num:first-of-type { margin-left: 0; }
+
+  /* Чип типа позиции склада */
+  .m1-badge-material { --badge-c: #2563EB; }
+  .m1-badge-product  { --badge-c: #15803D; }
 
   /* Грид для заказа снабжения (как у продаж: номер · статус · оплата · поставщик · поз. · сумма · дата) */
   .m1-row--order {
@@ -685,6 +716,24 @@
     transform: translate(2px, 2px);
     box-shadow: 2px 2px 0px var(--color-default);
   }
+
+  /* Редактор позиции склада: строка полей + строка "комментарий | тип" */
+  .m1-wh-oi-row {
+    display: grid;
+    grid-template-columns: 90px minmax(0,1fr) 72px 64px 96px;
+    gap: 8px;
+    align-items: center;
+  }
+  .m1-wh-cm-row {
+    display: grid;
+    grid-template-columns: minmax(0,1fr) 200px;
+    gap: 12px;
+    align-items: start;
+  }
+  @media (max-width: 600px) {
+    .m1-wh-oi-row { grid-template-columns: 1fr 1fr; }
+    .m1-wh-cm-row { grid-template-columns: 1fr; }
+  }
   
 </style>
 
@@ -797,15 +846,17 @@ function renderWarehouseRow(x) {
   const qty = Number(x.quantity || 0);
   const price = Number(x.price || 0);
   const sum = qty * price;
-  const typeLabel = x.type === 'material' ? 'материал' : 'продукция';
   const commentText = x.comment || '';
 
   if (qty === 0) node.classList.add('is-empty');
 
-  fld('type').textContent = x.article ? `${typeLabel} · ${x.article}` : typeLabel;
+  // Тип позиции — чип (как статусы в заказах)
+  const tp = fld('type');
+  tp.textContent = x.type === 'material' ? 'Материал' : 'Продукция';
+  tp.classList.add('m1-badge-' + (x.type === 'material' ? 'material' : 'product'));
 
   const name = fld('name');
-  name.textContent = x.name || '—';
+  name.textContent = x.article ? `${x.name} · ${x.article}` : (x.name || '—');
   name.title = x.name || '';
 
   fld('quantity').textContent = formatQuantity(qty, x.unit);
@@ -817,7 +868,7 @@ function renderWarehouseRow(x) {
     cm.textContent = commentText;
     cm.title = commentText;
   } else {
-    cm.innerHTML = '&nbsp;';   // место зарезервировано, чтобы дата не уезжала
+    cm.innerHTML = '&nbsp;';
   }
 
   fld('date').textContent = formatDate(new Date(x.updated_at || x.created_at));
@@ -835,8 +886,8 @@ function openWarehouseEditor(id) {
   $('m1-wh-f-type').value = item?.type || 'material';
   $('m1-wh-f-name').value = item?.name || '';
   $('m1-wh-f-unit').value = item?.unit || 'шт';
-  $('m1-wh-f-qty').value = item?.quantity ?? '';
-  $('m1-wh-f-price').value = item?.price ?? '';
+  $('m1-wh-f-qty').value = item?.quantity != null ? formatDecimal2(item.quantity) : '';
+  $('m1-wh-f-price').value = item?.price != null ? formatDecimal2(item.price) : '';
   $('m1-wh-f-comment').value = item?.comment || '';
   $('m1-wh-delete').classList.toggle('hidden', !id);
   validateWhForm();
@@ -863,8 +914,8 @@ $('m1-wh-save').addEventListener('click', async () => {
       type: $('m1-wh-f-type').value,
       name: $('m1-wh-f-name').value.trim(),
       unit: $('m1-wh-f-unit').value.trim(),
-      quantity: Number($('m1-wh-f-qty').value || 0),
-      price: $('m1-wh-f-price').value === '' ? null : Number($('m1-wh-f-price').value),
+      quantity: parseDecimalInput($('m1-wh-f-qty').value) ?? 0,
+      price: parseDecimalInput($('m1-wh-f-price').value),
       comment: $('m1-wh-f-comment').value.trim() || null
     };
 
