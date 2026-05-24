@@ -412,7 +412,8 @@
   ============================================================ */
   .m2-badge,
   .m2-chip-sub,
-  .m2-chip-mat {
+  .m2-chip-mat,
+  .m2-chip-prod {
     --m2-badge-pct: 13%;
     --m2-badge-blur: 6px;
 
@@ -437,8 +438,9 @@
   .m2-badge-done        { --badge-c: #15803D; }
   .m2-badge-cancelled   { --badge-c: #DC2626; }
 
-  .m2-chip-sub { --badge-c: #4338CA; }
-  .m2-chip-mat { --badge-c: #15803D; }
+  .m2-chip-sub  { --badge-c: #4338CA; }
+  .m2-chip-mat  { --badge-c: #15803D; }
+  .m2-chip-prod { --badge-c: #D97706; }
 
   /* ============================================================
      ТУЛБАР ПОДСТРАНИЦ
@@ -852,8 +854,9 @@ function renderIngredients() {
       const w = cache.warehouse.find(x => x.id === ing.material_id);
       label = w ? w.name : '(удалено)';
       unit = w?.unit || '';
-      chipClass = 'm2-chip-mat';
-      chipText = w?.type === 'product' ? 'продукция' : 'материал';
+      const isProduct = w?.type === 'product';
+      chipClass = isProduct ? 'm2-chip-prod' : 'm2-chip-mat';
+      chipText = isProduct ? 'продукция' : 'материал';
     } else {
       const r = cache.recipes.find(x => x.id === ing.sub_recipe_id);
       label = r ? r.name : '(удалено)';
