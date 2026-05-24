@@ -25,10 +25,10 @@
         <input id="m1-wh-search" type="search" placeholder="Поиск по артикулу или названию…"
           class="m1-bar-ctrl w-full rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors text-sm">
       </div>
-      <div class="m1-filter-group flex items-center gap-1 rounded-xl bg-surface-alt p-1 border border-line">
-        <button class="m1-wh-filter px-3 text-xs rounded-lg transition-colors" data-type="all">Все</button>
-        <button class="m1-wh-filter px-3 text-xs rounded-lg transition-colors" data-type="material">Материалы</button>
-        <button class="m1-wh-filter px-3 text-xs rounded-lg transition-colors" data-type="product">Продукция</button>
+      <div class="m1-filter-group">
+        <button class="m1-wh-filter" data-type="all">ВСЕ</button>
+        <button class="m1-wh-filter" data-type="material">МАТЕРИАЛЫ</button>
+        <button class="m1-wh-filter" data-type="product">ПРОДУКЦИЯ</button>
       </div>
       <label class="flex items-center gap-2 text-xs text-fg-secondary cursor-pointer select-none">
         <div class="uiverse-wrapper">
@@ -131,22 +131,31 @@
     
     <div class="p-5 space-y-3">
       
-      <div class="p-5 space-y-3">
-      <!-- Позиция в одну строку: артикул · название · кол-во · ед. · цена -->
-      <div class="m1-wh-oi-row">
-        <input id="m1-wh-f-article" type="text" maxlength="100" placeholder="Артикул"
-          class="m1-oi-input" autocomplete="off">
-        <input id="m1-wh-f-name" type="text" maxlength="300" placeholder="Название *"
-          class="m1-oi-input">
-        <input id="m1-wh-f-qty" type="text" inputmode="decimal" placeholder="Кол-во"
-          class="m1-oi-input m1-oi-input--center">
-        <input id="m1-wh-f-unit" type="text" maxlength="20" placeholder="ед."
-          class="m1-oi-input m1-oi-input--center">
-        <input id="m1-wh-f-price" type="text" inputmode="decimal" placeholder="Цена"
-          class="m1-oi-input m1-oi-input--right">
+     <div class="p-5 space-y-4">
+
+      <!-- Позиция -->
+      <div class="border border-line rounded-xl overflow-hidden">
+        <div class="px-4 py-3 bg-surface-alt border-b border-line flex items-center justify-between">
+          <span class="text-sm font-medium">Позиция</span>
+          <span class="text-xs text-fg-muted">артикул · название · кол-во · ед. · цена</span>
+        </div>
+        <div class="p-4">
+          <div class="m1-wh-oi-row">
+            <input id="m1-wh-f-article" type="text" maxlength="100" placeholder="Артикул"
+              class="m1-oi-input" autocomplete="off">
+            <input id="m1-wh-f-name" type="text" maxlength="300" placeholder="Название *"
+              class="m1-oi-input">
+            <input id="m1-wh-f-qty" type="text" inputmode="decimal" placeholder="Кол-во"
+              class="m1-oi-input m1-oi-input--center">
+            <input id="m1-wh-f-unit" type="text" maxlength="20" placeholder="ед."
+              class="m1-oi-input m1-oi-input--center">
+            <input id="m1-wh-f-price" type="text" inputmode="decimal" placeholder="Цена"
+              class="m1-oi-input m1-oi-input--right">
+          </div>
+        </div>
       </div>
 
-      <!-- Комментарий + тип позиции справа -->
+      <!-- Комментарий + тип -->
       <div class="m1-wh-cm-row">
         <label class="block">
           <span class="text-xs text-fg-muted block mb-1.5">Комментарий</span>
@@ -161,8 +170,7 @@
           </select>
         </label>
       </div>
-    </div>
-      
+
     </div>
     
     <div class="px-5 py-4 border-t border-line flex items-center justify-between gap-2">
@@ -306,9 +314,37 @@
     box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 0 0 1px rgba(0,0,0,.04);
   }
 
-  .m1-wh-filter.active { background: var(--bg); color: var(--fg); box-shadow: 0 1px 2px rgba(0,0,0,.04); }
-  .m1-wh-filter:not(.active) { color: var(--fg-muted); }
-  .m1-wh-filter:not(.active):hover { color: var(--fg); }
+  /* Группа фильтра — segmented control как .m1-subnav */
+  .m1-filter-group {
+    height: var(--m1-bar-h, 36px);
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: var(--ctrl-radius, 12px);
+    padding: 4px;
+    display: inline-flex;
+    align-items: stretch;
+    gap: 0;
+  }
+  .m1-filter-group .m1-wh-filter {
+    padding: 0 14px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: calc(var(--ctrl-radius, 12px) - 4px);
+    color: var(--fg-muted);
+    font-size: 13px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    transition: all .15s ease-in-out;
+  }
+  .m1-filter-group .m1-wh-filter:hover { color: var(--fg); }
+  .m1-filter-group .m1-wh-filter.active {
+    background: var(--bg);
+    color: var(--fg);
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 0 0 1px rgba(0,0,0,.04);
+  }
 
   /* ============================================================
      ШАБЛОН СТРОКИ (modal1 — Склад и Заказы снабжения)
@@ -600,13 +636,6 @@
      Группа фильтра: padding 4px + кнопки 28px = 36px (--m1-bar-h)
   ============================================================ */
   :root { --m1-bar-h: 36px; }
-
-  .m1-filter-group { height: var(--m1-bar-h); }
-  .m1-filter-group .m1-wh-filter {
-    height: 28px;
-    display: inline-flex;
-    align-items: center;
-  }
 
   .m1-bar-ctrl {
     height: var(--m1-bar-h);
