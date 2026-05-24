@@ -24,6 +24,19 @@
         <input id="m2-rec-search" type="search" placeholder="Поиск по коду или названию…"
           class="m2-bar-ctrl w-full rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors text-sm">
       </div>
+      <label class="flex items-center gap-2 text-xs text-fg-secondary cursor-pointer select-none">
+        <div class="uiverse-wrapper">
+          <span class="cb-container">
+            <input type="checkbox" id="m2-rec-producible" />
+            <span class="checkmark">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
+                <polyline points="20 6 9 17 4 12"></polyline>
+              </svg>
+            </span>
+          </span>
+        </div>
+        <span>Можно произвести</span>
+      </label>
       <button id="m2-rec-new" class="btn-primary m2-bar-ctrl rounded-xl text-sm font-medium ml-auto" style="padding-left:16px; padding-right:16px;">
         + Новый рецепт
       </button>
@@ -84,6 +97,21 @@
     <span class="m2-row__stat"     data-field="hours"></span>
     <span class="m2-row__product"  data-field="product"></span>
     <span class="m2-badge"         data-field="chip"></span>
+  </article>
+</template>
+
+<!-- ============================================================
+     ШАБЛОН СТРОКИ РЕЦЕПТА — режим «Можно произвести»
+============================================================ -->
+<template id="m2-recipe-prod-row-tpl">
+  <article class="m2-row m2-row--recipe-prod" data-rec-id="">
+    <span class="m2-row__code"   data-field="code"></span>
+    <span class="m2-row__title"  data-field="name"></span>
+    <div class="m2-prod-bar-wrap">
+      <div class="m2-prod-bar"><div class="m2-prod-bar-fill" data-field="bar"></div></div>
+      <div class="m2-prod-sub" data-field="limit"></div>
+    </div>
+    <span class="m2-prod-qty" data-field="qty"></span>
   </article>
 </template>
 
@@ -356,6 +384,16 @@
       90px;
   }
 
+  /* Режим «Можно произвести»: код · название · шкала · количество */
+  .m2-row--recipe-prod {
+    grid-template-columns:
+      110px
+      minmax(0, 1.4fr)
+      minmax(160px, 2fr)
+      140px;
+    min-height: 48px;
+  }
+
   .m2-row--run {
     grid-template-columns:
       170px
@@ -407,6 +445,36 @@
     white-space: nowrap;
   }
 
+  /* Шкала производственной мощности */
+  .m2-prod-bar-wrap { min-width: 0; }
+  .m2-prod-bar {
+    position: relative;
+    height: 8px; border-radius: 6px;
+    background: color-mix(in srgb, var(--fg) 10%, transparent);
+    overflow: hidden;
+  }
+  .m2-prod-bar-fill {
+    position: absolute; left: 0; top: 0; bottom: 0;
+    border-radius: 6px;
+    transition: width .25s ease, background .25s ease;
+  }
+  .m2-prod-sub {
+    font-size: 12px;
+    color: var(--fg-muted);
+    margin-top: 4px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .m2-prod-qty {
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--fg);
+    text-align: right;
+    white-space: nowrap;
+  }
+  .m2-prod-qty--zero { color: #DC2626; }
+
   /* ============================================================
      БЕЙДЖИ И ЧИПЫ
   ============================================================ */
@@ -453,6 +521,70 @@
     padding-bottom: 0;
   }
   input.m2-bar-ctrl { padding-left: 14px; padding-right: 14px; }
+
+  /* ============================================================
+     ЧЕКБОКС (uiverse) — адаптирован под тему приложения (как в modal1)
+  ============================================================ */
+  .uiverse-wrapper {
+    --size: 22px;
+    --color-default: var(--line);
+    --color-active: var(--fg);
+    --transition: 0.4s cubic-bezier(0.68, -0.6, 0.32, 1.6);
+    display: inline-flex;
+  }
+  .cb-container {
+    display: block;
+    position: relative;
+    cursor: pointer;
+    width: var(--size);
+    height: var(--size);
+    user-select: none;
+  }
+  .cb-container input {
+    position: absolute;
+    opacity: 0;
+    cursor: pointer;
+    height: 0;
+    width: 0;
+  }
+  .checkmark {
+    position: absolute;
+    top: 0; left: 0;
+    height: 100%; width: 100%;
+    background-color: var(--bg);
+    border: 3px solid var(--color-default);
+    border-radius: 7px;
+    transition: var(--transition);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    box-shadow: 2px 2px 0px var(--color-default);
+  }
+  .checkmark svg {
+    width: 15px;
+    height: 15px;
+    color: var(--bg);
+    transform: scale(0) rotate(-45deg);
+    transition: var(--transition);
+    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
+  }
+  .cb-container:hover .checkmark {
+    transform: translate(-2px, -2px);
+    box-shadow: 4px 4px 0px var(--color-default);
+  }
+  .cb-container input:checked ~ .checkmark {
+    background-color: var(--color-active);
+    border-color: var(--color-active);
+    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.15);
+    transform: scale(1.1) rotate(5deg);
+  }
+  .cb-container input:checked ~ .checkmark svg {
+    transform: scale(1) rotate(0deg);
+  }
+  .cb-container:active .checkmark {
+    transform: translate(2px, 2px);
+    box-shadow: 2px 2px 0px var(--color-default);
+  }
 
   /* ============================================================
      КАСТОМНЫЙ ДРОПДАУН
@@ -580,15 +712,21 @@
       gap: 10px;
     }
     .m2-row__product { display: none; }
+    .m2-row--recipe-prod {
+      grid-template-columns: auto minmax(0, 1fr) minmax(120px, 1.4fr) auto;
+      gap: 10px;
+    }
   }
   @media (max-width: 700px) {
     .m2-row--recipe,
-    .m2-row--run {
+    .m2-row--run,
+    .m2-row--recipe-prod {
       grid-template-columns: 1fr;
       gap: 4px;
       padding: 12px 14px;
     }
     .m2-row__date, .m2-row__planfact { text-align: left; }
+    .m2-prod-qty { text-align: left; }
   }
 </style>
 
@@ -703,10 +841,40 @@ async function refreshCache() {
 const recState = {
   cached: [],
   editing: null,
-  ingredients: []
+  ingredients: [],
+  producibleMode: false,
+  producible: {}   // recipe_id -> { producible, limiting_material, has_materials }
 };
 
 $('m2-rec-search').addEventListener('input', renderRecipes);
+
+// Переключатель режима «Можно произвести»
+$('m2-rec-producible').addEventListener('change', async (e) => {
+  recState.producibleMode = e.target.checked;
+  if (recState.producibleMode && Object.keys(recState.producible).length === 0) {
+    await loadProducible();
+  }
+  renderRecipes();
+});
+
+async function loadProducible() {
+  try {
+    const { data, error } = await sb.rpc('get_recipes_producible');
+    if (error) throw error;
+    const map = {};
+    (data || []).forEach(row => {
+      map[row.recipe_id] = {
+        producible: Number(row.producible || 0),
+        limiting: row.limiting_material || null,
+        hasMaterials: !!row.has_materials
+      };
+    });
+    recState.producible = map;
+  } catch (e) {
+    toast('Не удалось рассчитать производственную мощность: ' + e.message, 'error');
+    recState.producible = {};
+  }
+}
 
 async function loadRecipes() {
   await refreshCache();
@@ -721,6 +889,11 @@ async function loadRecipes() {
     return;
   }
   recState.cached = data || [];
+
+  // если включён режим мощности — пересчитываем (остатки могли измениться)
+  if (recState.producibleMode) {
+    await loadProducible();
+  }
   renderRecipes();
 }
 
@@ -737,7 +910,17 @@ function renderRecipes() {
   const container = $('m2-rec-list');
   container.innerHTML = '';
   const frag = document.createDocumentFragment();
-  list.forEach(r => frag.appendChild(renderRecipeRow(r)));
+
+  if (recState.producibleMode) {
+    // максимум по списку — для нормировки шкалы
+    const maxProducible = Math.max(
+      1,
+      ...list.map(r => recState.producible[r.id]?.producible || 0)
+    );
+    list.forEach(r => frag.appendChild(renderRecipeProdRow(r, maxProducible)));
+  } else {
+    list.forEach(r => frag.appendChild(renderRecipeRow(r)));
+  }
   container.appendChild(frag);
 }
 
@@ -773,6 +956,51 @@ function renderRecipeRow(r) {
     chip.title = 'Содержит вложенные рецепты';
     chip.classList.add('m2-chip-sub');
   }
+
+  return node;
+}
+
+// Строка рецепта в режиме «Можно произвести»
+function renderRecipeProdRow(r, maxProducible) {
+  const tpl = document.getElementById('m2-recipe-prod-row-tpl');
+  const node = tpl.content.firstElementChild.cloneNode(true);
+  node.dataset.recId = r.id;
+
+  const fld = (name) => node.querySelector(`[data-field="${name}"]`);
+
+  fld('code').textContent = r.code || '—';
+
+  const name = fld('name');
+  name.textContent = r.name || '—';
+  name.title = r.name || '';
+
+  const info = recState.producible[r.id] || { producible: 0, limiting: null, hasMaterials: false };
+  const qty = Number(info.producible || 0);
+  const unit = r.output_unit || '';
+
+  // ширина шкалы относительно максимума по списку
+  const pct = Math.max(0, Math.min(100, Math.round((qty / maxProducible) * 100)));
+  // цвет: 0 — красный, мало (<25% от макс) — янтарный, иначе зелёный
+  const color = qty <= 0 ? '#DC2626' : (pct < 25 ? '#D97706' : '#15803D');
+  const bar = fld('bar');
+  bar.style.width = pct + '%';
+  bar.style.background = color;
+
+  const limit = fld('limit');
+  if (!info.hasMaterials) {
+    limit.textContent = 'Нет материалов в составе';
+  } else if (qty <= 0) {
+    limit.textContent = info.limiting ? `Не хватает: ${info.limiting}` : 'Недостаточно материалов';
+  } else if (info.limiting) {
+    limit.textContent = `Ограничивает: ${info.limiting}`;
+  } else {
+    limit.textContent = '';
+  }
+  limit.title = limit.textContent;
+
+  const q = fld('qty');
+  q.textContent = `${formatNumber(qty)} ${unit}`.trim();
+  if (qty <= 0) q.classList.add('m2-prod-qty--zero');
 
   return node;
 }
@@ -1128,6 +1356,8 @@ $('m2-rec-save').addEventListener('click', async () => {
 
     toast('Рецепт сохранён', 'success');
     recState.editing = recipeId;
+    // данные мощности устарели — сбрасываем кэш расчёта
+    recState.producible = {};
     await loadRecipes();
     loadRecipeCost(recipeId);
     $('m2-rec-delete').classList.remove('hidden');
@@ -1147,6 +1377,7 @@ $('m2-rec-delete').addEventListener('click', async () => {
     const { error } = await sb.from('recipes').delete().eq('id', recState.editing);
     if (error) throw error;
     toast('Рецепт удалён', 'success');
+    recState.producible = {};
     $('m2-rec-modal').classList.add('hidden');
     await loadRecipes();
   } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
@@ -1182,6 +1413,7 @@ $('m2-rec-duplicate').addEventListener('click', async () => {
     }
 
     toast('Рецепт скопирован', 'success');
+    recState.producible = {};
     $('m2-rec-modal').classList.add('hidden');
     await loadRecipes();
     openRecipeEditor(copy.id);
