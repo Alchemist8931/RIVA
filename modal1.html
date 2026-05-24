@@ -66,13 +66,19 @@
         <input id="m1-ord-search" type="search" placeholder="Поиск по номеру или поставщику…"
           class="m1-bar-ctrl w-full rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors text-sm">
       </div>
-      <select id="m1-ord-status-filter" class="m1-select m1-bar-ctrl rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-        <option value="all">Все статусы</option>
-        <option value="draft">В работе</option>
-        <option value="placed">Заказ размещён</option>
-        <option value="in_transit">Товар в пути</option>
-        <option value="received">На складе</option>
-      </select>
+      <div class="m1-dd m1-bar-ctrl" id="m1-ord-status-dd">
+        <button type="button" class="m1-dd-btn" id="m1-ord-status-btn">
+          <span id="m1-ord-status-label">Все статусы</span>
+          <svg class="m1-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="m1-dd-menu hidden" id="m1-ord-status-menu">
+          <div class="m1-dd-opt" data-value="all">Все статусы</div>
+          <div class="m1-dd-opt" data-value="draft">В работе</div>
+          <div class="m1-dd-opt" data-value="placed">Заказ размещён</div>
+          <div class="m1-dd-opt" data-value="in_transit">Товар в пути</div>
+          <div class="m1-dd-opt" data-value="received">На складе</div>
+        </div>
+      </div>
       <button id="m1-ord-new" class="btn-primary m1-bar-ctrl rounded-xl text-sm font-medium ml-auto" style="padding-left:16px; padding-right:16px;">
         + Новый заказ
       </button>
@@ -742,6 +748,62 @@
     .m1-wh-oi-row { grid-template-columns: 1fr 1fr; }
     .m1-wh-cm-row { grid-template-columns: 1fr; }
   }
+
+  /* ============================================================
+     КАСТОМНЫЙ ДРОПДАУН (фильтр статуса заказа) — раскрытие снизу
+  ============================================================ */
+  .m1-dd { position: relative; display: inline-flex; }
+  .m1-dd-btn {
+    height: var(--m1-bar-h, 36px);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px 0 14px;
+    border-radius: 12px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    color: var(--fg);
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color .15s ease;
+  }
+  .m1-dd-btn:hover { border-color: var(--fg-muted); }
+  .m1-dd.is-open .m1-dd-btn { border-color: var(--fg); }
+  .m1-dd-chev {
+    width: 16px; height: 16px;
+    color: var(--fg-muted);
+    transition: transform .18s ease;
+    flex-shrink: 0;
+  }
+  .m1-dd.is-open .m1-dd-chev { transform: rotate(180deg); }
+
+  .m1-dd-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 100%;
+    z-index: 30;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    padding: 4px;
+  }
+  .m1-dd-opt {
+    padding: 8px 10px;
+    border-radius: 7px;
+    font-size: 13px;
+    color: var(--fg);
+    cursor: pointer;
+    white-space: nowrap;
+    transition: background .12s ease;
+  }
+  .m1-dd-opt:hover { background: var(--bg-alt); }
+  .m1-dd-opt.is-selected {
+    background: var(--bg-alt);
+    font-weight: 600;
+  }
   
 </style>
 
@@ -991,7 +1053,39 @@ function formatDecimal2(num) {
 }
 
 $('m1-ord-search').addEventListener('input', (e) => { ord.search = e.target.value.trim().toLowerCase(); renderOrders(); });
-$('m1-ord-status-filter').addEventListener('change', (e) => { ord.statusFilter = e.target.value; renderOrders(); });
+// ---- Кастомный дропдаун фильтра статуса ----
+(function initStatusDropdown() {
+  const dd    = $('m1-ord-status-dd');
+  const btn   = $('m1-ord-status-btn');
+  const menu  = $('m1-ord-status-menu');
+  const label = $('m1-ord-status-label');
+  if (!dd || !btn || !menu) return;
+
+  const open  = () => { dd.classList.add('is-open'); menu.classList.remove('hidden'); };
+  const close = () => { dd.classList.remove('is-open'); menu.classList.add('hidden'); };
+  const toggle = () => dd.classList.contains('is-open') ? close() : open();
+
+  function markSelected() {
+    menu.querySelectorAll('.m1-dd-opt').forEach(o =>
+      o.classList.toggle('is-selected', o.dataset.value === ord.statusFilter));
+  }
+
+  btn.addEventListener('click', (e) => { e.stopPropagation(); markSelected(); toggle(); });
+
+  menu.addEventListener('click', (e) => {
+    const opt = e.target.closest('.m1-dd-opt');
+    if (!opt) return;
+    ord.statusFilter = opt.dataset.value;
+    label.textContent = opt.textContent;
+    markSelected();
+    close();
+    renderOrders();
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#m1-ord-status-dd')) close();
+  });
+})();
 
 async function loadSuppliersCache() {
   const { data } = await sb.from('suppliers').select('id, name').order('name');
