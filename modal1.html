@@ -141,7 +141,7 @@
       <div class="border border-line rounded-xl overflow-hidden">
         <div class="px-4 py-3 bg-surface-alt border-b border-line flex items-center justify-between">
           <span class="text-sm font-medium">Позиция</span>
-          <span class="text-xs text-fg-muted">артикул · название · кол-во · ед. · цена</span>
+          <span class="text-xs text-fg-muted">артикул · название · кол-во · ед. · цена · сумма</span>
         </div>
         <div class="p-4">
           <div class="m1-oi-row m1-oi-row--wh">
@@ -155,6 +155,8 @@
               class="m1-oi-input m1-oi-input--center">
             <input id="m1-wh-f-price" type="text" inputmode="decimal" placeholder="Цена"
               class="m1-oi-input m1-oi-input--right">
+            <input id="m1-wh-f-sum" type="text" tabindex="-1" readonly placeholder="Сумма"
+              class="m1-oi-input m1-oi-input--right m1-oi-input--readonly">
           </div>
         </div>
       </div>
@@ -813,7 +815,8 @@
       minmax(0, 1fr)  /* наименование */
       72px            /* кол-во */
       64px            /* ед. */
-      96px;           /* цена */
+      96px            /* цена */
+      96px;           /* сумма */
   }
 
   /* Дропдаун на всю ширину (в формах модалок, вместо block-select) */
@@ -979,7 +982,33 @@ function openWarehouseEditor(id) {
   setTimeout(() => $('m1-wh-f-name').focus(), 50);
   wh.typeValue = item?.type || 'material';
   whTypeSelect.set(wh.typeValue);
+  recalcWhSum();
 }
+
+// Пересчёт автосуммы в редакторе позиции склада
+function recalcWhSum() {
+  const qty = parseDecimalInput($('m1-wh-f-qty').value) || 0;
+  const price = parseDecimalInput($('m1-wh-f-price').value) || 0;
+  $('m1-wh-f-sum').value = formatDecimal2(qty * price);
+}
+
+// Кол-во и цена: точка→запятая на лету, округление на blur, пересчёт суммы
+['m1-wh-f-qty', 'm1-wh-f-price'].forEach(id => {
+  const input = $(id);
+  input.addEventListener('input', (e) => {
+    if (e.target.value.includes('.')) {
+      const pos = e.target.selectionStart;
+      e.target.value = e.target.value.replace(/\./g, ',');
+      try { e.target.setSelectionRange(pos, pos); } catch (_) {}
+    }
+    recalcWhSum();
+  });
+  input.addEventListener('blur', (e) => {
+    const n = parseDecimalInput(e.target.value);
+    e.target.value = n == null ? '' : formatDecimal2(n);
+    recalcWhSum();
+  });
+});
 
 $('m1-wh-add').addEventListener('click', () => openWarehouseEditor(null));
 document.querySelectorAll('.m1-wh-close').forEach(b => b.addEventListener('click', () => $('m1-wh-modal').classList.add('hidden')));
