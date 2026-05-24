@@ -1,35 +1,30 @@
 <!-- modal2.html — Страница "Производство". Подстраницы: Рецепты, Партии. -->
 <!-- Доступ: admin, production, management. -->
 
-<section id="m2" class="space-y-6">
+<section id="m2">
 
-  <div class="flex items-center justify-between gap-4 flex-wrap">
-    <div>
-      <h1 class="text-2xl font-medium tracking-tight">Производство</h1>
-      <p class="text-sm text-fg-muted mt-1" id="m2-subtitle">—</p>
+  <div class="flex items-center justify-between gap-4 flex-wrap mb-6">
+    <div class="leading-tight">
+      <h1 class="text-[17px] font-medium tracking-tight">Производство</h1>
+      <p class="text-xs text-fg-muted mt-0.5" id="m2-subtitle">—</p>
     </div>
-    <div id="m2-chat-btn-wrap"></div>
-  </div>
-
-  <div class="flex items-center gap-1 border-b border-line overflow-x-auto">
-    <button class="m2-tab px-4 py-3 text-sm text-fg-muted hover:text-fg transition-colors relative whitespace-nowrap" data-tab="recipes">
-      Рецепты
-      <span class="m2-tab-bar"></span>
-    </button>
-    <button class="m2-tab px-4 py-3 text-sm text-fg-muted hover:text-fg transition-colors relative whitespace-nowrap" data-tab="runs">
-      Партии
-      <span class="m2-tab-bar"></span>
-    </button>
+    <nav class="m2-subnav" id="m2-subnav">
+      <button class="m2-tab active" data-tab="recipes">Рецепты</button>
+      <button class="m2-tab" data-tab="runs">Партии</button>
+    </nav>
   </div>
 
   <!-- =========================
        RECIPES
   ========================== -->
   <div class="m2-panel" data-panel="recipes">
-    <div class="bg-surface rounded-2xl border border-line p-4 mb-5 flex flex-wrap items-center gap-3">
-      <input id="m2-rec-search" type="search" placeholder="Поиск по коду или названию…"
-        class="flex-1 min-w-[180px] px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-      <button id="m2-rec-new" class="btn-primary px-4 py-2.5 rounded-xl text-sm font-medium ml-auto">
+
+    <div class="bg-surface rounded-2xl border border-line mb-5 flex flex-wrap items-center" style="padding:10px; gap:10px;">
+      <div class="flex-1 min-w-[180px]">
+        <input id="m2-rec-search" type="search" placeholder="Поиск по коду или названию…"
+          class="m2-bar-ctrl w-full rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors text-sm">
+      </div>
+      <button id="m2-rec-new" class="btn-primary m2-bar-ctrl rounded-xl text-sm font-medium ml-auto" style="padding-left:16px; padding-right:16px;">
         + Новый рецепт
       </button>
     </div>
@@ -45,17 +40,26 @@
        RUNS
   ========================== -->
   <div class="m2-panel hidden" data-panel="runs">
-    <div class="bg-surface rounded-2xl border border-line p-4 mb-5 flex flex-wrap items-center gap-3">
-      <input id="m2-run-search" type="search" placeholder="Поиск по номеру или рецепту…"
-        class="flex-1 min-w-[180px] px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-      <select id="m2-run-status-filter" class="px-3 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-        <option value="all">Все статусы</option>
-        <option value="planned">Запланировано</option>
-        <option value="in_progress">В работе</option>
-        <option value="done">Завершено</option>
-        <option value="cancelled">Отменено</option>
-      </select>
-      <button id="m2-run-new" class="btn-primary px-4 py-2.5 rounded-xl text-sm font-medium ml-auto">
+
+    <div class="bg-surface rounded-2xl border border-line mb-5 flex flex-wrap items-center" style="padding:10px; gap:10px;">
+      <div class="flex-1 min-w-[180px]">
+        <input id="m2-run-search" type="search" placeholder="Поиск по номеру или рецепту…"
+          class="m2-bar-ctrl w-full rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors text-sm">
+      </div>
+      <div class="m2-dd m2-bar-ctrl" id="m2-run-status-dd">
+        <button type="button" class="m2-dd-btn" id="m2-run-status-btn">
+          <span id="m2-run-status-label">Все статусы</span>
+          <svg class="m2-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+        </button>
+        <div class="m2-dd-menu hidden" id="m2-run-status-menu">
+          <div class="m2-dd-opt" data-value="all">Все статусы</div>
+          <div class="m2-dd-opt" data-value="planned">Запланировано</div>
+          <div class="m2-dd-opt" data-value="in_progress">В работе</div>
+          <div class="m2-dd-opt" data-value="done">Завершено</div>
+          <div class="m2-dd-opt" data-value="cancelled">Отменено</div>
+        </div>
+      </div>
+      <button id="m2-run-new" class="btn-primary m2-bar-ctrl rounded-xl text-sm font-medium ml-auto" style="padding-left:16px; padding-right:16px;">
         + Новая партия
       </button>
     </div>
@@ -70,7 +74,6 @@
 
 <!-- ============================================================
      ШАБЛОН СТРОКИ РЕЦЕПТА — используется на подстранице "Рецепты".
-     Каждое поле помечено data-field="...", на него ссылается JS.
 ============================================================ -->
 <template id="m2-recipe-row-tpl">
   <article class="m2-row m2-row--recipe" data-rec-id="">
@@ -80,7 +83,7 @@
     <span class="m2-row__stat"     data-field="ingredients"></span>
     <span class="m2-row__stat"     data-field="hours"></span>
     <span class="m2-row__product"  data-field="product"></span>
-    <span class="m2-row__chip"     data-field="chip"></span>
+    <span class="m2-badge"         data-field="chip"></span>
   </article>
 </template>
 
@@ -90,7 +93,7 @@
 <template id="m2-run-row-tpl">
   <article class="m2-row m2-row--run" data-run-id="">
     <span class="m2-row__code"     data-field="number"></span>
-    <span class="m2-badge"          data-field="status"></span>
+    <span class="m2-badge"         data-field="status"></span>
     <span class="m2-row__title"    data-field="recipe"></span>
     <span class="m2-row__planfact" data-field="planfact"></span>
     <span class="m2-row__date"     data-field="date"></span>
@@ -127,16 +130,20 @@
       <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
         <label class="block md:col-span-2">
           <span class="text-xs text-fg-muted block mb-1.5">Готовая продукция *</span>
-          <select id="m2-rec-f-output" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-            <option value="">— выберите со склада —</option>
-          </select>
+          <div class="m2-dd m2-dd--block" id="m2-rec-output-dd">
+            <button type="button" class="m2-dd-btn m2-dd-btn--block" id="m2-rec-output-btn">
+              <span id="m2-rec-output-label" class="truncate">— выберите со склада —</span>
+              <svg class="m2-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+            </button>
+            <div class="m2-dd-menu hidden" id="m2-rec-output-menu"></div>
+          </div>
           <p class="text-xs text-fg-muted mt-1.5">
             Сначала добавьте продукцию на Склад (тип «Готовая продукция»).
           </p>
         </label>
         <label class="block">
           <span class="text-xs text-fg-muted block mb-1.5">Выход за цикл *</span>
-          <input id="m2-rec-f-output-qty" type="number" step="0.001" min="0.001" value="1" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+          <input id="m2-rec-f-output-qty" type="text" inputmode="decimal" value="1" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
         </label>
         <div>
           <span class="text-xs text-fg-muted block mb-1.5">Ед. изм.</span>
@@ -147,11 +154,11 @@
       <div class="grid grid-cols-2 gap-3">
         <label class="block">
           <span class="text-xs text-fg-muted block mb-1.5">Нормо-часы</span>
-          <input id="m2-rec-f-hours" type="number" step="0.01" min="0" value="0" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+          <input id="m2-rec-f-hours" type="text" inputmode="decimal" value="0" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
         </label>
         <label class="block">
           <span class="text-xs text-fg-muted block mb-1.5">Ставка, ₽/час</span>
-          <input id="m2-rec-f-rate" type="number" step="0.01" min="0" value="0" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+          <input id="m2-rec-f-rate" type="text" inputmode="decimal" value="0" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
         </label>
       </div>
 
@@ -217,23 +224,27 @@
 
       <label class="block">
         <span class="text-xs text-fg-muted block mb-1.5">Рецепт *</span>
-        <select id="m2-run-f-recipe" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-          <option value="">— выберите рецепт —</option>
-        </select>
+        <div class="m2-dd m2-dd--block" id="m2-run-recipe-dd">
+          <button type="button" class="m2-dd-btn m2-dd-btn--block" id="m2-run-recipe-btn">
+            <span id="m2-run-recipe-label" class="truncate">— выберите рецепт —</span>
+            <svg class="m2-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+          </button>
+          <div class="m2-dd-menu hidden" id="m2-run-recipe-menu"></div>
+        </div>
       </label>
 
       <div class="grid grid-cols-2 gap-3">
         <label class="block">
           <span class="text-xs text-fg-muted block mb-1.5">Плановое кол-во *</span>
           <div class="relative">
-            <input id="m2-run-f-planned" type="number" step="0.001" min="0.001" class="w-full px-3 py-2 pr-12 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+            <input id="m2-run-f-planned" type="text" inputmode="decimal" class="w-full px-3 py-2 pr-12 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
             <span id="m2-run-f-planned-unit" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-fg-muted">—</span>
           </div>
         </label>
         <label class="block" id="m2-run-actual-wrap">
           <span class="text-xs text-fg-muted block mb-1.5">Фактическое кол-во</span>
           <div class="relative">
-            <input id="m2-run-f-actual" type="number" step="0.001" min="0" class="w-full px-3 py-2 pr-12 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+            <input id="m2-run-f-actual" type="text" inputmode="decimal" class="w-full px-3 py-2 pr-12 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
             <span id="m2-run-f-actual-unit" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-fg-muted">—</span>
           </div>
         </label>
@@ -261,7 +272,6 @@
     <div class="px-5 py-4 border-t border-line flex items-center justify-between gap-2 flex-wrap">
       <button id="m2-run-delete" class="hidden px-4 py-2 rounded-lg text-sm text-state-error hover:bg-surface-alt transition-colors">Удалить</button>
       <div class="flex items-center gap-2 ml-auto flex-wrap">
-        <!-- Dynamic actions -->
         <div id="m2-run-actions" class="flex items-center gap-2 flex-wrap"></div>
         <button class="m2-run-close btn-secondary px-4 py-2 rounded-lg text-sm">Закрыть</button>
         <button id="m2-run-save" class="btn-primary px-4 py-2 rounded-lg text-sm" disabled>Сохранить</button>
@@ -271,26 +281,40 @@
 </div>
 
 <style>
-  .m2-tab .m2-tab-bar {
-    content: ''; position: absolute; bottom: -1px; left: 0; right: 0; height: 1px;
-    background: var(--fg); transform: scaleX(0); transform-origin: center;
-    transition: transform .2s ease;
+  /* Подстраничная навигация — segmented control как в шапке приложения */
+  .m2-subnav {
+    height: var(--ctrl-h, 38px);
+    background: var(--bg-card);
+    border: 1px solid var(--line);
+    border-radius: var(--ctrl-radius, 12px);
+    padding: 4px;
+    display: inline-flex;
+    align-items: stretch;
+    gap: 0;
   }
-  .m2-tab.active { color: var(--fg); }
-  .m2-tab.active .m2-tab-bar { transform: scaleX(1); }
+  .m2-subnav .m2-tab {
+    padding: 0 14px;
+    border: none;
+    background: none;
+    cursor: pointer;
+    border-radius: calc(var(--ctrl-radius, 12px) - 4px);
+    color: var(--fg-muted);
+    font-size: 13px;
+    white-space: nowrap;
+    display: inline-flex;
+    align-items: center;
+    transition: all .15s ease-in-out;
+  }
+  .m2-subnav .m2-tab:hover { color: var(--fg); }
+  .m2-subnav .m2-tab.active {
+    background: var(--bg);
+    color: var(--fg);
+    font-weight: 600;
+    box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 0 0 1px rgba(0,0,0,.04);
+  }
 
   /* ============================================================
      ШАБЛОН СТРОКИ (modal2 — Рецепты и Партии)
-     Связан с <template id="m2-recipe-row-tpl"> и <template id="m2-run-row-tpl">.
-
-     Главные настройки:
-       --m2-accent         — акцентный цвет темы (по умолчанию = основной текст)
-       --m2-bg-pct         — насыщенность фона карточки   (3%)
-       --m2-bg-hover       — насыщенность на hover        (6%)
-       --m2-border-pct     — насыщенность бордера         (8%)
-       --m2-badge-pct      — насыщенность фона чипов     (13% = +10% к карточке)
-       --m2-blur           — размытие фона карточки      (3px)
-       --m2-badge-blur     — размытие фона чипов         (6px)
   ============================================================ */
   .m2-row {
     --m2-accent: var(--fg);
@@ -309,6 +333,7 @@
     align-items: center;
     gap: 12px;
     padding: 10px 16px;
+    min-height: 44px;
 
     transition: background .15s ease, border-color .15s ease;
     cursor: pointer;
@@ -327,7 +352,7 @@
       /* ингред.     */ 110px
       /* нормо-часы  */ 100px
       /* продукция   */ minmax(0, 1fr)
-      /* чип         */ 80px;
+      /* чип         */ 90px;
   }
 
   /* Грид для партии: номер · статус · рецепт · план/факт · дата */
@@ -340,7 +365,6 @@
       /* дата      */ 180px;
   }
 
-  /* Ячейки строки — единые стили для обоих типов */
   .m2-row__code {
     font-size: 13px;
     font-weight: 500;
@@ -382,13 +406,9 @@
     text-align: right;
     white-space: nowrap;
   }
-  .m2-row__chip { justify-self: end; }
-  .m2-row__chip:empty { display: none; }
 
   /* ============================================================
-     ЧИПЫ И БЕЙДЖИ (статусы партии, чипы ингредиентов в редакторе)
-     Фон/размытие на ~10% сильнее, чем у карточки.
-     Цвет задаётся переменной --badge-c.
+     БЕЙДЖИ И ЧИПЫ — фон/размытие на +10% сильнее карточки
   ============================================================ */
   .m2-badge,
   .m2-chip-sub,
@@ -410,6 +430,7 @@
     backdrop-filter: blur(var(--m2-badge-blur));
     -webkit-backdrop-filter: blur(var(--m2-badge-blur));
   }
+  .m2-badge:empty { display: none; }
 
   /* Статусы партии */
   .m2-badge-planned     { --badge-c: #6B7280; }
@@ -421,6 +442,89 @@
   .m2-chip-sub { --badge-c: #4338CA; }   /* вложенный рецепт — индиго */
   .m2-chip-mat { --badge-c: #15803D; }   /* материал — зелёный */
 
+  /* ============================================================
+     ТУЛБАР ПОДСТРАНИЦ — единая высота контролов
+  ============================================================ */
+  :root { --m2-bar-h: 36px; }
+
+  .m2-bar-ctrl {
+    height: var(--m2-bar-h);
+    padding-top: 0;
+    padding-bottom: 0;
+  }
+  input.m2-bar-ctrl { padding-left: 14px; padding-right: 14px; }
+
+  /* ============================================================
+     КАСТОМНЫЙ ДРОПДАУН — раскрытие снизу (как в modal1)
+  ============================================================ */
+  .m2-dd { position: relative; display: inline-flex; }
+  .m2-dd-btn {
+    height: var(--m2-bar-h, 36px);
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 0 12px 0 14px;
+    border-radius: 12px;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    color: var(--fg);
+    font-size: 13px;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: border-color .15s ease;
+  }
+  .m2-dd-btn:hover { border-color: var(--fg-muted); }
+  .m2-dd.is-open .m2-dd-btn { border-color: var(--fg); }
+  .m2-dd-chev {
+    width: 16px; height: 16px;
+    color: var(--fg-muted);
+    transition: transform .18s ease;
+    flex-shrink: 0;
+  }
+  .m2-dd.is-open .m2-dd-chev { transform: rotate(180deg); }
+
+  .m2-dd-menu {
+    position: absolute;
+    top: calc(100% + 4px);
+    left: 0;
+    min-width: 100%;
+    z-index: 30;
+    max-height: 260px;
+    overflow-y: auto;
+    background: var(--bg);
+    border: 1px solid var(--line);
+    border-radius: 10px;
+    box-shadow: 0 8px 24px rgba(0,0,0,.08);
+    padding: 4px;
+  }
+  .m2-dd-menu::-webkit-scrollbar { width: 4px; }
+  .m2-dd-menu::-webkit-scrollbar-track { background: transparent; }
+  .m2-dd-menu::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
+  .m2-dd-menu:hover::-webkit-scrollbar-thumb { background: var(--fg-muted); }
+  .m2-dd-menu { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+
+  .m2-dd-opt {
+    padding: 8px 10px;
+    border-radius: 7px;
+    font-size: 13px;
+    color: var(--fg);
+    cursor: pointer;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    transition: background .12s ease;
+  }
+  .m2-dd-opt:hover { background: var(--bg-alt); }
+  .m2-dd-opt.is-selected {
+    background: var(--bg-alt);
+    font-weight: 600;
+  }
+
+  /* Дропдаун на всю ширину (в формах модалок) */
+  .m2-dd--block { display: block; }
+  .m2-dd-btn--block { width: 100%; justify-content: space-between; }
+  .m2-dd-btn--block > span { overflow: hidden; text-overflow: ellipsis; }
+
   /* Адаптив */
   @media (max-width: 1024px) {
     .m2-row--recipe,
@@ -428,7 +532,7 @@
       grid-template-columns: auto minmax(0, 1fr) auto auto;
       gap: 10px;
     }
-    .m2-row__product, .m2-row__chip { display: none; }
+    .m2-row__product { display: none; }
   }
   @media (max-width: 700px) {
     .m2-row--recipe,
@@ -461,6 +565,59 @@ if (!canWrite) {
   $('m2-run-new')?.setAttribute('disabled', 'disabled');
 }
 
+// ---- Универсальный кастомный select (раскрытие снизу) ----
+// ids: { dd, btn, menu, label }. Опции живут в menu как .m2-dd-opt[data-value].
+// onChange(value) вызывается при выборе. Возвращает { set(value), setOptions(html) }.
+function initCustomSelect(ids, onChange) {
+  const dd    = $(ids.dd);
+  const btn   = $(ids.btn);
+  const menu  = $(ids.menu);
+  const label = $(ids.label);
+  if (!dd || !btn || !menu) return { set() {}, setOptions() {} };
+
+  const open  = () => { dd.classList.add('is-open'); menu.classList.remove('hidden'); };
+  const close = () => { dd.classList.remove('is-open'); menu.classList.add('hidden'); };
+
+  function mark(value) {
+    menu.querySelectorAll('.m2-dd-opt').forEach(o =>
+      o.classList.toggle('is-selected', o.dataset.value === value));
+  }
+  function set(value) {
+    const opt = menu.querySelector(`.m2-dd-opt[data-value="${(value ?? '').replace(/"/g, '\\"')}"]`);
+    if (opt) label.textContent = opt.textContent;
+    mark(value ?? '');
+  }
+  function setOptions(html) {
+    menu.innerHTML = html;
+  }
+
+  btn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    dd.classList.contains('is-open') ? close() : open();
+  });
+  menu.addEventListener('click', (e) => {
+    const opt = e.target.closest('.m2-dd-opt');
+    if (!opt) return;
+    set(opt.dataset.value);
+    close();
+    onChange?.(opt.dataset.value);
+  });
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('#' + ids.dd)) close();
+  });
+
+  return { set, setOptions };
+}
+
+// ---- Парсинг чисел (запятая/точка) ----
+function parseDecimalInput(str) {
+  if (str == null) return null;
+  const cleaned = String(str).replace(',', '.').replace(/[^\d.]/g, '');
+  if (cleaned === '' || cleaned === '.') return null;
+  const num = parseFloat(cleaned);
+  return Number.isFinite(num) ? num : null;
+}
+
 // ---------- tabs ----------
 function switchTab(name) {
   document.querySelectorAll('.m2-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
@@ -482,8 +639,8 @@ $('m2-run-list').addEventListener('click', (e) => {
 
 // Кэш склада и рецептов для селектов и автокомплита
 const cache = {
-  warehouse: [],    // все позиции склада текущей группы
-  recipes: []       // все рецепты текущей группы
+  warehouse: [],
+  recipes: []
 };
 
 async function refreshCache() {
@@ -500,8 +657,10 @@ async function refreshCache() {
 // ================================================================
 
 const recState = {
+  cached: [],
   editing: null,
-  ingredients: [] // [{kind: 'material'|'sub_recipe', id, quantity, ref: обогащённые данные}]
+  outputValue: '',
+  ingredients: []
 };
 
 $('m2-rec-search').addEventListener('input', renderRecipes);
@@ -576,6 +735,19 @@ function renderRecipeRow(r) {
   return node;
 }
 
+// ---- Кастомный select готовой продукции ----
+const recOutputSelect = initCustomSelect(
+  { dd: 'm2-rec-output-dd', btn: 'm2-rec-output-btn', menu: 'm2-rec-output-menu', label: 'm2-rec-output-label' },
+  (value) => { recState.outputValue = value; updateOutputUnit(); updateCycleOut(); validateRecipeForm(); }
+);
+
+function fillRecOutputOptions() {
+  const products = cache.warehouse.filter(w => w.type === 'product');
+  const opts = ['<div class="m2-dd-opt" data-value="">— выберите со склада —</div>']
+    .concat(products.map(p => `<div class="m2-dd-opt" data-value="${esc(p.id)}">${esc(p.name)}${p.article ? ' (' + esc(p.article) + ')' : ''}</div>`));
+  recOutputSelect.setOptions(opts.join(''));
+}
+
 // ---- Recipe editor ----
 async function openRecipeEditor(id) {
   if (!canWrite) return;
@@ -596,11 +768,10 @@ async function openRecipeEditor(id) {
   $('m2-rec-f-rate').value = recipe?.labor_rate || 0;
   $('m2-rec-f-desc').value = recipe?.description || '';
 
-  // Заполняем селект готовой продукции (только type='product')
-  const products = cache.warehouse.filter(w => w.type === 'product');
-  $('m2-rec-f-output').innerHTML = '<option value="">— выберите со склада —</option>' +
-    products.map(p => `<option value="${esc(p.id)}">${esc(p.name)} ${p.article ? '('+esc(p.article)+')' : ''}</option>`).join('');
-  $('m2-rec-f-output').value = recipe?.output_item_id || '';
+  // Селект готовой продукции (только type='product')
+  fillRecOutputOptions();
+  recState.outputValue = recipe?.output_item_id || '';
+  recOutputSelect.set(recState.outputValue);
   updateOutputUnit();
 
   // Ингредиенты
@@ -613,11 +784,9 @@ async function openRecipeEditor(id) {
   renderIngredients();
   updateCycleOut();
 
-  // Кнопки delete/duplicate
   $('m2-rec-delete').classList.toggle('hidden', !id);
   $('m2-rec-duplicate').classList.toggle('hidden', !id);
 
-  // Себестоимость
   if (id) loadRecipeCost(id);
   else $('m2-rec-cost').textContent = 'Сохраните рецепт, чтобы увидеть себестоимость';
 
@@ -630,24 +799,22 @@ document.querySelectorAll('.m2-rec-close').forEach(b => b.addEventListener('clic
 $('m2-rec-new').addEventListener('click', () => openRecipeEditor(null));
 
 function updateOutputUnit() {
-  const selId = $('m2-rec-f-output').value;
-  const p = cache.warehouse.find(w => w.id === selId);
+  const p = cache.warehouse.find(w => w.id === recState.outputValue);
   $('m2-rec-f-output-unit').textContent = p ? p.unit : '—';
 }
-$('m2-rec-f-output').addEventListener('change', () => { updateOutputUnit(); updateCycleOut(); validateRecipeForm(); });
 $('m2-rec-f-output-qty').addEventListener('input', () => { updateCycleOut(); validateRecipeForm(); });
 ['m2-rec-f-name'].forEach(id => $(id).addEventListener('input', validateRecipeForm));
 
 function updateCycleOut() {
-  const p = cache.warehouse.find(w => w.id === $('m2-rec-f-output').value);
+  const p = cache.warehouse.find(w => w.id === recState.outputValue);
   const qty = $('m2-rec-f-output-qty').value;
   $('m2-rec-cycle-out').textContent = p && qty
-    ? `${formatNumber(qty)} ${p.unit} «${p.name}»`
+    ? `${formatNumber(parseDecimalInput(qty))} ${p.unit} «${p.name}»`
     : '—';
 }
 
 function validateRecipeForm() {
-  const ok = $('m2-rec-f-name').value.trim() && $('m2-rec-f-output').value && Number($('m2-rec-f-output-qty').value) > 0;
+  const ok = $('m2-rec-f-name').value.trim() && recState.outputValue && (parseDecimalInput($('m2-rec-f-output-qty').value) || 0) > 0;
   $('m2-rec-save').disabled = !ok;
 }
 
@@ -678,7 +845,7 @@ function renderIngredients() {
         <span class="m2-badge ${chipClass}">${chipText}</span>
         <div class="min-w-0 flex-1 text-sm truncate">${esc(label)}</div>
         <div class="flex items-center gap-1">
-          <input type="number" step="0.001" min="0.001" value="${ing.quantity}"
+          <input type="text" inputmode="decimal" value="${ing.quantity}"
             class="w-24 px-2 py-1.5 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm text-right"
             data-ing-idx="${i}">
           <span class="text-xs text-fg-muted w-10">${esc(unit)}</span>
@@ -693,7 +860,7 @@ function renderIngredients() {
   el.querySelectorAll('[data-ing-idx]').forEach(input => {
     input.addEventListener('input', () => {
       const i = Number(input.dataset.ingIdx);
-      recState.ingredients[i].quantity = Number(input.value) || 0;
+      recState.ingredients[i].quantity = parseDecimalInput(input.value) || 0;
     });
   });
   el.querySelectorAll('[data-remove-ing]').forEach(btn => {
@@ -707,7 +874,7 @@ function renderIngredients() {
 $('m2-rec-add-material').addEventListener('click', () => {
   const mat = promptChoose('Выберите материал/продукцию со склада:', cache.warehouse.map(w => ({
     value: w.id,
-    label: `${w.name} ${w.article ? '('+w.article+')' : ''} — ${w.unit}`
+    label: `${w.name} ${w.article ? '(' + w.article + ')' : ''} — ${w.unit}`
   })));
   if (!mat) return;
   recState.ingredients.push({ kind: 'material', material_id: mat, sub_recipe_id: null, quantity: 1 });
@@ -722,7 +889,7 @@ $('m2-rec-add-subrecipe').addEventListener('click', () => {
   }
   const sub = promptChoose('Выберите рецепт для вложения:', others.map(r => ({
     value: r.id,
-    label: `${r.name} ${r.code ? '('+r.code+')' : ''}`
+    label: `${r.name} ${r.code ? '(' + r.code + ')' : ''}`
   })));
   if (!sub) return;
   recState.ingredients.push({ kind: 'sub_recipe', material_id: null, sub_recipe_id: sub, quantity: 1 });
@@ -731,7 +898,6 @@ $('m2-rec-add-subrecipe').addEventListener('click', () => {
 
 function promptChoose(title, options) {
   if (options.length === 0) { toast('Список пуст', 'warning'); return null; }
-  // Простой prompt-диалог через встроенный prompt со списком. Нумерованный выбор.
   const listText = options.map((o, i) => `${i + 1}. ${o.label}`).join('\n');
   const raw = prompt(title + '\n\n' + listText + '\n\nВведите номер:');
   if (!raw) return null;
@@ -751,8 +917,7 @@ async function loadRecipeCost(recipeId) {
   const lab = Number(data.labor_cost || 0);
   const total = Number(data.total_cost || 0);
   const unit = Number(data.unit_cost || 0);
-  const outputQty = Number(data.output_quantity || 1);
-  const p = cache.warehouse.find(w => w.id === $('m2-rec-f-output').value);
+  const p = cache.warehouse.find(w => w.id === recState.outputValue);
   const unitLabel = p ? p.unit : '';
   $('m2-rec-cost').innerHTML = `
     <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
@@ -785,10 +950,10 @@ $('m2-rec-save').addEventListener('click', async () => {
     const payload = {
       code: $('m2-rec-f-code').value.trim() || null,
       name: $('m2-rec-f-name').value.trim(),
-      output_item_id: $('m2-rec-f-output').value,
-      output_quantity: Number($('m2-rec-f-output-qty').value),
-      labor_hours: Number($('m2-rec-f-hours').value || 0),
-      labor_rate: Number($('m2-rec-f-rate').value || 0),
+      output_item_id: recState.outputValue,
+      output_quantity: parseDecimalInput($('m2-rec-f-output-qty').value) || 0,
+      labor_hours: parseDecimalInput($('m2-rec-f-hours').value) || 0,
+      labor_rate: parseDecimalInput($('m2-rec-f-rate').value) || 0,
       description: $('m2-rec-f-desc').value.trim() || null
     };
 
@@ -802,7 +967,6 @@ $('m2-rec-save').addEventListener('click', async () => {
       recipeId = data.id;
     }
 
-    // Синхронизируем ингредиенты: удаляем все и заново вставляем
     await sb.from('recipe_ingredients').delete().eq('recipe_id', recipeId);
     const ings = recState.ingredients
       .filter(i => i.quantity > 0 && (i.material_id || i.sub_recipe_id))
@@ -846,7 +1010,6 @@ $('m2-rec-delete').addEventListener('click', async () => {
 $('m2-rec-duplicate').addEventListener('click', async () => {
   if (!recState.editing) return;
   try {
-    // Читаем оригинал
     const { data: orig, error: e1 } = await sb.from('recipes').select('*, recipe_ingredients!recipe_id(*)').eq('id', recState.editing).single();
     if (e1) throw e1;
 
@@ -887,11 +1050,30 @@ $('m2-rec-duplicate').addEventListener('click', async () => {
 const runState = {
   cached: [],
   editing: null,
-  currentRun: null
+  currentRun: null,
+  statusFilter: 'all',
+  recipeValue: ''
 };
 
 $('m2-run-search').addEventListener('input', renderRuns);
-$('m2-run-status-filter').addEventListener('change', renderRuns);
+
+// ---- Фильтр статуса (тулбар) ----
+initCustomSelect(
+  { dd: 'm2-run-status-dd', btn: 'm2-run-status-btn', menu: 'm2-run-status-menu', label: 'm2-run-status-label' },
+  (value) => { runState.statusFilter = value; renderRuns(); }
+);
+
+// ---- Кастомный select рецепта в редакторе партии ----
+const runRecipeSelect = initCustomSelect(
+  { dd: 'm2-run-recipe-dd', btn: 'm2-run-recipe-btn', menu: 'm2-run-recipe-menu', label: 'm2-run-recipe-label' },
+  async (value) => { runState.recipeValue = value; updateRunUnits(); await refreshRequirements(); validateRunForm(); }
+);
+
+function fillRunRecipeOptions() {
+  const opts = ['<div class="m2-dd-opt" data-value="">— выберите рецепт —</div>']
+    .concat(cache.recipes.map(r => `<div class="m2-dd-opt" data-value="${esc(r.id)}">${esc(r.name)}${r.code ? ' (' + esc(r.code) + ')' : ''}</div>`));
+  runRecipeSelect.setOptions(opts.join(''));
+}
 
 async function loadRuns() {
   await refreshCache();
@@ -918,7 +1100,7 @@ const RUN_STATUS = {
 
 function renderRuns() {
   const q = ($('m2-run-search').value || '').trim().toLowerCase();
-  const st = $('m2-run-status-filter').value;
+  const st = runState.statusFilter;
   let list = runState.cached;
   if (st !== 'all') list = list.filter(r => r.status === st);
   if (q) list = list.filter(r =>
@@ -984,11 +1166,14 @@ async function openRunEditor(id) {
     ? `Создана ${formatDateTime(new Date(run.created_at))}`
     : '';
 
-  // Заполняем селект рецептов
-  $('m2-run-f-recipe').innerHTML = '<option value="">— выберите рецепт —</option>' +
-    cache.recipes.map(r => `<option value="${esc(r.id)}">${esc(r.name)} ${r.code ? '('+esc(r.code)+')' : ''}</option>`).join('');
-  $('m2-run-f-recipe').value = run?.recipe_id || '';
-  $('m2-run-f-recipe').disabled = !!run; // После создания менять рецепт нельзя
+  // Селект рецептов
+  fillRunRecipeOptions();
+  runState.recipeValue = run?.recipe_id || '';
+  runRecipeSelect.set(runState.recipeValue);
+  // После создания менять рецепт нельзя — блокируем кнопку дропдауна
+  $('m2-run-recipe-btn').disabled = !!run;
+  $('m2-run-recipe-dd').style.opacity = run ? '0.6' : '';
+  $('m2-run-recipe-dd').style.pointerEvents = run ? 'none' : '';
 
   $('m2-run-f-planned').value = run?.planned_quantity ?? '';
   $('m2-run-f-planned').disabled = run && run.status !== 'planned';
@@ -1013,12 +1198,10 @@ async function openRunEditor(id) {
 document.querySelectorAll('.m2-run-close').forEach(b => b.addEventListener('click', () => $('m2-run-modal').classList.add('hidden')));
 $('m2-run-new').addEventListener('click', () => openRunEditor(null));
 
-$('m2-run-f-recipe').addEventListener('change', async () => { updateRunUnits(); await refreshRequirements(); validateRunForm(); });
 $('m2-run-f-planned').addEventListener('input', async () => { await refreshRequirements(); validateRunForm(); });
 
 function updateRunUnits() {
-  const recipeId = $('m2-run-f-recipe').value;
-  const r = cache.recipes.find(x => x.id === recipeId);
+  const r = cache.recipes.find(x => x.id === runState.recipeValue);
   const out = r ? cache.warehouse.find(w => w.id === r.output_item_id) : null;
   const unit = out?.unit || '—';
   $('m2-run-f-planned-unit').textContent = unit;
@@ -1026,8 +1209,8 @@ function updateRunUnits() {
 }
 
 async function refreshRequirements() {
-  const recipeId = $('m2-run-f-recipe').value;
-  const plannedQ = Number($('m2-run-f-planned').value);
+  const recipeId = runState.recipeValue;
+  const plannedQ = parseDecimalInput($('m2-run-f-planned').value);
   const reqEl = $('m2-run-requirements');
   const listEl = $('m2-run-req-list');
   $('m2-run-deficit').classList.add('hidden');
@@ -1105,7 +1288,7 @@ function validateRunForm() {
     $('m2-run-save').disabled = true;
     return;
   }
-  const ok = $('m2-run-f-recipe').value && Number($('m2-run-f-planned').value) > 0;
+  const ok = runState.recipeValue && (parseDecimalInput($('m2-run-f-planned').value) || 0) > 0;
   $('m2-run-save').disabled = !ok;
 }
 
@@ -1115,8 +1298,8 @@ $('m2-run-save').addEventListener('click', async () => {
   btn.textContent = 'Сохраняем…';
   try {
     const payload = {
-      recipe_id: $('m2-run-f-recipe').value,
-      planned_quantity: Number($('m2-run-f-planned').value),
+      recipe_id: runState.recipeValue,
+      planned_quantity: parseDecimalInput($('m2-run-f-planned').value) || 0,
       comment: $('m2-run-f-comment').value.trim() || null
     };
 
@@ -1176,7 +1359,7 @@ async function startRun() {
 
 async function finishRun() {
   if (!runState.editing) return;
-  const actual = Number($('m2-run-f-actual').value);
+  const actual = parseDecimalInput($('m2-run-f-actual').value);
   if (!actual || actual <= 0) { toast('Укажите фактическое количество', 'warning'); return; }
   try {
     const { data, error } = await sb.rpc('finish_production_run', { p_run_id: runState.editing, p_actual_quantity: actual });
