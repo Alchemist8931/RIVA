@@ -665,15 +665,14 @@ const tr = {
   editingDir: 'expense', editingCat: null, editingRec: 'none', editingOpId: null
 };
 
-function initTreasury() {
+async function initTreasury() {
   if (!tr.inited) {
     tr.inited = true;
     bindTreasury();
     // материализуем повторяющиеся операции один раз при входе
-    sb.rpc('treasury_materialize_recurring').catch(() => {}).finally(() => switchTrTab(tr.subtab));
-  } else {
-    switchTrTab(tr.subtab);
+    try { await sb.rpc('treasury_materialize_recurring'); } catch (_) {}
   }
+  switchTrTab(tr.subtab);
 }
 
 function switchTrTab(name) {
