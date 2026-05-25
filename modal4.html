@@ -1,5 +1,5 @@
 <!-- modal4.html — Страница "Управление". -->
-<!-- Подстраницы: Казначейство, Администрирование. -->
+<!-- Подстраницы: Казначейство (Дашборд / Операции / Регулярные), Администрирование. -->
 <!-- Доступ: admin (всё), management (без Пользователей и Настроек). -->
 
 <section id="m4">
@@ -28,13 +28,12 @@
       <div class="m4-segment" id="m4-tr-subnav">
         <button class="m4-seg-btn active" data-trtab="dashboard">Дашборд</button>
         <button class="m4-seg-btn" data-trtab="operations">Операции</button>
+        <button class="m4-seg-btn" data-trtab="recurring">Регулярные</button>
       </div>
     </div>
 
     <!-- ---- ДАШБОРД КАЗНАЧЕЙСТВА ---- -->
     <div class="m4-tr-pane" data-trpane="dashboard">
-
-      <!-- Селектор периода -->
       <div class="bg-surface rounded-2xl border border-line mb-5 flex flex-wrap items-center" style="padding:10px; gap:10px;">
         <span class="text-sm text-fg-muted">Период:</span>
         <div class="m4-segment" id="m4-tr-period">
@@ -53,41 +52,79 @@
         </div>
         <span id="m4-tr-range" class="text-xs text-fg-muted ml-auto">—</span>
       </div>
-
       <div id="m4-tr-dash">
         <div class="flex items-center justify-center py-16"><div class="w-6 h-6 loader"></div></div>
       </div>
     </div>
 
-    <!-- ---- ОПЕРАЦИИ ---- -->
+    <!-- ---- ОПЕРАЦИИ (полный реестр) ---- -->
     <div class="m4-tr-pane hidden" data-trpane="operations">
 
-      <!-- Тулбар операций -->
-      <div class="bg-surface rounded-2xl border border-line mb-5 flex flex-wrap items-center" style="padding:10px; gap:10px;">
+      <!-- Период реестра -->
+      <div class="bg-surface rounded-2xl border border-line mb-4 flex flex-wrap items-center" style="padding:10px; gap:10px;">
+        <span class="text-sm text-fg-muted">Период:</span>
+        <div class="m4-segment" id="m4-op-period">
+          <button class="m4-seg-btn" data-period="today">Сегодня</button>
+          <button class="m4-seg-btn" data-period="week">Неделя</button>
+          <button class="m4-seg-btn active" data-period="month">Месяц</button>
+          <button class="m4-seg-btn" data-period="quarter">Квартал</button>
+          <button class="m4-seg-btn" data-period="year">Год</button>
+          <button class="m4-seg-btn" data-period="custom">Свой</button>
+        </div>
+        <div id="m4-op-custom-wrap" class="hidden flex items-center gap-2">
+          <input id="m4-op-from" type="date" class="m4-input-sm">
+          <span class="text-xs text-fg-muted">—</span>
+          <input id="m4-op-to" type="date" class="m4-input-sm">
+          <button id="m4-op-apply" class="btn-secondary px-3 py-2 rounded-lg text-sm">Применить</button>
+        </div>
+        <span id="m4-op-range" class="text-xs text-fg-muted ml-auto">—</span>
+      </div>
+
+      <!-- Тулбар -->
+      <div class="bg-surface rounded-2xl border border-line mb-4 flex flex-wrap items-center" style="padding:10px; gap:10px;">
         <div class="flex-1 min-w-[180px]">
-          <input id="m4-op-search" type="search" placeholder="Поиск по описанию или контрагенту…"
+          <input id="m4-op-search" type="search" placeholder="Поиск по описанию, категории, контрагенту…"
             class="m4-bar-ctrl w-full rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors text-sm">
+        </div>
+        <div class="m4-segment" id="m4-op-src">
+          <button class="m4-seg-btn active" data-src="all">Все</button>
+          <button class="m4-seg-btn" data-src="auto">Авто</button>
+          <button class="m4-seg-btn" data-src="manual">Ручные</button>
         </div>
         <div class="m4-dd m4-bar-ctrl" id="m4-op-dir-dd">
           <button type="button" class="m4-dd-btn" id="m4-op-dir-btn">
-            <span id="m4-op-dir-label">Все операции</span>
+            <span id="m4-op-dir-label">Доходы и расходы</span>
             <svg class="m4-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
           </button>
           <div class="m4-dd-menu hidden" id="m4-op-dir-menu">
-            <div class="m4-dd-opt" data-value="all">Все операции</div>
+            <div class="m4-dd-opt" data-value="all">Доходы и расходы</div>
             <div class="m4-dd-opt" data-value="income">Только доходы</div>
             <div class="m4-dd-opt" data-value="expense">Только расходы</div>
           </div>
         </div>
-        <button id="m4-op-new" class="btn-primary m4-bar-ctrl rounded-xl text-sm font-medium ml-auto" style="padding-left:16px; padding-right:16px;">
+        <button id="m4-op-new" class="btn-primary m4-bar-ctrl rounded-xl text-sm font-medium" style="padding-left:16px; padding-right:16px;">
           + Новая операция
         </button>
       </div>
+
+      <div id="m4-op-summary" class="m4-op-summary mb-3">—</div>
 
       <div id="m4-op-list" class="space-y-2">
         <div class="flex items-center justify-center py-16"><div class="w-6 h-6 loader"></div></div>
       </div>
     </div>
+
+    <!-- ---- РЕГУЛЯРНЫЕ (правила повторения) ---- -->
+    <div class="m4-tr-pane hidden" data-trpane="recurring">
+      <div class="bg-surface rounded-2xl border border-line mb-4 flex flex-wrap items-center justify-between" style="padding:10px 14px; gap:10px;">
+        <span class="text-sm text-fg-muted">Правила повторяющихся операций — система сама добавляет их в реестр по расписанию.</span>
+        <button id="m4-rec-new" class="btn-primary rounded-xl text-sm font-medium" style="height:36px; padding:0 16px;">+ Новое правило</button>
+      </div>
+      <div id="m4-rec-list" class="space-y-2">
+        <div class="flex items-center justify-center py-16"><div class="w-6 h-6 loader"></div></div>
+      </div>
+    </div>
+
   </div>
 
   <!-- =========================================================
@@ -301,24 +338,7 @@
 
 </section>
 
-<!-- ШАБЛОН СТРОКИ ОПЕРАЦИИ КАЗНАЧЕЙСТВА -->
-<template id="m4-op-row-tpl">
-  <article class="m4-op-row" data-op-id="">
-    <span class="m4-badge" data-field="cat"></span>
-    <div class="m4-op-main">
-      <div class="m4-op-desc" data-field="desc"></div>
-      <div class="m4-op-meta" data-field="meta"></div>
-    </div>
-    <span class="m4-op-amount" data-field="amount"></span>
-    <div class="m4-op-actions">
-      <button class="m4-op-del" data-op-del title="Удалить">
-        <svg class="w-4 h-4 text-state-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
-      </button>
-    </div>
-  </article>
-</template>
-
-<!-- MODAL: операция казначейства -->
+<!-- MODAL: операция казначейства (разовая или повторяющаяся) -->
 <div id="m4-op-modal" class="hidden fixed inset-0 z-40 bg-black/30 flex items-center justify-center px-4 py-8 overflow-y-auto">
   <div class="bg-surface rounded-2xl border border-line w-full max-w-lg my-auto">
     <div class="px-5 py-4 border-b border-line flex items-center justify-between">
@@ -347,16 +367,32 @@
         </div>
       </label>
 
+      <div id="m4-op-rec-wrap">
+        <span class="text-xs text-fg-muted block mb-1.5">Периодичность *</span>
+        <div class="m4-segment m4-segment--full" id="m4-op-rec-seg" style="flex-wrap:wrap;">
+          <button type="button" class="m4-seg-btn active" data-rec="none">Разовая</button>
+          <button type="button" class="m4-seg-btn" data-rec="weekly">Еженедельно</button>
+          <button type="button" class="m4-seg-btn" data-rec="monthly">Ежемесячно</button>
+          <button type="button" class="m4-seg-btn" data-rec="quarterly">Ежеквартально</button>
+          <button type="button" class="m4-seg-btn" data-rec="yearly">Ежегодно</button>
+        </div>
+      </div>
+
       <div class="grid grid-cols-2 gap-3">
         <label class="block">
-          <span class="text-xs text-fg-muted block mb-1.5">Сумma, ₽ *</span>
+          <span class="text-xs text-fg-muted block mb-1.5">Сумма, ₽ *</span>
           <input id="m4-op-amount" type="text" inputmode="decimal" class="w-full px-3 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
         </label>
         <label class="block">
-          <span class="text-xs text-fg-muted block mb-1.5">Дата *</span>
+          <span class="text-xs text-fg-muted block mb-1.5" id="m4-op-date-label">Дата *</span>
           <input id="m4-op-date" type="date" class="w-full px-3 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
         </label>
       </div>
+
+      <label class="block hidden" id="m4-op-end-wrap">
+        <span class="text-xs text-fg-muted block mb-1.5">Дата окончания (необязательно)</span>
+        <input id="m4-op-end" type="date" class="w-full px-3 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
+      </label>
 
       <label class="block">
         <span class="text-xs text-fg-muted block mb-1.5">Контрагент</span>
@@ -488,6 +524,16 @@
   .m4-op-del { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; cursor: pointer; transition: background .12s ease; }
   .m4-op-del:hover { background: var(--bg-alt); }
 
+  /* Теги источника / периодичности */
+  .m4-op-tag { display:inline-block; font-size:10px; line-height:1.4; padding:1px 6px; border-radius:6px; vertical-align:middle; margin-left:4px; font-weight:600; }
+  .m4-op-tag--auto { background: color-mix(in srgb, var(--fg) 8%, transparent); color: var(--fg-muted); }
+  .m4-op-tag--rec  { background: color-mix(in srgb, #2563EB 14%, transparent); color:#2563EB; }
+  .m4-op-row--auto { opacity:.9; }
+  .m4-op-row[data-edit="1"] { cursor:pointer; }
+  .m4-op-lock { display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; opacity:.45; }
+  .m4-rec-row { grid-template-columns: 160px minmax(0,1fr) 150px auto !important; }
+  .m4-op-summary { font-size:12px; color:var(--fg-muted); }
+
   /* Дропдаун */
   .m4-bar-ctrl { height: 36px; padding-top: 0; padding-bottom: 0; }
   input.m4-bar-ctrl { padding-left: 14px; padding-right: 14px; }
@@ -530,6 +576,7 @@
   @media (max-width: 700px) {
     .m4-op-row { grid-template-columns: 1fr auto; }
     .m4-op-amount { text-align: left; }
+    .m4-rec-row { grid-template-columns: 1fr auto !important; }
     .m4-cat-row { grid-template-columns: 1fr auto; }
     .m4-cat-bar { display: none; }
   }
@@ -592,162 +639,160 @@ document.querySelectorAll('#m4-subnav .m4-tab').forEach(t => t.addEventListener(
 // ================================================================
 
 const CATEGORY_LABELS = {
-  // расходы
-  consumables: 'Расходники',
-  logistics: 'Логистика',
-  marketing: 'Реклама и маркетинг',
-  rent: 'Аренда',
-  salary: 'Зарплаты',
-  equipment: 'Оборудование и инструмент',
-  taxes: 'Налоги и комиссии',
-  refund: 'Возвраты',
-  defect: 'Брак',
-  test_batch: 'Тестовые партии',
-  withdrawal: 'Вывод на личное',
-  other_expense: 'Прочие расходы',
-  // доходы
+  consumables: 'Расходники', logistics: 'Логистика', marketing: 'Реклама и маркетинг',
+  rent: 'Аренда', salary: 'Зарплаты', equipment: 'Оборудование и инструмент',
+  taxes: 'Налоги и комиссии', refund: 'Возвраты', defect: 'Брак',
+  test_batch: 'Тестовые партии', withdrawal: 'Вывод на личное', other_expense: 'Прочие расходы',
   other_income: 'Прочие доходы',
-  // авто
-  auto_sales: 'Продажи (авто)',
-  auto_supply: 'Закупки (авто)'
+  auto_sales: 'Продажи', auto_supply: 'Закупки'
 };
 const EXPENSE_CATEGORIES = ['consumables','logistics','marketing','rent','salary','equipment','taxes','refund','defect','test_batch','withdrawal','other_expense'];
 const INCOME_CATEGORIES = ['other_income'];
+const INTERVAL_LABELS = { weekly:'Еженедельно', monthly:'Ежемесячно', quarterly:'Ежеквартально', yearly:'Ежегодно' };
+
+const SVG_PAUSE = '<svg class="w-4 h-4 text-fg-muted" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
+const SVG_PLAY  = '<svg class="w-4 h-4 text-state-success" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
+const SVG_TRASH = '<svg class="w-4 h-4 text-state-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>';
+const SVG_DEL   = '<svg class="w-4 h-4 text-state-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>';
+const SVG_LOCK  = '<svg class="w-4 h-4 text-fg-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
 
 const tr = {
   inited: false,
   subtab: 'dashboard',
-  period: 'month',
-  from: null, to: null,
-  prevFrom: null, prevTo: null,
-  ops: [],
-  opSearch: '',
-  opDir: 'all',
-  editingDir: 'expense',
-  editingCat: null
+  period: 'month', from: null, to: null, prevFrom: null, prevTo: null,   // дашборд
+  opPeriod: 'month',                                                      // реестр
+  ledger: [], opSearch: '', opDir: 'all', opSrc: 'all',
+  editingDir: 'expense', editingCat: null, editingRec: 'none', editingOpId: null
 };
 
 function initTreasury() {
   if (!tr.inited) {
     tr.inited = true;
     bindTreasury();
+    // материализуем повторяющиеся операции один раз при входе
+    sb.rpc('treasury_materialize_recurring').catch(() => {}).finally(() => switchTrTab(tr.subtab));
+  } else {
+    switchTrTab(tr.subtab);
   }
-  switchTrTab(tr.subtab);
 }
 
 function switchTrTab(name) {
   tr.subtab = name;
   document.querySelectorAll('#m4-tr-subnav .m4-seg-btn').forEach(b => b.classList.toggle('active', b.dataset.trtab === name));
   document.querySelectorAll('.m4-tr-pane').forEach(p => p.classList.toggle('hidden', p.dataset.trpane !== name));
-  if (name === 'dashboard') loadTreasuryDash();
-  if (name === 'operations') loadOperations();
+  if (name === 'dashboard')  loadTreasuryDash();
+  if (name === 'operations') loadLedger();
+  if (name === 'recurring')  loadRecurring();
 }
 
 function bindTreasury() {
+  // подвкладки
   document.querySelectorAll('#m4-tr-subnav .m4-seg-btn').forEach(b =>
     b.addEventListener('click', () => switchTrTab(b.dataset.trtab)));
 
+  // период дашборда
   document.querySelectorAll('#m4-tr-period .m4-seg-btn').forEach(b => {
     b.addEventListener('click', () => {
       tr.period = b.dataset.period;
       document.querySelectorAll('#m4-tr-period .m4-seg-btn').forEach(x => x.classList.toggle('active', x === b));
       if (tr.period === 'custom') {
         $('m4-tr-custom-wrap').classList.remove('hidden');
-        // префилл текущим месяцем
         const now = new Date();
         $('m4-tr-from').value = toInputDate(new Date(now.getFullYear(), now.getMonth(), 1));
         $('m4-tr-to').value = toInputDate(now);
-      } else {
-        $('m4-tr-custom-wrap').classList.add('hidden');
-        loadTreasuryDash();
-      }
+      } else { $('m4-tr-custom-wrap').classList.add('hidden'); loadTreasuryDash(); }
     });
   });
   $('m4-tr-apply').addEventListener('click', loadTreasuryDash);
 
-  // операции
-  $('m4-op-search').addEventListener('input', debounce((e) => { tr.opSearch = e.target.value.trim().toLowerCase(); renderOperations(); }, 200));
+  // период реестра
+  document.querySelectorAll('#m4-op-period .m4-seg-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      tr.opPeriod = b.dataset.period;
+      document.querySelectorAll('#m4-op-period .m4-seg-btn').forEach(x => x.classList.toggle('active', x === b));
+      if (tr.opPeriod === 'custom') {
+        $('m4-op-custom-wrap').classList.remove('hidden');
+        const now = new Date();
+        $('m4-op-from').value = toInputDate(new Date(now.getFullYear(), now.getMonth(), 1));
+        $('m4-op-to').value = toInputDate(now);
+      } else { $('m4-op-custom-wrap').classList.add('hidden'); loadLedger(); }
+    });
+  });
+  $('m4-op-apply').addEventListener('click', loadLedger);
+
+  // фильтры реестра
+  $('m4-op-search').addEventListener('input', debounce((e) => { tr.opSearch = e.target.value.trim().toLowerCase(); renderLedger(); }, 200));
+  document.querySelectorAll('#m4-op-src .m4-seg-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      tr.opSrc = b.dataset.src;
+      document.querySelectorAll('#m4-op-src .m4-seg-btn').forEach(x => x.classList.toggle('active', x === b));
+      renderLedger();
+    });
+  });
   initDirDropdown();
-  $('m4-op-new').addEventListener('click', () => openOpModal());
+
+  // создание
+  $('m4-op-new').addEventListener('click', () => openOpModalNew('none'));
+  $('m4-rec-new').addEventListener('click', () => openOpModalNew('monthly'));
   document.querySelectorAll('.m4-op-close').forEach(b => b.addEventListener('click', () => $('m4-op-modal').classList.add('hidden')));
   bindOpModal();
 }
 
-// --- Вычисление целых периодов ---
-function toInputDate(d) {
-  const pad = n => String(n).padStart(2, '0');
-  return `${d.getFullYear()}-${pad(d.getMonth()+1)}-${pad(d.getDate())}`;
-}
-function startOfWeekMonday(d) {
-  const x = new Date(d); x.setHours(0,0,0,0);
-  const day = (x.getDay() + 6) % 7; // 0 = Monday
-  x.setDate(x.getDate() - day);
-  return x;
-}
-function computePeriod(period) {
+// --- периоды (целые) ---
+function toInputDate(d) { const p = n => String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`; }
+function startOfWeekMonday(d) { const x = new Date(d); x.setHours(0,0,0,0); const day = (x.getDay()+6)%7; x.setDate(x.getDate()-day); return x; }
+
+function computePeriod(period, fromStr, toStr) {
   const now = new Date();
   let from, to, prevFrom, prevTo, label;
-
   if (period === 'today') {
     from = new Date(now); from.setHours(0,0,0,0);
     to = new Date(from); to.setDate(to.getDate()+1);
-    prevFrom = new Date(from); prevFrom.setDate(prevFrom.getDate()-1);
-    prevTo = new Date(from);
+    prevFrom = new Date(from); prevFrom.setDate(prevFrom.getDate()-1); prevTo = new Date(from);
     label = `Сегодня, ${formatDate(from)}`;
   } else if (period === 'week') {
-    from = startOfWeekMonday(now);
-    to = new Date(from); to.setDate(to.getDate()+7);
-    prevFrom = new Date(from); prevFrom.setDate(prevFrom.getDate()-7);
-    prevTo = new Date(from);
-    const weekEnd = new Date(to); weekEnd.setDate(weekEnd.getDate()-1);
-    label = `Неделя: ${formatDate(from)} — ${formatDate(weekEnd)}`;
+    from = startOfWeekMonday(now); to = new Date(from); to.setDate(to.getDate()+7);
+    prevFrom = new Date(from); prevFrom.setDate(prevFrom.getDate()-7); prevTo = new Date(from);
+    const we = new Date(to); we.setDate(we.getDate()-1);
+    label = `Неделя: ${formatDate(from)} — ${formatDate(we)}`;
   } else if (period === 'month') {
     from = new Date(now.getFullYear(), now.getMonth(), 1);
     to = new Date(now.getFullYear(), now.getMonth()+1, 1);
-    prevFrom = new Date(now.getFullYear(), now.getMonth()-1, 1);
-    prevTo = from;
+    prevFrom = new Date(now.getFullYear(), now.getMonth()-1, 1); prevTo = from;
     label = `Месяц: с ${formatDate(from)} (сравнение с предыдущим месяцем)`;
   } else if (period === 'quarter') {
     const q = Math.floor(now.getMonth()/3);
-    from = new Date(now.getFullYear(), q*3, 1);
-    to = new Date(now.getFullYear(), q*3+3, 1);
-    prevFrom = new Date(now.getFullYear(), q*3-3, 1);
-    prevTo = from;
+    from = new Date(now.getFullYear(), q*3, 1); to = new Date(now.getFullYear(), q*3+3, 1);
+    prevFrom = new Date(now.getFullYear(), q*3-3, 1); prevTo = from;
     label = `Квартал ${q+1}: с ${formatDate(from)} (сравнение с предыдущим кварталом)`;
   } else if (period === 'year') {
-    from = new Date(now.getFullYear(), 0, 1);
-    to = new Date(now.getFullYear()+1, 0, 1);
-    prevFrom = new Date(now.getFullYear()-1, 0, 1);
-    prevTo = from;
+    from = new Date(now.getFullYear(), 0, 1); to = new Date(now.getFullYear()+1, 0, 1);
+    prevFrom = new Date(now.getFullYear()-1, 0, 1); prevTo = from;
     label = `Год ${now.getFullYear()}: с ${formatDate(from)} (сравнение с предыдущим годом)`;
   } else { // custom
-    const f = $('m4-tr-from').value ? new Date($('m4-tr-from').value + 'T00:00:00') : new Date(now.getFullYear(), now.getMonth(), 1);
-    const t = $('m4-tr-to').value ? new Date($('m4-tr-to').value + 'T00:00:00') : new Date(now);
-    from = f;
-    to = new Date(t); to.setDate(to.getDate()+1); // включительно конечный день
+    const f = fromStr ? new Date(fromStr + 'T00:00:00') : new Date(now.getFullYear(), now.getMonth(), 1);
+    const t = toStr ? new Date(toStr + 'T00:00:00') : new Date(now);
+    from = f; to = new Date(t); to.setDate(to.getDate()+1);
     const spanDays = Math.max(1, Math.round((to - from) / 86400000));
-    prevTo = from;
-    prevFrom = new Date(from); prevFrom.setDate(prevFrom.getDate() - spanDays);
+    prevTo = from; prevFrom = new Date(from); prevFrom.setDate(prevFrom.getDate() - spanDays);
     label = `Период: ${formatDate(from)} — ${formatDate(t)}`;
   }
   return { from, to, prevFrom, prevTo, label };
 }
 
+// --- дашборд ---
 async function loadTreasuryDash() {
-  const p = computePeriod(tr.period);
+  const p = computePeriod(tr.period, $('m4-tr-from').value, $('m4-tr-to').value);
   tr.from = p.from; tr.to = p.to; tr.prevFrom = p.prevFrom; tr.prevTo = p.prevTo;
   $('m4-tr-range').textContent = p.label;
   $('m4-tr-dash').innerHTML = `<div class="flex items-center justify-center py-16"><div class="w-6 h-6 loader"></div></div>`;
 
   const { data, error } = await sb.rpc('get_treasury_summary', {
-    p_from: p.from.toISOString(),
-    p_to: p.to.toISOString(),
-    p_prev_from: p.prevFrom.toISOString(),
-    p_prev_to: p.prevTo.toISOString()
+    p_from: p.from.toISOString(), p_to: p.to.toISOString(),
+    p_prev_from: p.prevFrom.toISOString(), p_prev_to: p.prevTo.toISOString()
   });
   if (error) { $('m4-tr-dash').innerHTML = `<div class="text-sm text-state-error p-6">${esc(error.message)}</div>`; return; }
   if (!data?.ok) { $('m4-tr-dash').innerHTML = `<div class="text-sm text-state-error p-6">${esc(data?.error || 'UNKNOWN')}</div>`; return; }
-
   renderTreasuryDash(data);
 }
 
@@ -757,10 +802,9 @@ function deltaHtml(cur, prev) {
   const diff = cur - prev;
   const pct = prev === 0 ? null : (diff / Math.abs(prev)) * 100;
   const up = diff >= 0;
-  const arrow = up ? '▲' : '▼';
   const cls = diff === 0 ? 'm4-delta-flat' : (up ? 'm4-delta-up' : 'm4-delta-down');
   const pctText = pct === null ? '' : ` (${up ? '+' : ''}${pct.toFixed(0)}%)`;
-  return `<span class="m4-kpi-delta ${cls}">${arrow} ${esc(formatMoney(Math.abs(diff)))}${pctText} к пред.</span>`;
+  return `<span class="m4-kpi-delta ${cls}">${up ? '▲' : '▼'} ${esc(formatMoney(Math.abs(diff)))}${pctText} к пред.</span>`;
 }
 
 function renderTreasuryDash(d) {
@@ -768,22 +812,16 @@ function renderTreasuryDash(d) {
   const incPrev = Number(d.auto.income_prev) + Number(d.manual.income_prev);
   const expCur = Number(d.auto.expense_cur) + Number(d.manual.expense_cur);
   const expPrev = Number(d.auto.expense_prev) + Number(d.manual.expense_prev);
-  const profitCur = incCur - expCur;
-  const profitPrev = incPrev - expPrev;
+  const profitCur = incCur - expCur, profitPrev = incPrev - expPrev;
 
-  // разбивка расходов/доходов по категориям (ручные) + авто
   const cats = d.categories || [];
   const expRows = cats.filter(c => c.direction === 'expense').map(c => ({ name: CATEGORY_LABELS[c.category] || c.category, total: Number(c.total) }));
   if (Number(d.auto.expense_cur) > 0) expRows.push({ name: CATEGORY_LABELS.auto_supply, total: Number(d.auto.expense_cur) });
   expRows.sort((a,b) => b.total - a.total);
-
   const incRows = cats.filter(c => c.direction === 'income').map(c => ({ name: CATEGORY_LABELS[c.category] || c.category, total: Number(c.total) }));
   if (Number(d.auto.income_cur) > 0) incRows.push({ name: CATEGORY_LABELS.auto_sales, total: Number(d.auto.income_cur) });
   incRows.sort((a,b) => b.total - a.total);
-
-  const maxExp = Math.max(1, ...expRows.map(r => r.total));
-  const maxInc = Math.max(1, ...incRows.map(r => r.total));
-
+  const maxExp = Math.max(1, ...expRows.map(r => r.total)), maxInc = Math.max(1, ...incRows.map(r => r.total));
   const catRow = (r, max, color) => `
     <div class="m4-cat-row">
       <div class="m4-cat-name">${esc(r.name)}</div>
@@ -807,11 +845,10 @@ function renderTreasuryDash(d) {
       </div>
       <div class="m4-kpi">
         <div class="text-xs text-fg-muted">Прибыль (доходы − расходы)</div>
-        <div class="text-2xl font-medium mt-2 ${profitCur >= 0 ? '' : ''}" style="color:${profitCur >= 0 ? '#15803D' : '#DC2626'}">${esc(formatMoney(profitCur))}</div>
+        <div class="text-2xl font-medium mt-2" style="color:${profitCur >= 0 ? '#15803D' : '#DC2626'}">${esc(formatMoney(profitCur))}</div>
         ${deltaHtml(profitCur, profitPrev)}
       </div>
     </div>
-
     <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
       <div class="bg-surface rounded-2xl border border-line p-5">
         <div class="text-sm font-medium mb-3">Структура расходов</div>
@@ -822,15 +859,13 @@ function renderTreasuryDash(d) {
         ${incRows.length ? incRows.map(r => catRow(r, maxInc, '#15803D')).join('') : '<div class="text-sm text-fg-muted py-4 text-center">Нет доходов за период</div>'}
       </div>
     </div>
-
     <p class="text-xs text-fg-muted mt-4">
-      Доходы автоматически включают завершённые заказы продаж, расходы — оприходованные заказы снабжения за период.
-      Ручные операции добавляются на вкладке «Операции».
-    </p>
-  `;
+      Доходы включают завершённые заказы продаж, расходы — оприходованные заказы снабжения за период,
+      плюс ручные и повторяющиеся операции. Полный список — на вкладке «Операции».
+    </p>`;
 }
 
-// ---- Дропдаун фильтра направления операций ----
+// --- фильтр направления (реестр) ---
 function initDirDropdown() {
   const dd = $('m4-op-dir-dd'), btn = $('m4-op-dir-btn'), menu = $('m4-op-dir-menu'), label = $('m4-op-dir-label');
   const open = () => { dd.classList.add('is-open'); menu.classList.remove('hidden'); };
@@ -838,111 +873,209 @@ function initDirDropdown() {
   btn.addEventListener('click', (e) => { e.stopPropagation(); dd.classList.contains('is-open') ? close() : open(); });
   menu.addEventListener('click', (e) => {
     const opt = e.target.closest('.m4-dd-opt'); if (!opt) return;
-    tr.opDir = opt.dataset.value;
-    label.textContent = opt.textContent;
+    tr.opDir = opt.dataset.value; label.textContent = opt.textContent;
     menu.querySelectorAll('.m4-dd-opt').forEach(o => o.classList.toggle('is-selected', o === opt));
-    close();
-    renderOperations();
+    close(); renderLedger();
   });
   document.addEventListener('click', (e) => { if (!e.target.closest('#m4-op-dir-dd')) close(); });
 }
 
-async function loadOperations() {
+// --- реестр (ledger) ---
+async function loadLedger() {
+  const p = computePeriod(tr.opPeriod, $('m4-op-from').value, $('m4-op-to').value);
+  $('m4-op-range').textContent = p.label;
   $('m4-op-list').innerHTML = `<div class="flex items-center justify-center py-16"><div class="w-6 h-6 loader"></div></div>`;
-  const { data, error } = await sb.from('treasury_operations').select('*').order('occurred_on', { ascending: false }).order('created_at', { ascending: false }).limit(500);
+  const { data, error } = await sb.rpc('get_treasury_ledger', { p_from: p.from.toISOString(), p_to: p.to.toISOString() });
   if (error) { $('m4-op-list').innerHTML = `<div class="text-sm text-state-error p-6">${esc(error.message)}</div>`; return; }
-  tr.ops = data || [];
-  renderOperations();
+  if (!data?.ok) { $('m4-op-list').innerHTML = `<div class="text-sm text-state-error p-6">${esc(data?.error || 'UNKNOWN')}</div>`; return; }
+  tr.ledger = data.rows || [];
+  renderLedger();
 }
 
-function renderOperations() {
-  let list = tr.ops;
+function ledgerFiltered() {
+  let list = tr.ledger.slice();
   if (tr.opDir !== 'all') list = list.filter(o => o.direction === tr.opDir);
-  if (tr.opSearch) list = list.filter(o =>
-    (o.description || '').toLowerCase().includes(tr.opSearch) ||
-    (o.counterparty || '').toLowerCase().includes(tr.opSearch) ||
-    (CATEGORY_LABELS[o.category] || '').toLowerCase().includes(tr.opSearch)
-  );
+  if (tr.opSrc === 'auto') list = list.filter(o => o.source === 'auto_sales' || o.source === 'auto_supply');
+  else if (tr.opSrc === 'manual') list = list.filter(o => o.source === 'manual' || o.source === 'recurring');
+  if (tr.opSearch) {
+    const q = tr.opSearch;
+    list = list.filter(o =>
+      (o.description || '').toLowerCase().includes(q) ||
+      (o.counterparty || '').toLowerCase().includes(q) ||
+      (CATEGORY_LABELS[o.category] || '').toLowerCase().includes(q));
+  }
+  return list;
+}
 
-  if (list.length === 0) {
-    $('m4-op-list').innerHTML = `<div class="text-center py-16 text-sm text-fg-muted">${tr.opSearch || tr.opDir !== 'all' ? 'Ничего не найдено' : 'Операций пока нет. Добавьте первую.'}</div>`;
+function updateLedgerSummary(list) {
+  let inc = 0, exp = 0;
+  list.forEach(o => { if (o.direction === 'income') inc += Number(o.amount); else exp += Number(o.amount); });
+  const net = inc - exp;
+  $('m4-op-summary').innerHTML =
+    `Операций: ${list.length} · доходы <span style="color:#15803D;font-weight:600">${esc(formatMoney(inc))}</span> · ` +
+    `расходы <span style="color:#DC2626;font-weight:600">${esc(formatMoney(exp))}</span> · ` +
+    `итог <span style="color:${net>=0?'#15803D':'#DC2626'};font-weight:600">${esc(formatMoney(net))}</span>`;
+}
+
+function renderLedger() {
+  const list = ledgerFiltered();
+  const box = $('m4-op-list');
+  updateLedgerSummary(list);
+  if (!list.length) {
+    box.innerHTML = `<div class="text-center py-16 text-sm text-fg-muted">${tr.opSearch || tr.opDir !== 'all' || tr.opSrc !== 'all' ? 'Ничего не найдено' : 'Операций за период нет.'}</div>`;
     return;
   }
+  box.innerHTML = list.map(o => {
+    const dirCls = o.direction === 'income' ? 'income' : 'expense';
+    const sign = o.direction === 'income' ? '+' : '−';
+    const catLabel = CATEGORY_LABELS[o.category] || o.category;
+    let tag = '';
+    if (o.source === 'auto_sales' || o.source === 'auto_supply') tag = '<span class="m4-op-tag m4-op-tag--auto">Авто</span>';
+    else if (o.source === 'recurring') tag = '<span class="m4-op-tag m4-op-tag--rec">Повтор</span>';
+    const meta = [formatDate(new Date(o.occurred_on))];
+    if (o.counterparty) meta.push(esc(o.counterparty));
+    if (o.user_name) meta.push(esc(o.user_name));
+    const canEdit = o.editable && o.source === 'manual';
+    const actions = o.editable
+      ? `<button class="m4-op-del" data-del="${esc(o.id)}" title="Удалить">${SVG_DEL}</button>`
+      : `<span class="m4-op-lock" title="Создаётся автоматически на другой странице">${SVG_LOCK}</span>`;
+    return `
+      <article class="m4-op-row ${o.editable ? '' : 'm4-op-row--auto'}" data-id="${esc(o.id)}" data-edit="${canEdit ? '1' : ''}">
+        <span class="m4-badge m4-badge-${dirCls}">${esc(catLabel)}</span>
+        <div class="m4-op-main">
+          <div class="m4-op-desc">${esc(o.description || catLabel)}${tag}</div>
+          <div class="m4-op-meta">${meta.join(' · ')}</div>
+        </div>
+        <span class="m4-op-amount m4-op-amount--${dirCls}">${sign} ${esc(formatMoney(Number(o.amount)))}</span>
+        <div class="m4-op-actions">${actions}</div>
+      </article>`;
+  }).join('');
 
-  const container = $('m4-op-list');
-  container.innerHTML = '';
-  const frag = document.createDocumentFragment();
-  list.forEach(o => frag.appendChild(renderOpRow(o)));
-  container.appendChild(frag);
+  box.querySelectorAll('[data-del]').forEach(btn => btn.addEventListener('click', async (e) => {
+    e.stopPropagation();
+    const id = btn.dataset.del;
+    if (!confirm('Удалить операцию?')) return;
+    try {
+      const { error } = await sb.from('treasury_operations').delete().eq('id', id);
+      if (error) throw error;
+      tr.ledger = tr.ledger.filter(x => x.id !== id);
+      renderLedger();
+      toast('Операция удалена', 'success');
+    } catch (err) { toast('Ошибка: ' + err.message, 'error'); }
+  }));
 
-  container.querySelectorAll('[data-op-del]').forEach(btn => {
-    btn.addEventListener('click', async (e) => {
-      e.stopPropagation();
-      const row = btn.closest('[data-op-id]');
-      const id = row?.dataset.opId;
-      if (!id) return;
-      if (!confirm('Удалить операцию?')) return;
-      try {
-        const { error } = await sb.from('treasury_operations').delete().eq('id', id);
-        if (error) throw error;
-        tr.ops = tr.ops.filter(x => x.id !== id);
-        renderOperations();
-        toast('Операция удалена', 'success');
-      } catch (err) { toast('Ошибка: ' + err.message, 'error'); }
-    });
-  });
+  box.querySelectorAll('.m4-op-row[data-edit="1"]').forEach(row => row.addEventListener('click', (e) => {
+    if (e.target.closest('[data-del]')) return;
+    const op = tr.ledger.find(x => x.id === row.dataset.id);
+    if (op) openOpModalEdit(op);
+  }));
 }
 
-function renderOpRow(o) {
-  const tpl = document.getElementById('m4-op-row-tpl');
-  const node = tpl.content.firstElementChild.cloneNode(true);
-  node.dataset.opId = o.id;
-  const fld = (n) => node.querySelector(`[data-field="${n}"]`);
-
-  const cat = fld('cat');
-  cat.textContent = CATEGORY_LABELS[o.category] || o.category;
-  cat.classList.add('m4-badge-' + o.direction);
-
-  fld('desc').textContent = o.description || (CATEGORY_LABELS[o.category] || o.category);
-  const metaParts = [formatDate(new Date(o.occurred_on))];
-  if (o.counterparty) metaParts.push(o.counterparty);
-  if (o.user_name) metaParts.push(o.user_name);
-  fld('meta').textContent = metaParts.join(' · ');
-
-  const amount = fld('amount');
-  const sign = o.direction === 'income' ? '+' : '−';
-  amount.textContent = `${sign} ${formatMoney(Number(o.amount))}`;
-  amount.classList.add('m4-op-amount--' + o.direction);
-
-  return node;
+// --- повторяющиеся правила ---
+function addInterval(d, step) {
+  const x = new Date(d);
+  if (step === 'weekly') x.setDate(x.getDate()+7);
+  else if (step === 'monthly') x.setMonth(x.getMonth()+1);
+  else if (step === 'quarterly') x.setMonth(x.getMonth()+3);
+  else if (step === 'yearly') x.setFullYear(x.getFullYear()+1);
+  return x;
+}
+function nextOccurrence(rule) {
+  let d = new Date(rule.start_date + 'T00:00:00');
+  const today = new Date(); today.setHours(0,0,0,0);
+  const end = rule.end_date ? new Date(rule.end_date + 'T00:00:00') : null;
+  let guard = 0;
+  while (d <= today && guard < 2000) { d = addInterval(d, rule.interval); guard++; }
+  if (end && d > end) return null;
+  return d;
 }
 
-// ---- Модалка операции ----
+async function loadRecurring() {
+  $('m4-rec-list').innerHTML = `<div class="flex items-center justify-center py-16"><div class="w-6 h-6 loader"></div></div>`;
+  const { data, error } = await sb.from('treasury_recurring').select('*').order('created_at', { ascending: false });
+  if (error) { $('m4-rec-list').innerHTML = `<div class="text-sm text-state-error p-6">${esc(error.message)}</div>`; return; }
+  renderRecurring(data || []);
+}
+
+function renderRecurring(rules) {
+  const box = $('m4-rec-list');
+  if (!rules.length) {
+    box.innerHTML = `<div class="text-center py-16 text-sm text-fg-muted">Повторяющихся операций нет.<br>Создайте правило — система будет автоматически добавлять операции по расписанию.</div>`;
+    return;
+  }
+  box.innerHTML = rules.map(r => {
+    const dirCls = r.direction === 'income' ? 'income' : 'expense';
+    const sign = r.direction === 'income' ? '+' : '−';
+    const cat = CATEGORY_LABELS[r.category] || r.category;
+    const next = r.is_active ? nextOccurrence(r) : null;
+    const nextTxt = !r.is_active ? 'на паузе' : (next ? `следующая ${formatDate(next)}` : 'завершено');
+    const range = `с ${formatDate(new Date(r.start_date + 'T00:00:00'))}` + (r.end_date ? ` по ${formatDate(new Date(r.end_date + 'T00:00:00'))}` : '');
+    const meta = [range, nextTxt]; if (r.counterparty) meta.push(esc(r.counterparty));
+    return `
+      <article class="m4-op-row m4-rec-row ${r.is_active ? '' : 'm4-op-row--auto'}" data-rid="${esc(r.id)}">
+        <span class="m4-badge m4-badge-${dirCls}">${esc(cat)}</span>
+        <div class="m4-op-main">
+          <div class="m4-op-desc">${esc(r.description || cat)}<span class="m4-op-tag m4-op-tag--rec">${esc(INTERVAL_LABELS[r.interval] || r.interval)}</span></div>
+          <div class="m4-op-meta">${meta.join(' · ')}</div>
+        </div>
+        <span class="m4-op-amount m4-op-amount--${dirCls}">${sign} ${esc(formatMoney(Number(r.amount)))}</span>
+        <div class="m4-op-actions" style="gap:4px;">
+          <button class="m4-op-del" data-rec-toggle="${esc(r.id)}" title="${r.is_active ? 'Поставить на паузу' : 'Возобновить'}">${r.is_active ? SVG_PAUSE : SVG_PLAY}</button>
+          <button class="m4-op-del" data-rec-del="${esc(r.id)}" title="Удалить правило">${SVG_TRASH}</button>
+        </div>
+      </article>`;
+  }).join('');
+
+  box.querySelectorAll('[data-rec-toggle]').forEach(btn => btn.addEventListener('click', async () => {
+    const id = btn.dataset.recToggle;
+    const rule = rules.find(x => x.id === id); if (!rule) return;
+    try {
+      const { error } = await sb.from('treasury_recurring').update({ is_active: !rule.is_active, updated_at: new Date().toISOString() }).eq('id', id);
+      if (error) throw error;
+      if (!rule.is_active) await sb.rpc('treasury_materialize_recurring'); // возобновили — догенерируем пропущенные
+      toast(rule.is_active ? 'Правило поставлено на паузу' : 'Правило возобновлено', 'success');
+      await loadRecurring();
+    } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
+  }));
+
+  box.querySelectorAll('[data-rec-del]').forEach(btn => btn.addEventListener('click', async () => {
+    const id = btn.dataset.recDel;
+    if (!confirm('Удалить правило? Уже созданные операции останутся в реестре как обычные записи.')) return;
+    try {
+      const { error } = await sb.from('treasury_recurring').delete().eq('id', id);
+      if (error) throw error;
+      toast('Правило удалено', 'success');
+      await loadRecurring();
+    } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
+  }));
+}
+
+// --- модалка операции ---
 function bindOpModal() {
-  // переключатель направления
   document.querySelectorAll('#m4-op-dir-seg .m4-seg-btn').forEach(b => {
     b.addEventListener('click', () => {
       tr.editingDir = b.dataset.dir;
       document.querySelectorAll('#m4-op-dir-seg .m4-seg-btn').forEach(x => x.classList.toggle('active', x === b));
-      fillCatMenu();
-      tr.editingCat = null;
-      $('m4-op-cat-label').textContent = '— выберите —';
-      validateOpForm();
+      fillCatMenu(); tr.editingCat = null; $('m4-op-cat-label').textContent = '— выберите —'; validateOpForm();
+    });
+  });
+  document.querySelectorAll('#m4-op-rec-seg .m4-seg-btn').forEach(b => {
+    b.addEventListener('click', () => {
+      tr.editingRec = b.dataset.rec;
+      document.querySelectorAll('#m4-op-rec-seg .m4-seg-btn').forEach(x => x.classList.toggle('active', x === b));
+      updateRecUi(); validateOpForm();
     });
   });
 
-  // дропдаун категории
   const dd = $('m4-op-cat-dd'), btn = $('m4-op-cat-btn'), menu = $('m4-op-cat-menu');
   const open = () => { dd.classList.add('is-open'); menu.classList.remove('hidden'); };
   const close = () => { dd.classList.remove('is-open'); menu.classList.add('hidden'); };
   btn.addEventListener('click', (e) => { e.stopPropagation(); dd.classList.contains('is-open') ? close() : open(); });
   menu.addEventListener('click', (e) => {
     const opt = e.target.closest('.m4-dd-opt'); if (!opt) return;
-    tr.editingCat = opt.dataset.value;
-    $('m4-op-cat-label').textContent = opt.textContent;
+    tr.editingCat = opt.dataset.value; $('m4-op-cat-label').textContent = opt.textContent;
     menu.querySelectorAll('.m4-dd-opt').forEach(o => o.classList.toggle('is-selected', o === opt));
-    close();
-    validateOpForm();
+    close(); validateOpForm();
   });
   document.addEventListener('click', (e) => { if (!e.target.closest('#m4-op-cat-dd')) close(); });
 
@@ -955,7 +1088,6 @@ function bindOpModal() {
     validateOpForm();
   });
   $('m4-op-date').addEventListener('change', validateOpForm);
-
   $('m4-op-save').addEventListener('click', saveOperation);
 }
 
@@ -964,52 +1096,99 @@ function fillCatMenu() {
   $('m4-op-cat-menu').innerHTML = cats.map(c => `<div class="m4-dd-opt" data-value="${c}">${esc(CATEGORY_LABELS[c])}</div>`).join('');
 }
 
-function openOpModal() {
-  tr.editingDir = 'expense';
-  tr.editingCat = null;
+function updateRecUi() {
+  const isRec = tr.editingRec !== 'none';
+  $('m4-op-end-wrap').classList.toggle('hidden', !isRec);
+  $('m4-op-date-label').textContent = isRec ? 'Дата начала *' : 'Дата *';
+  $('m4-op-rec-wrap').classList.toggle('hidden', !!tr.editingOpId); // при редактировании периодичность не меняем
+}
+
+function resetOpModal() {
+  tr.editingOpId = null; tr.editingDir = 'expense'; tr.editingCat = null; tr.editingRec = 'none';
   document.querySelectorAll('#m4-op-dir-seg .m4-seg-btn').forEach(x => x.classList.toggle('active', x.dataset.dir === 'expense'));
+  document.querySelectorAll('#m4-op-rec-seg .m4-seg-btn').forEach(x => x.classList.toggle('active', x.dataset.rec === 'none'));
   fillCatMenu();
   $('m4-op-cat-label').textContent = '— выберите —';
-  $('m4-op-amount').value = '';
-  $('m4-op-date').value = toInputDate(new Date());
-  $('m4-op-counterparty').value = '';
-  $('m4-op-desc').value = '';
-  validateOpForm();
+  $('m4-op-amount').value = ''; $('m4-op-date').value = toInputDate(new Date());
+  $('m4-op-end').value = ''; $('m4-op-counterparty').value = ''; $('m4-op-desc').value = '';
+}
+
+function openOpModalNew(presetRec) {
+  resetOpModal();
+  tr.editingRec = presetRec || 'none';
+  document.querySelectorAll('#m4-op-rec-seg .m4-seg-btn').forEach(x => x.classList.toggle('active', x.dataset.rec === tr.editingRec));
+  updateRecUi();
+  $('m4-op-modal-title').textContent = tr.editingRec === 'none' ? 'Новая операция' : 'Новая повторяющаяся операция';
   $('m4-op-modal').classList.remove('hidden');
+  validateOpForm();
   setTimeout(() => $('m4-op-amount').focus(), 50);
+}
+
+function openOpModalEdit(op) {
+  resetOpModal();
+  tr.editingOpId = op.id; tr.editingDir = op.direction; tr.editingCat = op.category; tr.editingRec = 'none';
+  document.querySelectorAll('#m4-op-dir-seg .m4-seg-btn').forEach(x => x.classList.toggle('active', x.dataset.dir === op.direction));
+  fillCatMenu();
+  $('m4-op-cat-label').textContent = CATEGORY_LABELS[op.category] || op.category;
+  $('m4-op-amount').value = String(op.amount).replace('.', ',');
+  $('m4-op-date').value = op.occurred_on;
+  $('m4-op-counterparty').value = op.counterparty || '';
+  $('m4-op-desc').value = op.description || '';
+  updateRecUi();
+  $('m4-op-modal-title').textContent = 'Редактирование операции';
+  $('m4-op-modal').classList.remove('hidden');
+  validateOpForm();
 }
 
 function validateOpForm() {
   const amount = parseDecimalInput($('m4-op-amount').value);
-  const ok = tr.editingCat && amount && amount > 0 && $('m4-op-date').value;
-  $('m4-op-save').disabled = !ok;
+  $('m4-op-save').disabled = !(tr.editingCat && amount && amount > 0 && $('m4-op-date').value);
 }
 
 async function saveOperation() {
-  const btn = $('m4-op-save');
+  const btn = $('m4-op-save'); const orig = btn.textContent;
   btn.disabled = true; btn.textContent = 'Сохраняем…';
   try {
-    const payload = {
-      group_id: groupId,
-      direction: tr.editingDir,
-      category: tr.editingCat,
-      amount: parseDecimalInput($('m4-op-amount').value),
-      occurred_on: $('m4-op-date').value,
-      counterparty: $('m4-op-counterparty').value.trim() || null,
-      description: $('m4-op-desc').value.trim() || null,
-      user_id: state.authUser.id,
-      user_name: state.authUser.user_metadata?.name || state.authUser.email || null
-    };
-    const { error } = await sb.from('treasury_operations').insert(payload);
-    if (error) throw error;
-    toast('Операция добавлена', 'success');
+    const amount = parseDecimalInput($('m4-op-amount').value);
+    const uName = state.authUser.user_metadata?.name || state.authUser.email || null;
+    const cp = $('m4-op-counterparty').value.trim() || null;
+    const desc = $('m4-op-desc').value.trim() || null;
+
+    if (tr.editingOpId) {
+      const { error } = await sb.from('treasury_operations').update({
+        direction: tr.editingDir, category: tr.editingCat, amount,
+        occurred_on: $('m4-op-date').value, counterparty: cp, description: desc,
+        updated_at: new Date().toISOString()
+      }).eq('id', tr.editingOpId);
+      if (error) throw error;
+      toast('Операция обновлена', 'success');
+    } else if (tr.editingRec === 'none') {
+      const { error } = await sb.from('treasury_operations').insert({
+        group_id: groupId, direction: tr.editingDir, category: tr.editingCat, amount,
+        occurred_on: $('m4-op-date').value, counterparty: cp, description: desc,
+        source: 'manual', user_id: state.authUser.id, user_name: uName
+      });
+      if (error) throw error;
+      toast('Операция добавлена', 'success');
+    } else {
+      const { error } = await sb.from('treasury_recurring').insert({
+        group_id: groupId, direction: tr.editingDir, category: tr.editingCat, amount,
+        interval: tr.editingRec, start_date: $('m4-op-date').value,
+        end_date: $('m4-op-end').value || null, counterparty: cp, description: desc,
+        user_id: state.authUser.id, user_name: uName
+      });
+      if (error) throw error;
+      await sb.rpc('treasury_materialize_recurring');
+      toast('Повторяющаяся операция создана', 'success');
+    }
+
     $('m4-op-modal').classList.add('hidden');
-    await loadOperations();
+    if (tr.subtab === 'operations') await loadLedger();
+    else if (tr.subtab === 'recurring') await loadRecurring();
   } catch (e) {
     toast('Ошибка: ' + e.message, 'error');
   } finally {
-    btn.textContent = 'Сохранить';
-    validateOpForm();
+    btn.textContent = orig; validateOpForm();
   }
 }
 
@@ -1022,7 +1201,6 @@ const adm = { inited: false, atab: 'members' };
 function initAdmin() {
   if (!adm.inited) {
     adm.inited = true;
-    // скрываем admin-only вкладку настроек для management
     if (!isAdmin) {
       document.querySelectorAll('.m4-atab-admin').forEach(t => t.classList.add('hidden'));
     }
