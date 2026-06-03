@@ -600,5 +600,29 @@ body.is-authed .app{display:grid;}
 })();
 </script>
    <script type="module" src="assets/app.js"></script>
+   <script>
+/* Регистрация service worker (PWA-кэш). Путь относительный → корректная зона на /RIVA/. */
+if('serviceWorker' in navigator){
+  window.addEventListener('load', function(){
+    navigator.serviceWorker.register('./sw.js').then(function(reg){
+      // если появилась новая версия SW — попросить активироваться сразу
+      reg.addEventListener('updatefound', function(){
+        var nw = reg.installing;
+        if(!nw) return;
+        nw.addEventListener('statechange', function(){
+          if(nw.state === 'installed' && navigator.serviceWorker.controller){
+            reg.waiting && reg.waiting.postMessage({ type:'SKIP_WAITING' });
+          }
+        });
+      });
+    }).catch(function(e){ console.warn('SW register failed', e); });
+    // перезагрузить страницу один раз, когда новый SW взял управление
+    var refreshed = false;
+    navigator.serviceWorker.addEventListener('controllerchange', function(){
+      if(refreshed) return; refreshed = true; location.reload();
+    });
+  });
+}
+</script>
 </body>
 </html>
