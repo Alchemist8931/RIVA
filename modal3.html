@@ -1,1453 +1,418 @@
-<!-- modal3.html — Страница "Продажи". Подстраницы: Активные, Завершённые. -->
-<!-- Доступ: admin, sales, management. -->
+<style>
+/* ============================================================ RIVA · modal3 — Продажи ============================================================ */
+.m3{ color:var(--text); }
+.m3-head{ display:flex; align-items:center; justify-content:space-between; gap:var(--sp-4); margin-bottom:var(--sp-5); flex-wrap:wrap; }
+.m3-title{ font-size:1.35rem; font-weight:700; letter-spacing:-.02em; }
+.m3-tools{ display:flex; align-items:center; gap:var(--sp-3); flex-wrap:wrap; }
+.m3-search{ display:flex; align-items:center; gap:var(--sp-2); height:38px; padding:0 var(--sp-3); background:var(--card); border:1px solid var(--border); border-radius:var(--r); color:var(--text-3); min-width:190px; }
+.m3-search:focus-within{ border-color:var(--accent-line); }
+.m3-search svg{ width:15px; height:15px; flex:0 0 auto; }
+.m3-search input{ flex:1; background:none; border:none; outline:none; color:var(--text); font-size:.875rem; min-width:0; }
+.m3-pill{ display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 var(--sp-3); border-radius:var(--r); background:var(--accent-soft); color:var(--accent); border:1px solid var(--accent-line); font-size:.8rem; font-weight:600; }
+.m3-pill.muted{ background:var(--card); color:var(--text-3); border-color:var(--border); font-weight:500; }
+.m3-pill svg{ width:14px; height:14px; }
 
-<section id="m3">
+.m3-btn{ display:inline-flex; align-items:center; gap:var(--sp-2); height:38px; padding:0 var(--sp-4); border-radius:var(--r); background:var(--btn-bg); color:var(--btn-fg); font-size:.875rem; font-weight:600; box-shadow:var(--shadow-card); transition:transform var(--dur-fast) var(--ease),opacity var(--dur-fast) var(--ease); white-space:nowrap; }
+.m3-btn:hover{ transform:translateY(-1px); opacity:.92; }
+.m3-btn:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
+.m3-btn svg{ width:16px; height:16px; }
+.m3-btn.ghost{ background:var(--card); color:var(--text); border:1px solid var(--border-strong); box-shadow:none; }
+.m3-btn.ghost:hover{ background:var(--card-hover); }
+.m3-btn.sm{ height:32px; padding:0 var(--sp-3); font-size:.82rem; }
 
-  <div class="flex items-center justify-between gap-4 flex-wrap mb-6">
-    <div class="leading-tight">
-      <h1 class="text-[17px] font-medium tracking-tight">Продажи</h1>
-      <p class="text-xs text-fg-muted mt-0.5" id="m3-subtitle">—</p>
-    </div>
-    <div class="flex items-center gap-3">
-      <nav class="m3-subnav" id="m3-subnav">
-        <button class="m3-tab active" data-tab="active">Активные</button>
-        <button class="m3-tab" data-tab="completed">Завершённые</button>
-      </nav>
-      <div id="m3-chat-btn-wrap"></div>
-    </div>
+.m3-card{ border:1px solid var(--border); border-radius:var(--r-lg); background:var(--card); box-shadow:var(--shadow-card); overflow:hidden; }
+.m3-panel{ display:none; }
+.m3-panel.on{ display:block; animation:m3in .3s var(--ease); }
+@keyframes m3in{ from{ opacity:0; transform:translateY(6px);} to{ opacity:1; transform:none; } }
+
+.m3-tablewrap{ overflow-x:auto; }
+table.m3-tbl{ width:100%; border-collapse:collapse; font-size:.875rem; }
+.m3-tbl th{ text-align:left; font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--text-3); font-weight:600; padding:var(--sp-3) var(--sp-4); border-bottom:1px solid var(--border); white-space:nowrap; }
+.m3-tbl td{ padding:var(--sp-3) var(--sp-4); border-bottom:1px solid var(--border); color:var(--text-2); vertical-align:middle; }
+.m3-tbl tr:last-child td{ border-bottom:none; }
+.m3-tbl tbody tr.row{ transition:background var(--dur-fast) var(--ease); }
+.m3-tbl tbody tr.row:hover{ background:var(--card-hover); }
+.m3-tbl td.num, .m3-tbl th.num{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.m3-tbl .nm{ color:var(--text); font-weight:600; }
+.m3-tbl .sub{ color:var(--text-3); font-size:.78rem; font-family:var(--font-mono); }
+
+.m3-chip{ display:inline-flex; align-items:center; gap:5px; font-size:.74rem; font-weight:500; padding:3px 9px; border-radius:var(--r-sm); white-space:nowrap; border:1px solid var(--border); background:var(--card); color:var(--text-2); }
+.m3-chip::before{ content:""; width:6px; height:6px; border-radius:50%; background:currentColor; }
+.st-draft{ color:var(--st-pending); background:var(--st-pending-bg); border-color:transparent; }
+.st-confirmed{ color:var(--st-upcoming); background:var(--st-upcoming-bg); border-color:transparent; }
+.st-shipped{ color:var(--st-upcoming); background:var(--st-upcoming-bg); border-color:transparent; }
+.st-completed{ color:var(--st-completed); background:var(--st-completed-bg); border-color:transparent; }
+.st-cancelled{ color:var(--st-cancelled); background:var(--st-cancelled-bg); border-color:transparent; }
+.pay-paid{ color:var(--st-completed); } .pay-partial{ color:var(--st-pending); } .pay-unpaid{ color:var(--text-3); }
+.it-prod{ color:var(--st-upcoming); } .it-recipe{ color:var(--accent); }
+
+.m3-acts{ display:flex; gap:6px; justify-content:flex-end; }
+.m3-ic{ width:30px; height:30px; display:grid; place-items:center; border-radius:var(--r-sm); border:1px solid var(--border); background:var(--card); color:var(--text-2); transition:all var(--dur-fast) var(--ease); }
+.m3-ic:hover{ border-color:var(--border-strong); color:var(--text); background:var(--card-hover); }
+.m3-ic.danger:hover{ color:var(--st-cancelled); border-color:var(--st-cancelled); }
+.m3-ic.go:hover{ color:var(--st-completed); border-color:var(--st-completed); }
+.m3-ic svg{ width:15px; height:15px; }
+
+.m3-empty{ display:grid; place-items:center; gap:var(--sp-2); padding:var(--sp-12) var(--sp-4); text-align:center; color:var(--text-3); }
+.m3-empty svg{ width:36px; height:36px; opacity:.45; }
+.m3-empty .t{ font-size:1rem; font-weight:600; color:var(--text-2); }
+.m3-empty .d{ font-size:.875rem; max-width:42ch; }
+.m3-loading{ display:grid; place-items:center; gap:var(--sp-3); padding:var(--sp-12); color:var(--text-3); }
+.m3-loading .spin{ width:24px; height:24px; border-radius:50%; border:2px solid var(--border); border-top-color:var(--accent); animation:m3spin 1s linear infinite; }
+@keyframes m3spin{ to{ transform:rotate(360deg);} }
+.m3-foot{ display:flex; align-items:center; justify-content:space-between; padding:var(--sp-3) var(--sp-4); border-top:1px solid var(--border); font-size:.8rem; color:var(--text-3); }
+.m3-foot b{ color:var(--text); font-weight:600; }
+
+/* воронка статусов */
+.m3-funnel{ display:flex; gap:var(--sp-2); padding:var(--sp-3) var(--sp-4); border-bottom:1px solid var(--border); flex-wrap:wrap; }
+.m3-funnel button{ display:inline-flex; align-items:center; gap:6px; height:30px; padding:0 var(--sp-3); border-radius:var(--r); border:1px solid var(--border); background:var(--card); color:var(--text-3); font-size:.8rem; }
+.m3-funnel button.on{ background:var(--accent-soft); color:var(--accent); border-color:var(--accent-line); }
+.m3-funnel button .c{ font-family:var(--font-mono); font-size:.72rem; opacity:.8; }
+
+/* диалоги */
+.m3-overlay{ position:fixed; inset:0; z-index:400; display:grid; place-items:center; padding:var(--sp-4); background:rgba(0,0,0,.45); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); animation:m3fade .2s var(--ease); }
+@keyframes m3fade{ from{ opacity:0;} to{ opacity:1; } }
+.m3-dialog{ width:100%; max-width:600px; max-height:90vh; display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--border-strong); border-radius:var(--r-lg); box-shadow:var(--shadow-pop); animation:m3pop .25s var(--ease); }
+@keyframes m3pop{ from{ opacity:0; transform:translateY(10px) scale(.98);} to{ opacity:1; transform:none; } }
+.m3-dialog.wide{ max-width:780px; }
+.m3-dhead{ display:flex; align-items:center; justify-content:space-between; padding:var(--sp-4) var(--sp-5); border-bottom:1px solid var(--border); }
+.m3-dhead h3{ font-size:1.05rem; font-weight:700; letter-spacing:-.01em; }
+.m3-dclose{ width:32px; height:32px; display:grid; place-items:center; border-radius:var(--r-sm); color:var(--text-3); }
+.m3-dclose:hover{ background:var(--card-hover); color:var(--text); }
+.m3-dbody{ padding:var(--sp-5); overflow-y:auto; }
+.m3-dfoot{ display:flex; justify-content:flex-end; gap:var(--sp-3); padding:var(--sp-4) var(--sp-5); border-top:1px solid var(--border); }
+.m3-field{ margin-bottom:var(--sp-4); } .m3-field:last-child{ margin-bottom:0; }
+.m3-field label{ display:block; font-size:.78rem; font-weight:600; color:var(--text-2); margin-bottom:6px; }
+.m3-input, .m3-select, .m3-textarea{ width:100%; height:40px; padding:0 var(--sp-3); background:var(--card); border:1px solid var(--border); border-radius:var(--r); color:var(--text); font-size:.9rem; font-family:inherit; transition:border-color var(--dur-fast) var(--ease); }
+.m3-textarea{ height:auto; min-height:64px; padding:var(--sp-2) var(--sp-3); resize:vertical; }
+.m3-input:focus, .m3-select:focus, .m3-textarea:focus{ outline:none; border-color:var(--accent-line); }
+.m3-row2{ display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-3); }
+.m3-hint{ font-size:.78rem; color:var(--text-3); margin-top:6px; }
+.m3-total{ display:flex; align-items:center; justify-content:space-between; padding:var(--sp-3) 0; border-top:1px solid var(--border); margin-top:var(--sp-2); font-weight:700; color:var(--text); }
+
+/* строки позиций заказа */
+.m3-li-head{ display:grid; grid-template-columns:110px 1fr 70px 90px 30px; gap:var(--sp-2); font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; color:var(--text-3); margin-bottom:6px; padding:0 2px; }
+.m3-li{ display:grid; grid-template-columns:110px 1fr 70px 90px 30px; gap:var(--sp-2); align-items:center; margin-bottom:var(--sp-2); }
+.m3-li .m3-input, .m3-li .m3-select{ height:36px; }
+.m3-li-del{ width:30px; height:30px; display:grid; place-items:center; border-radius:var(--r-sm); border:1px solid var(--border); color:var(--text-3); }
+.m3-li-del:hover{ color:var(--st-cancelled); border-color:var(--st-cancelled); }
+</style>
+
+<div class="m3" id="m3-root">
+  <div class="m3-head">
+    <div class="m3-title" id="m3-title">Клиенты</div>
+    <div class="m3-tools" id="m3-tools"></div>
   </div>
-
-  <!-- =========================
-       ACTIVE
-  ========================== -->
-  <div class="m3-panel" data-panel="active">
-    <div class="bg-surface rounded-2xl border border-line mb-5 flex flex-wrap items-center" style="padding:10px; gap:10px;">
-      <div class="flex-1 min-w-[180px]">
-        <input id="m3-act-search" type="search" placeholder="Поиск по номеру или клиенту…"
-          class="m3-bar-ctrl w-full rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors text-sm">
-      </div>
-      <div class="m3-dd m3-bar-ctrl" id="m3-act-status-dd">
-        <button type="button" class="m3-dd-btn" id="m3-act-status-btn">
-          <span id="m3-act-status-label">Все статусы</span>
-          <svg class="m3-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-        <div class="m3-dd-menu hidden" id="m3-act-status-menu">
-          <div class="m3-dd-opt" data-value="all">Все статусы</div>
-          <div class="m3-dd-opt" data-value="draft">Черновик</div>
-          <div class="m3-dd-opt" data-value="confirmed">Подтверждён</div>
-          <div class="m3-dd-opt" data-value="shipped">Отгружен</div>
-          <div class="m3-dd-opt" data-value="cancelled">Отменён</div>
-        </div>
-      </div>
-      <button id="m3-order-new" class="btn-primary m3-bar-ctrl rounded-xl text-sm font-medium ml-auto" style="padding-left:16px; padding-right:16px;">
-        + Новый заказ
-      </button>
-    </div>
-    <div id="m3-act-list" class="space-y-3">
-      <div class="flex items-center justify-center py-16"><div class="w-6 h-6 loader"></div></div>
-    </div>
-  </div>
-
-  <!-- =========================
-       COMPLETED
-  ========================== -->
-  <div class="m3-panel hidden" data-panel="completed">
-    <div class="bg-surface rounded-2xl border border-line mb-5 flex flex-wrap items-center" style="padding:10px; gap:10px;">
-      <div class="flex-1 min-w-[180px]">
-        <input id="m3-cmp-search" type="search" placeholder="Поиск по номеру или клиенту…"
-          class="m3-bar-ctrl w-full rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors text-sm">
-      </div>
-      <span id="m3-cmp-count" class="text-xs text-fg-muted ml-auto">—</span>
-    </div>
-    <div id="m3-cmp-list" class="space-y-3">
-      <div class="flex items-center justify-center py-16"><div class="w-6 h-6 loader"></div></div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================
-     ШАБЛОН СТРОКИ ЗАКАЗА
-============================================================ -->
-<template id="m3-order-row-tpl">
-  <article class="m3-row" data-ord-id="">
-    <span class="m3-row__num"      data-field="number"></span>
-    <span class="m3-badge"          data-field="status"></span>
-    <span class="m3-badge"          data-field="payment"></span>
-    <span class="m3-row__customer" data-field="customer"></span>
-    <span class="m3-row__items"    data-field="items"></span>
-    <span class="m3-row__total"    data-field="total"></span>
-    <span class="m3-row__date"     data-field="date"></span>
-  </article>
-</template>
-
-<!-- =========================
-     MODAL: редактор заказа продажи
-========================== -->
-<div id="m3-order-modal" class="hidden fixed inset-0 z-40 bg-black/30 flex items-start justify-center px-4 py-8 overflow-y-auto">
-  <div class="bg-surface rounded-2xl border border-line w-full max-w-3xl">
-    <div class="px-5 py-4 border-b border-line flex items-center justify-between">
-      <div>
-        <h3 class="font-medium" id="m3-order-modal-title">Новый заказ</h3>
-        <p class="text-xs text-fg-muted mt-0.5" id="m3-order-modal-sub"></p>
-      </div>
-      <button class="m3-order-close p-1 rounded-lg hover:bg-surface-alt">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
-      </button>
-    </div>
-
-    <div class="p-5 space-y-4">
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <label class="block md:col-span-2">
-          <span class="text-xs text-fg-muted block mb-1.5">Клиент</span>
-          <input id="m3-order-f-customer" list="m3-customers-dl" type="text" maxlength="200"
-            placeholder="Начните вводить или выберите…"
-            class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-          <datalist id="m3-customers-dl"></datalist>
-        </label>
-        <label class="block">
-          <span class="text-xs text-fg-muted block mb-1.5">Статус оплаты</span>
-          <div class="m3-dd m3-dd--block" id="m3-order-payment-dd">
-            <button type="button" class="m3-dd-btn m3-dd-btn--block" id="m3-order-payment-btn">
-              <span id="m3-order-payment-label" class="truncate">Не оплачено</span>
-              <svg class="m3-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="m3-dd-menu hidden" id="m3-order-payment-menu">
-              <div class="m3-dd-opt" data-value="unpaid">Не оплачено</div>
-              <div class="m3-dd-opt" data-value="partial">Частично оплачено</div>
-              <div class="m3-dd-opt" data-value="paid">Оплачено</div>
-            </div>
-          </div>
-        </label>
-      </div>
-
-      <!-- Статус заказа -->
-      <div id="m3-order-status-row" class="hidden">
-        <span class="text-xs text-fg-muted block mb-2">Статус заказа</span>
-        <div id="m3-order-status-badges" class="flex items-center gap-1 flex-wrap"></div>
-      </div>
-
-      <!-- Позиции -->
-      <div class="border border-line rounded-xl overflow-hidden">
-        <div class="px-4 py-3 bg-surface-alt border-b border-line flex items-center justify-between">
-          <span class="text-sm font-medium">Позиции заказа</span>
-          <span id="m3-order-total" class="text-sm text-fg-muted">Итого: 0,00 ₽</span>
-        </div>
-        <div id="m3-order-items" class="divide-y divide-line-light"></div>
-        <div class="px-4 py-3 border-t border-line">
-          <button id="m3-order-add-item" class="text-sm text-fg-muted hover:text-fg transition-colors">
-            + Добавить позицию
-          </button>
-        </div>
-      </div>
-
-      <!-- Вложения -->
-      <div class="border border-line rounded-xl overflow-hidden">
-        <div class="px-4 py-3 bg-surface-alt border-b border-line flex items-center justify-between">
-          <span class="text-sm font-medium">Документы</span>
-          <label class="text-sm text-fg-muted hover:text-fg transition-colors cursor-pointer">
-            + Загрузить
-            <input id="m3-order-file-input" type="file" class="hidden" multiple>
-          </label>
-        </div>
-        <div id="m3-order-attachments" class="divide-y divide-line-light">
-          <div class="px-4 py-3 text-xs text-fg-muted">Нет вложений</div>
-        </div>
-      </div>
-
-      <div id="m3-order-deficit" class="hidden border border-state-error/30 bg-state-error/5 rounded-xl p-4">
-        <div class="text-sm font-medium text-state-error mb-2">Недостаточно продукции на складе</div>
-        <div id="m3-order-deficit-list" class="text-sm space-y-1"></div>
-      </div>
-
-    </div>
-
-    <div class="px-5 py-4 border-t border-line flex items-center justify-between gap-2 flex-wrap">
-      <button id="m3-order-delete" class="hidden px-4 py-2 rounded-lg text-sm text-state-error hover:bg-surface-alt transition-colors">Удалить</button>
-      <div class="flex items-center gap-2 ml-auto flex-wrap">
-        <div id="m3-order-actions" class="flex items-center gap-2 flex-wrap"></div>
-        <button class="m3-order-close btn-secondary px-4 py-2 rounded-lg text-sm">Закрыть</button>
-        <button id="m3-order-save" class="btn-primary px-4 py-2 rounded-lg text-sm" disabled>Сохранить</button>
-      </div>
-    </div>
+  <div class="m3-card">
+    <div class="m3-panel" data-tab="customers" id="m3p-customers"></div>
+    <div class="m3-panel" data-tab="orders" id="m3p-orders"></div>
+    <div class="m3-panel" data-tab="shipments" id="m3p-shipments"></div>
   </div>
 </div>
 
-<style>
-  /* Подстраничная навигация — segmented control */
-  .m3-subnav {
-    height: var(--ctrl-h, 38px);
-    background: var(--bg-card);
-    border: 1px solid var(--line);
-    border-radius: var(--ctrl-radius, 12px);
-    padding: 4px;
-    display: inline-flex;
-    align-items: stretch;
-    gap: 0;
-  }
-  .m3-subnav .m3-tab {
-    padding: 0 14px;
-    border: none;
-    background: none;
-    cursor: pointer;
-    border-radius: calc(var(--ctrl-radius, 12px) - 4px);
-    color: var(--fg-muted);
-    font-size: 13px;
-    white-space: nowrap;
-    display: inline-flex;
-    align-items: center;
-    transition: all .15s ease-in-out;
-  }
-  .m3-subnav .m3-tab:hover { color: var(--fg); }
-  .m3-subnav .m3-tab.active {
-    background: var(--bg);
-    color: var(--fg);
-    font-weight: 600;
-    box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 0 0 1px rgba(0,0,0,.04);
+<script>
+(function(){
+  var RIVA=window.RIVA, U=window.RIVA_UTILS;
+  if(!RIVA||!U){ var r=document.getElementById('m3-root'); if(r) r.innerHTML='<div class="m3-empty"><div class="t">Модуль не инициализирован</div></div>'; return; }
+  var sb=RIVA.sb;
+  var INSTANCE=Date.now()+'-'+Math.random(); RIVA._m3Instance=INSTANCE;
+  function alive(){ return RIVA._m3Instance===INSTANCE && document.getElementById('m3-root'); }
+
+  var data={ customers:[], orders:[], whLite:[], recLite:[] };
+  var search='', curTab='customers', statusFilter='all';
+
+  function role(){ return (RIVA.state.currentGroup && RIVA.state.currentGroup.role)||null; }
+  function canWrite(){ return ['admin','sales','management'].indexOf(role())>=0; }
+  function groupId(){ return RIVA.state.currentGroup && RIVA.state.currentGroup.group_id; }
+  function salesUnits(){ return (RIVA.unitsBySection&&RIVA.unitsBySection.sales)||[]; }
+  function activeUnit(){ return RIVA.state.activeUnitId||null; }
+  function activeSalesUnit(){ var id=activeUnit(); return salesUnits().some(function(u){return u.id===id;})?id:null; }
+  function activeSalesName(){ var id=activeSalesUnit(); var u=salesUnits().find(function(x){return x.id===id;}); return u?u.name:null; }
+  function defaultSalesUnit(){ var us=salesUnits(); var d=us.find(function(u){return u.is_default;})||us[0]; return d?d.id:null; }
+  function resolveSalesUnit(){ return activeSalesUnit()||defaultSalesUnit(); }
+  function num(v){ var n=typeof v==='number'?v:parseFloat(v); return isFinite(n)?n:0; }
+
+  function tabFromLabel(label){ var l=(label||'').toLowerCase(); if(l.indexOf('заказ')>=0) return 'orders'; if(l.indexOf('отгруз')>=0) return 'shipments'; return 'customers'; }
+
+  function showTab(tab){
+    curTab=tab; search=''; statusFilter='all';
+    var titles={customers:'Клиенты',orders:'Заказы',shipments:'Отгрузки'};
+    document.getElementById('m3-title').textContent=titles[tab]||'';
+    document.querySelectorAll('#m3-root .m3-panel').forEach(function(p){ p.classList.toggle('on', p.getAttribute('data-tab')===tab); });
+    renderTools(); loadTab(tab);
   }
 
-  /* ============================================================
-     ШАБЛОН СТРОКИ ЗАКАЗА
-  ============================================================ */
-  .m3-row {
-    --m3-accent: var(--fg);
-    --m3-bg-pct: 3%;
-    --m3-bg-hover: 6%;
-    --m3-border-pct: 8%;
-    --m3-blur: 3px;
-
-    background: color-mix(in srgb, var(--m3-accent) var(--m3-bg-pct), transparent);
-    backdrop-filter: blur(var(--m3-blur));
-    -webkit-backdrop-filter: blur(var(--m3-blur));
-    border: 1px solid color-mix(in srgb, var(--m3-accent) var(--m3-border-pct), transparent);
-    border-radius: 12px;
-
-    display: grid;
-    grid-template-columns:
-      150px
-      120px
-      120px
-      minmax(0, 1fr)
-      70px
-      130px
-      170px;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 16px;
-    min-height: 44px;
-
-    transition: background .15s ease, border-color .15s ease;
-    cursor: pointer;
-  }
-
-  .m3-row:hover {
-    background: color-mix(in srgb, var(--m3-accent) var(--m3-bg-hover), transparent);
-    border-color: color-mix(in srgb, var(--m3-accent) calc(var(--m3-border-pct) + 10%), transparent);
-  }
-
-  .m3-row__num {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--fg);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .m3-row__customer {
-    font-size: 13px;
-    color: var(--fg-secondary);
-    min-width: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .m3-row__items,
-  .m3-row__date {
-    font-size: 12px;
-    color: var(--fg-muted);
-    white-space: nowrap;
-  }
-  .m3-row__total {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--fg);
-    text-align: right;
-    white-space: nowrap;
-  }
-  .m3-row__date { text-align: right; }
-
-  /* ============================================================
-     ЧИПЫ СТАТУСОВ
-  ============================================================ */
-  .m3-badge {
-    --m3-badge-pct: 13%;
-    --m3-badge-blur: 6px;
-
-    display: inline-flex;
-    align-items: center;
-    justify-self: start;
-    padding: 3px 9px;
-    border-radius: 7px;
-    font-size: 11px;
-    font-weight: 500;
-    line-height: 1.4;
-    white-space: nowrap;
-    background: color-mix(in srgb, var(--badge-c, var(--fg-muted)) var(--m3-badge-pct), transparent);
-    color: var(--badge-c, var(--fg-muted));
-    backdrop-filter: blur(var(--m3-badge-blur));
-    -webkit-backdrop-filter: blur(var(--m3-badge-blur));
-  }
-  .m3-badge-draft     { --badge-c: #6B7280; }
-  .m3-badge-confirmed { --badge-c: #2563EB; }
-  .m3-badge-shipped   { --badge-c: #D97706; }
-  .m3-badge-completed { --badge-c: #15803D; }
-  .m3-badge-cancelled { --badge-c: #DC2626; }
-  .m3-badge-paid      { --badge-c: #15803D; }
-  .m3-badge-partial   { --badge-c: #D97706; }
-  .m3-badge-unpaid    { --badge-c: #DC2626; }
-
-  /* Чип типа позиции в строке заказа */
-  .m3-chip-prod { --badge-c: #D97706; }   /* продукция-рецепт — янтарный */
-  .m3-chip-wh   { --badge-c: #15803D; }   /* склад (товар/материал) — зелёный */
-
-  /* ============================================================
-     ТУЛБАР ПОДСТРАНИЦ
-  ============================================================ */
-  :root { --m3-bar-h: 36px; }
-
-  .m3-bar-ctrl {
-    height: var(--m3-bar-h);
-    padding-top: 0;
-    padding-bottom: 0;
-  }
-  input.m3-bar-ctrl { padding-left: 14px; padding-right: 14px; }
-
-  /* ============================================================
-     КАСТОМНЫЙ ДРОПДАУН
-  ============================================================ */
-  .m3-dd { position: relative; display: inline-flex; }
-  .m3-dd-btn {
-    height: var(--m3-bar-h, 36px);
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0 12px 0 14px;
-    border-radius: 12px;
-    background: var(--bg);
-    border: 1px solid var(--line);
-    color: var(--fg);
-    font-size: 13px;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: border-color .15s ease;
-  }
-  .m3-dd-btn:hover { border-color: var(--fg-muted); }
-  .m3-dd.is-open .m3-dd-btn { border-color: var(--fg); }
-  .m3-dd-chev {
-    width: 16px; height: 16px;
-    color: var(--fg-muted);
-    transition: transform .18s ease;
-    flex-shrink: 0;
-  }
-  .m3-dd.is-open .m3-dd-chev { transform: rotate(180deg); }
-
-  .m3-dd-menu {
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0;
-    min-width: 100%;
-    z-index: 30;
-    max-height: 260px;
-    overflow-y: auto;
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    box-shadow: 0 8px 24px rgba(0,0,0,.08);
-    padding: 4px;
-  }
-  .m3-dd-menu::-webkit-scrollbar { width: 4px; }
-  .m3-dd-menu::-webkit-scrollbar-track { background: transparent; }
-  .m3-dd-menu::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
-  .m3-dd-menu:hover::-webkit-scrollbar-thumb { background: var(--fg-muted); }
-  .m3-dd-menu { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
-
-  .m3-dd-opt {
-    padding: 8px 10px;
-    border-radius: 7px;
-    font-size: 13px;
-    color: var(--fg);
-    cursor: pointer;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    transition: background .12s ease;
-  }
-  .m3-dd-opt:hover { background: var(--bg-alt); }
-  .m3-dd-opt.is-selected { background: var(--bg-alt); font-weight: 600; }
-
-  .m3-dd--block { display: block; }
-  .m3-dd-btn--block { width: 100%; justify-content: space-between; }
-  .m3-dd-btn--block > span { overflow: hidden; text-overflow: ellipsis; }
-
-  /* ============================================================
-     СТРОКА ПОЗИЦИИ ЗАКАЗА (как .m1-oi-row / состав в modal2)
-     грид: позиция · кол-во · ед. · цена · сумма · удалить
-  ============================================================ */
-  .m3-oi-row {
-    display: grid;
-    grid-template-columns:
-      minmax(0, 1fr)   /* позиция (пикер) */
-      96px             /* кол-во */
-      52px             /* ед. */
-      110px            /* цена */
-      120px            /* сумма */
-      36px;            /* удалить */
-    gap: 8px;
-    align-items: center;
-    padding: 10px 16px;
-  }
-  .m3-oi-input {
-    width: 100%;
-    height: 34px;
-    padding: 0 10px;
-    border-radius: 9px;
-    background: var(--bg);
-    border: 1px solid var(--line);
-    color: var(--fg);
-    font-size: 13px;
-    outline: none;
-    transition: border-color .15s ease;
-  }
-  .m3-oi-input:focus { border-color: var(--fg); }
-  .m3-oi-input--num { text-align: right; }
-  .m3-oi-unit {
-    font-size: 12px;
-    color: var(--fg-muted);
-    text-align: center;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .m3-oi-sum {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--fg);
-    text-align: right;
-    white-space: nowrap;
-  }
-  .m3-oi-del {
-    display: inline-flex;
-    align-items: center;
-    justify-content: center;
-    width: 30px; height: 30px;
-    border-radius: 8px;
-    cursor: pointer;
-    transition: background .12s ease;
-  }
-  .m3-oi-del:hover { background: var(--bg-alt); }
-  .m3-oi-stock {
-    grid-column: 1 / -1;
-    font-size: 11px;
-    color: var(--fg-muted);
-    padding-left: 2px;
-  }
-  .m3-oi-stock.is-short { color: #DC2626; }
-
-  /* Кнопка выбора позиции (пикер) */
-  .m3-oi-pick {
-    width: 100%;
-    height: 34px;
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0 10px;
-    border-radius: 9px;
-    background: var(--bg);
-    border: 1px solid var(--line);
-    color: var(--fg);
-    font-size: 13px;
-    cursor: pointer;
-    text-align: left;
-    transition: border-color .15s ease;
-  }
-  .m3-oi-pick:hover { border-color: var(--fg-muted); }
-  .m3-oi-pick .m3-oi-pick-label {
-    flex: 1; min-width: 0;
-    overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
-  }
-  .m3-oi-pick.is-empty .m3-oi-pick-label { color: var(--fg-muted); }
-
-  /* ИНЛАЙН-ПИКЕР (поиск + список) — стиль из modal2 */
-  .m3-picker {
-    grid-column: 1 / -1;
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    background: var(--bg);
-    overflow: hidden;
-    margin-top: 4px;
-  }
-  .m3-picker-search {
-    width: 100%;
-    padding: 8px 10px;
-    border: none;
-    border-bottom: 1px solid var(--line);
-    background: var(--bg);
-    color: var(--fg);
-    font-size: 13px;
-    outline: none;
-  }
-  .m3-picker-search::placeholder { color: var(--fg-muted); }
-  .m3-picker-list { max-height: 220px; overflow-y: auto; padding: 4px; }
-  .m3-picker-list::-webkit-scrollbar { width: 4px; }
-  .m3-picker-list::-webkit-scrollbar-track { background: transparent; }
-  .m3-picker-list::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
-  .m3-picker-list:hover::-webkit-scrollbar-thumb { background: var(--fg-muted); }
-  .m3-picker-list { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
-
-  .m3-picker-group {
-    padding: 6px 10px 2px;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--fg-muted);
-    text-transform: uppercase;
-    letter-spacing: .03em;
-  }
-  .m3-picker-opt {
-    padding: 8px 10px;
-    border-radius: 7px;
-    font-size: 13px;
-    color: var(--fg);
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 8px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    transition: background .12s ease;
-  }
-  .m3-picker-opt:hover,
-  .m3-picker-opt.active { background: var(--bg-alt); }
-  .m3-picker-opt .m3-picker-opt-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-  .m3-picker-opt small { color: var(--fg-muted); font-weight: 400; }
-  .m3-picker-opt--empty { color: var(--fg-muted); cursor: default; font-style: italic; }
-
-  /* Адаптив */
-  @media (max-width: 1024px) {
-    .m3-row {
-      grid-template-columns: auto auto auto minmax(0, 1fr) auto auto auto;
-      gap: 10px;
+  function renderTools(){
+    var t=document.getElementById('m3-tools'); t.innerHTML='';
+    var an=activeSalesName(); var pill=document.createElement('span'); pill.className='m3-pill'+(an?'':' muted');
+    pill.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h2l2.4 12.3a2 2 0 0 0 2 1.7h7.7a2 2 0 0 0 2-1.6L22 8H6"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>'+(an?U.esc(an):'Все отделы продаж');
+    t.appendChild(pill);
+    var s=document.createElement('label'); s.className='m3-search';
+    s.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>';
+    var i=document.createElement('input'); i.type='text'; i.placeholder='Поиск'; i.value=search;
+    i.addEventListener('input', function(){ search=i.value.toLowerCase(); renderCurrent(); }); s.appendChild(i); t.appendChild(s);
+    if(canWrite()){
+      if(curTab==='customers') t.appendChild(mkbtn('Новый клиент', iconPlus(), function(){ openCustomerDialog(null); }));
+      else if(curTab==='orders') t.appendChild(mkbtn('Новый заказ', iconPlus(), function(){ openOrderDialog(null); }));
     }
   }
-  @media (max-width: 700px) {
-    .m3-row {
-      grid-template-columns: 1fr;
-      gap: 4px;
-      padding: 12px 14px;
-    }
-    .m3-row__date, .m3-row__total { text-align: left; }
-    .m3-oi-row {
-      grid-template-columns: minmax(0,1fr) 70px 70px 36px;
-      gap: 6px;
-    }
-    .m3-oi-unit { display: none; }
-  }
-</style>
+  function mkbtn(label,icon,on){ var b=document.createElement('button'); b.className='m3-btn'; b.innerHTML=icon+'<span>'+label+'</span>'; b.addEventListener('click',on); return b; }
+  function iconPlus(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>'; }
 
-<script type="module">
-// ================================================================
-// modal3.html — Продажи
-// ================================================================
-
-const { sb, state } = window.RIVA;
-const { toast, esc, formatDate, formatDateTime, formatMoney, formatNumber } = window.RIVA_UTILS;
-const $ = (id) => document.getElementById(id);
-
-const myRole = state.currentGroup?.role;
-const canWrite = ['admin','sales','management'].includes(myRole);
-const groupId = state.currentGroup.group_id;
-
-$('m3-subtitle').textContent = `Группа «${state.currentGroup.group_name}»`;
-if (!canWrite) {
-  $('m3-order-new')?.setAttribute('disabled', 'disabled');
-}
-
-// ---- Парсинг чисел (запятая/точка) ----
-function parseDecimalInput(str) {
-  if (str == null) return null;
-  const cleaned = String(str).replace(',', '.').replace(/[^\d.]/g, '');
-  if (cleaned === '' || cleaned === '.') return null;
-  const num = parseFloat(cleaned);
-  return Number.isFinite(num) ? num : null;
-}
-
-// ---- Универсальный кастомный select ----
-function initCustomSelect(ids, onChange) {
-  const dd    = $(ids.dd);
-  const btn   = $(ids.btn);
-  const menu  = $(ids.menu);
-  const label = $(ids.label);
-  if (!dd || !btn || !menu) return { set() {}, setOptions() {} };
-
-  const open  = () => { dd.classList.add('is-open'); menu.classList.remove('hidden'); };
-  const close = () => { dd.classList.remove('is-open'); menu.classList.add('hidden'); };
-
-  function mark(value) {
-    menu.querySelectorAll('.m3-dd-opt').forEach(o =>
-      o.classList.toggle('is-selected', o.dataset.value === value));
-  }
-  function set(value) {
-    const opt = menu.querySelector(`.m3-dd-opt[data-value="${(value ?? '').replace(/"/g, '\\"')}"]`);
-    if (opt) label.textContent = opt.textContent;
-    mark(value ?? '');
-  }
-  function setOptions(html) { menu.innerHTML = html; }
-
-  btn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    dd.classList.contains('is-open') ? close() : open();
-  });
-  menu.addEventListener('click', (e) => {
-    const opt = e.target.closest('.m3-dd-opt');
-    if (!opt) return;
-    set(opt.dataset.value);
-    close();
-    onChange?.(opt.dataset.value);
-  });
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('#' + ids.dd)) close();
-  });
-
-  return { set, setOptions };
-}
-
-function switchTab(name) {
-  document.querySelectorAll('.m3-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
-  document.querySelectorAll('.m3-panel').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== name));
-  if (name === 'active') loadActive();
-  if (name === 'completed') loadCompleted();
-}
-document.querySelectorAll('.m3-tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
-
-['m3-act-list', 'm3-cmp-list'].forEach(id => {
-  $(id).addEventListener('click', (e) => {
-    const card = e.target.closest('[data-ord-id]');
-    if (card && card.dataset.ordId) openOrderEditor(card.dataset.ordId);
-  });
-});
-
-// ---- Кэш справочников ----
-const cache = {
-  products: [],   // warehouse_items type='product'
-  warehouse: [],  // все позиции склада (товары + материалы)
-  recipes: [],    // рецепты
-  customers: []
-};
-
-async function refreshCache() {
-  const [wh, rc, cus] = await Promise.all([
-    sb.from('warehouse_items').select('id, article, name, unit, type, quantity, price').order('name'),
-    sb.from('recipes').select('id, code, name, output_unit').order('name'),
-    sb.from('customers').select('id, name').order('name')
-  ]);
-  cache.warehouse = wh.data || [];
-  cache.products = cache.warehouse.filter(w => w.type === 'product');
-  cache.recipes = rc.data || [];
-  cache.customers = cus.data || [];
-  $('m3-customers-dl').innerHTML = cache.customers.map(c => `<option value="${esc(c.name)}"></option>`).join('');
-}
-
-// ================================================================
-// ACTIVE
-// ================================================================
-
-const active = { cached: [], search: '', statusFilter: 'all' };
-
-$('m3-act-search').addEventListener('input', (e) => { active.search = e.target.value.trim().toLowerCase(); renderActive(); });
-
-initCustomSelect(
-  { dd: 'm3-act-status-dd', btn: 'm3-act-status-btn', menu: 'm3-act-status-menu', label: 'm3-act-status-label' },
-  (value) => { active.statusFilter = value; renderActive(); }
-);
-
-async function loadActive() {
-  await refreshCache();
-
-  const { data, error } = await sb
-    .from('sales_orders')
-    .select(`
-      id, order_number, status, payment_status,
-      shipped_at, completed_at, created_at, updated_at,
-      customer_id,
-      customers ( id, name ),
-      sales_order_items ( id, warehouse_item_id, recipe_id, quantity, price )
-    `)
-    .neq('status', 'completed')
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    $('m3-act-list').innerHTML = `<div class="text-sm text-state-error p-6">${esc(error.message)}</div>`;
-    return;
-  }
-  active.cached = data || [];
-  renderActive();
-}
-
-function orderTotal(o) {
-  return (o.sales_order_items || []).reduce((sum, it) => sum + Number(it.quantity || 0) * Number(it.price || 0), 0);
-}
-
-const STATUS_LABEL = {
-  draft: 'Черновик',
-  confirmed: 'Подтверждён',
-  shipped: 'Отгружен',
-  completed: 'Завершён',
-  cancelled: 'Отменён'
-};
-const PAYMENT_LABEL = { unpaid: 'Не оплачено', partial: 'Частично', paid: 'Оплачено' };
-
-function renderActive() {
-  let list = active.cached;
-  if (active.statusFilter !== 'all') list = list.filter(x => x.status === active.statusFilter);
-  if (active.search) list = list.filter(x =>
-    (x.order_number || '').toLowerCase().includes(active.search) ||
-    (x.customers?.name || '').toLowerCase().includes(active.search)
-  );
-
-  if (list.length === 0) {
-    $('m3-act-list').innerHTML = `
-      <div class="text-center py-16 text-sm text-fg-muted">
-        ${active.search || active.statusFilter !== 'all' ? 'Ничего не найдено' : 'Пока нет активных заказов. Создайте первый.'}
-      </div>`;
-    return;
+  async function ensurePickers(){
+    if(!data.whLite.length){ var w=await sb.from('warehouse_items').select('id,name,unit,type,quantity,price').order('name'); if(!w.error) data.whLite=w.data||[]; }
+    if(!data.recLite.length){ var r=await sb.from('recipes').select('id,name,output_unit').order('name'); if(!r.error) data.recLite=r.data||[]; }
   }
 
-  const container = $('m3-act-list');
-  container.innerHTML = '';
-  const frag = document.createDocumentFragment();
-  list.forEach(o => frag.appendChild(renderOrderCard(o)));
-  container.appendChild(frag);
-}
-
-function renderOrderCard(o) {
-  const tpl = document.getElementById('m3-order-row-tpl');
-  const node = tpl.content.firstElementChild.cloneNode(true);
-  node.dataset.ordId = o.id;
-
-  const fld = (name) => node.querySelector(`[data-field="${name}"]`);
-
-  fld('number').textContent = o.order_number || '—';
-
-  const st = fld('status');
-  st.textContent = STATUS_LABEL[o.status] || o.status;
-  st.classList.add('m3-badge-' + o.status);
-
-  const pm = fld('payment');
-  pm.textContent = PAYMENT_LABEL[o.payment_status] || o.payment_status;
-  pm.classList.add('m3-badge-' + o.payment_status);
-
-  const customerName = o.customers?.name || 'Клиент не указан';
-  const cu = fld('customer');
-  cu.textContent = customerName;
-  cu.title = customerName;
-
-  const itemsCount = o.sales_order_items?.length || 0;
-  fld('items').textContent = `${itemsCount} поз.`;
-
-  fld('total').textContent = formatMoney(orderTotal(o));
-
-  fld('date').textContent = o.completed_at
-    ? `Завершён ${formatDate(new Date(o.completed_at))}`
-    : o.shipped_at
-      ? `Отгружен ${formatDate(new Date(o.shipped_at))}`
-      : `Создан ${formatDate(new Date(o.created_at))}`;
-
-  return node;
-}
-
-// ================================================================
-// COMPLETED
-// ================================================================
-
-const completed = { cached: [], search: '' };
-
-$('m3-cmp-search').addEventListener('input', (e) => { completed.search = e.target.value.trim().toLowerCase(); renderCompleted(); });
-
-async function loadCompleted() {
-  await refreshCache();
-
-  const { data, error } = await sb
-    .from('sales_orders')
-    .select(`
-      id, order_number, status, payment_status,
-      shipped_at, completed_at, created_at,
-      customers ( id, name ),
-      sales_order_items ( id, warehouse_item_id, recipe_id, quantity, price )
-    `)
-    .eq('status', 'completed')
-    .order('completed_at', { ascending: false });
-
-  if (error) {
-    $('m3-cmp-list').innerHTML = `<div class="text-sm text-state-error p-6">${esc(error.message)}</div>`;
-    return;
-  }
-  completed.cached = data || [];
-  renderCompleted();
-}
-
-function renderCompleted() {
-  let list = completed.cached;
-  if (completed.search) list = list.filter(x =>
-    (x.order_number || '').toLowerCase().includes(completed.search) ||
-    (x.customers?.name || '').toLowerCase().includes(completed.search)
-  );
-
-  $('m3-cmp-count').textContent = list.length + ' ' + pluralize(list.length, ['заказ','заказа','заказов']);
-
-  if (list.length === 0) {
-    $('m3-cmp-list').innerHTML = `<div class="text-center py-16 text-sm text-fg-muted">${completed.search ? 'Ничего не найдено' : 'Пока нет завершённых заказов.'}</div>`;
-    return;
+  async function loadTab(tab){
+    var panel=document.getElementById('m3p-'+tab); panel.innerHTML='<div class="m3-loading"><div class="spin"></div>Загрузка…</div>';
+    try{
+      if(tab==='customers'){ var c=await sb.from('customers').select('*').order('name'); if(c.error) throw c.error; data.customers=c.data||[]; }
+      else { // orders + shipments из одной выборки
+        var o=await sb.from('sales_orders').select('*, customers(name), sales_order_items(*)').order('created_at',{ascending:false}); if(o.error) throw o.error; data.orders=o.data||[];
+      }
+      if(!alive()) return; renderCurrent();
+    }catch(err){ if(!alive())return; panel.innerHTML='<div class="m3-empty"><div class="t">Не удалось загрузить</div><div class="d">'+U.esc(err.message||String(err))+'</div></div>'; }
   }
 
-  const container = $('m3-cmp-list');
-  container.innerHTML = '';
-  const frag = document.createDocumentFragment();
-  list.forEach(o => frag.appendChild(renderOrderCard(o)));
-  container.appendChild(frag);
-}
+  function renderCurrent(){ if(curTab==='customers') renderCustomers(); else if(curTab==='orders') renderOrders(); else renderShipments(); }
+  function match(s){ return !search||(s||'').toLowerCase().indexOf(search)>=0; }
 
-// ================================================================
-// ORDER EDITOR
-// ================================================================
-
-const ord = {
-  editing: null,
-  current: null,
-  items: [],        // [{ source:'warehouse'|'recipe', warehouse_item_id, recipe_id, quantity, price }]
-  attachments: [],
-  pickerOpenIdx: -1,
-  pickerActive: -1
-};
-
-const paymentSelect = initCustomSelect(
-  { dd: 'm3-order-payment-dd', btn: 'm3-order-payment-btn', menu: 'm3-order-payment-menu', label: 'm3-order-payment-label' },
-  () => {}
-);
-function paymentValueFromLabel() {
-  const opt = $('m3-order-payment-menu').querySelector('.m3-dd-opt.is-selected');
-  return opt?.dataset.value || 'unpaid';
-}
-
-document.querySelectorAll('.m3-order-close').forEach(b => b.addEventListener('click', () => $('m3-order-modal').classList.add('hidden')));
-$('m3-order-new').addEventListener('click', () => openOrderEditor(null));
-
-async function openOrderEditor(id) {
-  if (!canWrite && !id) return;
-  await refreshCache();
-
-  ord.editing = id;
-  ord.items = [];
-  ord.attachments = [];
-  ord.current = null;
-  ord.pickerOpenIdx = -1;
-  ord.pickerActive = -1;
-
-  $('m3-order-deficit').classList.add('hidden');
-
-  let order = null;
-  if (id) {
-    const { data } = await sb.from('sales_orders').select(`*, customers(id, name), sales_order_items(*)`).eq('id', id).maybeSingle();
-    order = data;
+  /* ---------- КЛИЕНТЫ ---------- */
+  function renderCustomers(){
+    var panel=document.getElementById('m3p-customers');
+    var rows=data.customers.filter(function(c){ return match(c.name)||match(c.contact)||match(c.phone); });
+    if(!data.customers.length){ panel.innerHTML=empty('Нет клиентов','Добавьте клиента, чтобы оформлять продажи.'); return; }
+    var html='<div class="m3-tablewrap"><table class="m3-tbl"><thead><tr><th>Клиент</th><th>Контакт</th><th>Телефон</th><th>Email</th>'+(canWrite()?'<th></th>':'')+'</tr></thead><tbody>';
+    rows.forEach(function(c){
+      html+='<tr class="row"><td><div class="nm">'+U.esc(c.name)+'</div>'+(c.comment?'<div class="sub">'+U.esc(c.comment)+'</div>':'')+'</td>'
+        +'<td>'+U.esc(c.contact||'—')+'</td><td>'+U.esc(c.phone||'—')+'</td><td>'+U.esc(c.email||'—')+'</td>'
+        +(canWrite()?('<td><div class="m3-acts">'+ic('edit','Изм.',c.id,svgEdit())+ic('del','Удал.',c.id,svgTrash(),true)+'</div></td>'):'')+'</tr>';
+    });
+    html+='</tbody></table></div><div class="m3-foot"><span>Клиентов: <b>'+data.customers.length+'</b></span></div>';
+    panel.innerHTML=html;
+    panel.querySelectorAll('[data-act]').forEach(function(b){ b.addEventListener('click', function(){ var id=b.getAttribute('data-id'), it=data.customers.find(function(x){return x.id===id;}); if(b.getAttribute('data-act')==='edit') openCustomerDialog(it); else confirmAct('Удалить клиента «'+it.name+'»?','Нельзя удалить, если есть заказы.','Удалить',true,function(){ return delCustomer(id); }); }); });
   }
-  ord.current = order;
-
-  $('m3-order-modal-title').textContent = order ? `Заказ ${order.order_number}` : 'Новый заказ';
-  $('m3-order-modal-sub').textContent = order
-    ? `Создан ${formatDateTime(new Date(order.created_at))}${order.updated_at && order.updated_at !== order.created_at ? ' · изменён ' + formatDateTime(new Date(order.updated_at)) : ''}`
-    : '';
-
-  $('m3-order-f-customer').value = order?.customers?.name || '';
-  paymentSelect.set(order?.payment_status || 'unpaid');
-
-  const readOnly = order && ['completed','cancelled'].includes(order.status);
-  $('m3-order-f-customer').disabled = readOnly;
-  const payDisabled = readOnly && order?.status === 'cancelled';
-  $('m3-order-payment-btn').disabled = payDisabled;
-  $('m3-order-payment-dd').style.opacity = payDisabled ? '0.6' : '';
-  $('m3-order-payment-dd').style.pointerEvents = payDisabled ? 'none' : '';
-
-  if (order) {
-    $('m3-order-status-row').classList.remove('hidden');
-    renderOrderStatusBadges(order.status);
-    ord.items = (order.sales_order_items || []).map(i => ({
-      source: i.recipe_id ? 'recipe' : 'warehouse',
-      warehouse_item_id: i.warehouse_item_id || null,
-      recipe_id: i.recipe_id || null,
-      quantity: i.quantity,
-      price: i.price
-    }));
-    await loadAttachments(id);
-    $('m3-order-delete').classList.toggle('hidden', order.status !== 'draft');
-  } else {
-    $('m3-order-status-row').classList.add('hidden');
-    $('m3-order-delete').classList.add('hidden');
+  function openCustomerDialog(it){
+    var e=!!it;
+    var body=''
+      +'<div class="m3-field"><label>Название / ФИО *</label><input class="m3-input" id="c-name" value="'+U.esc(e?it.name:'')+'"></div>'
+      +'<div class="m3-row2"><div class="m3-field"><label>Контактное лицо</label><input class="m3-input" id="c-contact" value="'+U.esc(e?(it.contact||''):'')+'"></div>'
+      +'<div class="m3-field"><label>Телефон</label><input class="m3-input" id="c-phone" value="'+U.esc(e?(it.phone||''):'')+'"></div></div>'
+      +'<div class="m3-field"><label>Email</label><input class="m3-input" id="c-email" value="'+U.esc(e?(it.email||''):'')+'"></div>'
+      +(e?'':'<div class="m3-field"><label>Отдел продаж</label>'+unitSelectHTML('c-unitid')+'</div>')
+      +'<div class="m3-field"><label>Комментарий</label><textarea class="m3-textarea" id="c-comment">'+U.esc(e?(it.comment||''):'')+'</textarea></div>';
+    dialog({ title:e?'Клиент':'Новый клиент', ok:e?'Сохранить':'Добавить', body:body, onOk:async function(ov){
+      var name=val(ov,'#c-name'); if(!name){ U.toast('Укажите название'); return false; }
+      var rec={ name:name, contact:val(ov,'#c-contact')||null, phone:val(ov,'#c-phone')||null, email:val(ov,'#c-email')||null, comment:val(ov,'#c-comment')||null };
+      var res;
+      if(e){ res=await sb.from('customers').update(rec).eq('id',it.id); }
+      else { rec.group_id=groupId(); rec.unit_id=(ov.querySelector('#c-unitid')||{}).value||resolveSalesUnit(); res=await sb.from('customers').insert(rec); }
+      if(res.error){ U.toast('Ошибка: '+res.error.message); return false; }
+      U.toast(e?'Сохранено':'Клиент добавлен'); await loadTab('customers');
+    }});
   }
+  async function delCustomer(id){ var r=await sb.from('customers').delete().eq('id',id); if(r.error){ U.toast('Нельзя удалить: есть заказы'); return false; } U.toast('Удалено'); await loadTab('customers'); }
 
-  renderOrderItems();
-  renderAttachments();
-  renderOrderActions();
-  validateOrderForm();
+  /* ---------- ЗАКАЗЫ ---------- */
+  function orderStatus(st){ var m={draft:['st-draft','Черновик'],confirmed:['st-confirmed','Подтверждён'],shipped:['st-shipped','Отгружен'],completed:['st-completed','Завершён'],cancelled:['st-cancelled','Отменён']}; var x=m[st]||['','—']; return '<span class="m3-chip '+x[0]+'">'+x[1]+'</span>'; }
+  function payChip(p){ var m={paid:['pay-paid','оплачен'],partial:['pay-partial','частично'],unpaid:['pay-unpaid','не оплачен']}; var x=m[p||'unpaid']||['pay-unpaid','—']; return '<span class="'+x[0]+'" style="font-size:.78rem">'+x[1]+'</span>'; }
+  function orderSum(o){ return (o.sales_order_items||[]).reduce(function(a,i){ return a+num(i.quantity)*num(i.price); },0); }
 
-  $('m3-order-modal').classList.remove('hidden');
-}
-
-function renderOrderStatusBadges(current) {
-  const flow = ['draft','confirmed','shipped','completed'];
-  let html;
-  if (current === 'cancelled') {
-    html = `<span class="m3-badge m3-badge-cancelled">${esc(STATUS_LABEL.cancelled)}</span>`;
-  } else {
-    const idx = flow.indexOf(current);
-    html = flow.map((s, i) => `
-      <span class="m3-badge ${i <= idx ? 'm3-badge-' + s : ''}" style="${i > idx ? 'background:#F5F5F5;color:#A3A3A3;' : ''}">${esc(STATUS_LABEL[s])}</span>
-      ${i < flow.length - 1 ? '<span class="text-fg-muted text-xs">→</span>' : ''}
-    `).join('');
-  }
-  $('m3-order-status-badges').innerHTML = html;
-}
-
-// ---- Описание позиции: имя, ед., остаток ----
-function itemMeta(it) {
-  if (it.source === 'recipe') {
-    const r = cache.recipes.find(x => x.id === it.recipe_id);
-    // остаток продукта ищем на складе по имени рецепта
-    const prod = r ? cache.warehouse.find(w => w.type === 'product' && w.name === r.name) : null;
-    return {
-      name: r?.name || '(рецепт удалён)',
-      unit: r?.output_unit || (prod?.unit || ''),
-      stock: prod ? Number(prod.quantity || 0) : 0,
-      stockKnown: !!prod,
-      isRecipe: true
-    };
-  }
-  const w = cache.warehouse.find(x => x.id === it.warehouse_item_id);
-  return {
-    name: w?.name || '(не выбрано)',
-    unit: w?.unit || '',
-    stock: w ? Number(w.quantity || 0) : 0,
-    stockKnown: !!w,
-    isRecipe: false
-  };
-}
-
-// ---- Items editor ----
-function renderOrderItems() {
-  const el = $('m3-order-items');
-  const readOnly = ord.current && ['shipped','completed','cancelled'].includes(ord.current.status);
-
-  if (ord.items.length === 0) {
-    el.innerHTML = '<div class="px-4 py-3 text-xs text-fg-muted">Добавьте позиции заказа</div>';
-    updateOrderTotal();
-    return;
-  }
-
-  el.innerHTML = ord.items.map((it, i) => {
-    const m = itemMeta(it);
-    const sum = Number(it.quantity || 0) * Number(it.price || 0);
-    const chosen = (it.source === 'recipe' && it.recipe_id) || (it.source === 'warehouse' && it.warehouse_item_id);
-    const short = chosen && Number(it.quantity) > 0 && (!m.stockKnown || Number(it.quantity) > m.stock);
-
-    if (readOnly) {
-      return `
-        <div class="m3-oi-row" data-item-index="${i}">
-          <div class="text-sm truncate">${esc(m.name)}</div>
-          <div class="m3-oi-input--num text-sm">${formatNumber(it.quantity || 0)}</div>
-          <div class="m3-oi-unit">${esc(m.unit)}</div>
-          <div class="m3-oi-input--num text-sm">${esc(formatMoney(it.price || 0))}</div>
-          <div class="m3-oi-sum">${esc(formatMoney(sum))}</div>
-          <div></div>
-        </div>`;
-    }
-
-    return `
-      <div class="m3-oi-row" data-item-index="${i}">
-        <button type="button" class="m3-oi-pick ${chosen ? '' : 'is-empty'}" data-pick="${i}">
-          ${chosen ? `<span class="m3-badge ${m.isRecipe ? 'm3-chip-prod' : 'm3-chip-wh'}">${m.isRecipe ? 'рецепт' : 'склад'}</span>` : ''}
-          <span class="m3-oi-pick-label">${chosen ? esc(m.name) : '— выберите позицию —'}</span>
-          <svg class="m3-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-        <input type="text" inputmode="decimal" placeholder="Кол-во"
-          class="m3-oi-input m3-oi-input--num" data-field="quantity" value="${it.quantity ?? ''}">
-        <div class="m3-oi-unit">${esc(m.unit)}</div>
-        <input type="text" inputmode="decimal" placeholder="Цена"
-          class="m3-oi-input m3-oi-input--num" data-field="price" value="${it.price ?? ''}">
-        <div class="m3-oi-sum" data-item-sum>${esc(formatMoney(sum))}</div>
-        <div class="m3-oi-del" data-remove-item="${i}">
-          <svg class="w-4 h-4 text-state-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
-        </div>
-        ${chosen ? `<div class="m3-oi-stock ${short ? 'is-short' : ''}">${m.stockKnown ? `На складе: ${formatNumber(m.stock)} ${esc(m.unit)}` : (m.isRecipe ? 'Ещё не произведено — потребуется выпуск' : 'Нет на складе')}</div>` : ''}
-        ${ord.pickerOpenIdx === i ? renderPickerHtml(it) : ''}
-      </div>`;
-  }).join('');
-
-  // обработчики
-  el.querySelectorAll('[data-item-index]').forEach(row => {
-    const idx = Number(row.dataset.itemIndex);
-
-    row.querySelectorAll('[data-field]').forEach(input => {
-      input.addEventListener('input', () => {
-        const field = input.dataset.field;
-        ord.items[idx][field] = parseDecimalInput(input.value);
-        const sum = Number(ord.items[idx].quantity || 0) * Number(ord.items[idx].price || 0);
-        const sumEl = row.querySelector('[data-item-sum]');
-        if (sumEl) sumEl.textContent = formatMoney(sum);
-        updateOrderTotal();
+  function renderOrders(){
+    var panel=document.getElementById('m3p-orders');
+    var counts={all:data.orders.length,draft:0,confirmed:0,shipped:0,completed:0,cancelled:0};
+    data.orders.forEach(function(o){ if(counts[o.status]!=null) counts[o.status]++; });
+    var funnel='<div class="m3-funnel">'+['all','draft','confirmed','shipped','completed','cancelled'].map(function(k){
+      var labels={all:'Все',draft:'Черновики',confirmed:'Подтверждённые',shipped:'Отгруженные',completed:'Завершённые',cancelled:'Отменённые'};
+      return '<button data-st="'+k+'"'+(statusFilter===k?' class="on"':'')+'>'+labels[k]+' <span class="c">'+counts[k]+'</span></button>';
+    }).join('')+'</div>';
+    var rows=data.orders.filter(function(o){ return (statusFilter==='all'||o.status===statusFilter) && (match(o.order_number)||match(o.customers&&o.customers.name)); });
+    var inner;
+    if(!data.orders.length){ inner=empty('Нет заказов','Создайте заказ: позиции — товар со склада или рецепт. После подтверждения и отгрузки склад спишется автоматически.'); }
+    else {
+      var html='<div class="m3-tablewrap"><table class="m3-tbl"><thead><tr><th>Заказ</th><th>Клиент</th><th>Статус</th><th class="num">Позиций</th><th class="num">Сумма</th><th>Оплата</th><th></th></tr></thead><tbody>';
+      rows.forEach(function(o){
+        html+='<tr class="row"><td><div class="nm">'+U.esc(o.order_number||'—')+'</div><div class="sub">'+U.formatDate(o.created_at)+'</div></td>'
+          +'<td>'+U.esc((o.customers&&o.customers.name)||'—')+'</td>'
+          +'<td>'+orderStatus(o.status)+'</td>'
+          +'<td class="num">'+(o.sales_order_items||[]).length+'</td>'
+          +'<td class="num">'+U.formatMoney(orderSum(o))+'</td>'
+          +'<td>'+payChip(o.payment_status)+'</td>'
+          +'<td><div class="m3-acts">'+orderActions(o)+'</div></td></tr>';
       });
-    });
-
-    row.querySelector('[data-pick]')?.addEventListener('click', (e) => {
-      e.stopPropagation();
-      ord.pickerOpenIdx = ord.pickerOpenIdx === idx ? -1 : idx;
-      ord.pickerActive = -1;
-      renderOrderItems();
-      if (ord.pickerOpenIdx === idx) {
-        setTimeout(() => row.parentElement.querySelector(`[data-item-index="${idx}"] .m3-picker-search`)?.focus(), 30);
-      }
-    });
-
-    row.querySelector('[data-remove-item]')?.addEventListener('click', () => {
-      ord.items.splice(idx, 1);
-      if (ord.pickerOpenIdx === idx) ord.pickerOpenIdx = -1;
-      renderOrderItems();
-    });
-
-    // пикер (если открыт в этой строке)
-    if (ord.pickerOpenIdx === idx) {
-      const search = row.querySelector('.m3-picker-search');
-      const listEl = row.querySelector('.m3-picker-list');
-      if (search) {
-        search.addEventListener('input', () => fillPicker(listEl, search.value));
-        search.addEventListener('keydown', (e) => pickerKeydown(e, idx, listEl, search));
-      }
-      listEl?.addEventListener('click', (e) => {
-        const opt = e.target.closest('[data-opt-source]');
-        if (!opt) return;
-        applyPick(idx, opt.dataset.optSource, opt.dataset.optId);
-      });
-      fillPicker(listEl, '');
+      html+='</tbody></table></div><div class="m3-foot"><span>Показано: <b>'+rows.length+'</b> из '+data.orders.length+'</span></div>';
+      inner=html;
     }
-  });
-
-  updateOrderTotal();
-}
-
-// HTML контейнера пикера
-function renderPickerHtml(it) {
-  return `
-    <div class="m3-picker">
-      <input class="m3-picker-search" type="text" autocomplete="off" spellcheck="false" placeholder="Поиск товара или рецепта…">
-      <div class="m3-picker-list"></div>
-    </div>`;
-}
-
-// Заполнение списка пикера (две группы: склад и рецепты)
-function fillPicker(listEl, query) {
-  if (!listEl) return;
-  const q = (query || '').trim().toLowerCase();
-
-  const wh = cache.warehouse
-    .filter(w => !q || w.name.toLowerCase().includes(q) || (w.article || '').toLowerCase().includes(q))
-    .map(w => ({
-      source: 'warehouse', id: w.id, name: w.name,
-      meta: `${w.article ? w.article + ' · ' : ''}${w.unit || ''}${w.type === 'product' ? ' · продукция' : ' · материал'}`
-    }));
-
-  const rc = cache.recipes
-    .filter(r => !q || r.name.toLowerCase().includes(q) || (r.code || '').toLowerCase().includes(q))
-    .map(r => ({
-      source: 'recipe', id: r.id, name: r.name,
-      meta: `${r.code ? r.code + ' · ' : ''}${r.output_unit || ''}`
-    }));
-
-  let html = '';
-  if (wh.length) {
-    html += `<div class="m3-picker-group">Склад</div>`;
-    html += wh.map(o => optHtml(o, 'm3-chip-wh', 'склад')).join('');
+    panel.innerHTML=funnel+inner;
+    panel.querySelectorAll('.m3-funnel [data-st]').forEach(function(b){ b.addEventListener('click', function(){ statusFilter=b.getAttribute('data-st'); renderOrders(); }); });
+    panel.querySelectorAll('[data-oact]').forEach(function(b){ b.addEventListener('click', function(){
+      var id=b.getAttribute('data-id'), o=data.orders.find(function(x){return x.id===id;}), a=b.getAttribute('data-oact');
+      if(a==='view') openOrderView(o);
+      else if(a==='edit') openOrderDialog(o);
+      else if(a==='confirm') doConfirm(id);
+      else if(a==='ship') confirmAct('Отгрузить заказ '+(o.order_number||'')+'?','Товары спишутся со склада, движение запишется в журнал.','Отгрузить',false,function(){ return doShip(id); });
+      else if(a==='complete') confirmAct('Завершить заказ '+(o.order_number||'')+'?','Заказ перейдёт в «Завершён» и попадёт в доход казначейства.','Завершить',false,function(){ return doComplete(id); });
+      else if(a==='cancel') confirmAct('Отменить заказ '+(o.order_number||'')+'?',(o.status==='shipped'?'Отгруженные товары вернутся на склад.':'Заказ будет отменён.'),'Отменить заказ',true,function(){ return doCancel(id); });
+      else if(a==='del') confirmAct('Удалить черновик '+(o.order_number||'')+'?','Действие необратимо.','Удалить',true,function(){ return delOrder(id); });
+    });});
   }
-  if (rc.length) {
-    html += `<div class="m3-picker-group">Рецепты</div>`;
-    html += rc.map(o => optHtml(o, 'm3-chip-prod', 'рецепт')).join('');
+  function orderActions(o){
+    var s=ic('view','Открыть',o.id,'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>',false,'oact');
+    if(canWrite()){
+      if(o.status==='draft'){ s+=ic('confirm','Подтвердить',o.id,'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6 9 17l-5-5"/></svg>',false,'oact','go'); s+=ic('edit','Изменить',o.id,svgEdit(),false,'oact'); s+=ic('del','Удалить',o.id,svgTrash(),true,'oact'); }
+      else if(o.status==='confirmed'){ s+=ic('ship','Отгрузить',o.id,'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 7h11v8H3zM14 10h4l3 3v2h-7z"/><circle cx="7" cy="18" r="1.6"/><circle cx="17" cy="18" r="1.6"/></svg>',false,'oact','go'); s+=ic('cancel','Отменить',o.id,svgX(),true,'oact'); }
+      else if(o.status==='shipped'){ s+=ic('complete','Завершить',o.id,'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6 9 17l-5-5"/></svg>',false,'oact','go'); s+=ic('cancel','Отменить',o.id,svgX(),true,'oact'); }
+    }
+    return s;
   }
-  if (!html) html = `<div class="m3-picker-opt m3-picker-opt--empty">Ничего не найдено</div>`;
 
-  listEl.innerHTML = html;
-  ord.pickerActive = -1;
-}
-
-function optHtml(o, chipClass, chipText) {
-  return `<div class="m3-picker-opt" data-opt-source="${esc(o.source)}" data-opt-id="${esc(o.id)}">
-    <span class="m3-badge ${chipClass}">${chipText}</span>
-    <span class="m3-picker-opt-name">${esc(o.name)}</span>
-    ${o.meta ? `<small>${esc(o.meta)}</small>` : ''}
-  </div>`;
-}
-
-function pickerKeydown(e, idx, listEl, search) {
-  const opts = Array.from(listEl.querySelectorAll('[data-opt-source]'));
-  if (e.key === 'Escape') { ord.pickerOpenIdx = -1; renderOrderItems(); return; }
-  if (e.key === 'ArrowDown') {
-    e.preventDefault();
-    ord.pickerActive = Math.min(ord.pickerActive + 1, opts.length - 1);
-  } else if (e.key === 'ArrowUp') {
-    e.preventDefault();
-    ord.pickerActive = Math.max(ord.pickerActive - 1, 0);
-  } else if (e.key === 'Enter') {
-    e.preventDefault();
-    const target = ord.pickerActive >= 0 ? opts[ord.pickerActive] : (opts.length === 1 ? opts[0] : null);
-    if (target) applyPick(idx, target.dataset.optSource, target.dataset.optId);
-    return;
-  } else { return; }
-  opts.forEach((o, i) => o.classList.toggle('active', i === ord.pickerActive));
-  opts[ord.pickerActive]?.scrollIntoView({ block: 'nearest' });
-}
-
-// Выбор позиции из пикера
-function applyPick(idx, source, id) {
-  const it = ord.items[idx];
-  it.source = source;
-  if (source === 'recipe') {
-    it.recipe_id = id;
-    it.warehouse_item_id = null;
-  } else {
-    it.warehouse_item_id = id;
-    it.recipe_id = null;
-    // автоподстановка цены из склада, если ещё пусто
-    const w = cache.warehouse.find(x => x.id === id);
-    if (w && (it.price === null || it.price === undefined || it.price === '')) it.price = w.price;
-  }
-  ord.pickerOpenIdx = -1;
-  renderOrderItems();
-}
-
-function updateOrderTotal() {
-  const total = ord.items.reduce((s, it) => s + Number(it.quantity || 0) * Number(it.price || 0), 0);
-  $('m3-order-total').textContent = 'Итого: ' + formatMoney(total);
-}
-
-$('m3-order-add-item').addEventListener('click', () => {
-  if (cache.warehouse.length === 0 && cache.recipes.length === 0) {
-    toast('Нет ни товаров на складе, ни рецептов', 'warning');
-    return;
-  }
-  ord.items.push({ source: 'warehouse', warehouse_item_id: null, recipe_id: null, quantity: null, price: null });
-  ord.pickerOpenIdx = ord.items.length - 1;  // сразу открываем пикер новой позиции
-  renderOrderItems();
-  const row = $('m3-order-items').querySelector(`[data-item-index="${ord.items.length - 1}"] .m3-picker-search`);
-  setTimeout(() => row?.focus(), 30);
-});
-
-// ---- Attachments ----
-async function loadAttachments(orderId) {
-  const { data } = await sb.from('attachments')
-    .select('*')
-    .eq('entity_type', 'sales_order')
-    .eq('entity_id', orderId)
-    .order('uploaded_at', { ascending: false });
-  ord.attachments = data || [];
-}
-
-function renderAttachments() {
-  const el = $('m3-order-attachments');
-  if (ord.attachments.length === 0) {
-    el.innerHTML = '<div class="px-4 py-3 text-xs text-fg-muted">Нет вложений</div>';
-    return;
-  }
-  el.innerHTML = ord.attachments.map(a => `
-    <div class="px-4 py-3 flex items-center gap-3">
-      <svg class="w-5 h-5 text-fg-muted flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-        <polyline points="14 2 14 8 20 8"/>
-      </svg>
-      <div class="min-w-0 flex-1">
-        <div class="text-sm truncate">${esc(a.file_name)}</div>
-        <div class="text-xs text-fg-muted">${esc(humanFileSize(a.file_size))} · ${esc(formatDate(new Date(a.uploaded_at)))}</div>
-      </div>
-      <a href="#" class="text-xs text-fg-muted hover:text-fg" data-download="${esc(a.storage_path)}">Скачать</a>
-      <button class="text-xs text-state-error hover:underline" data-del-att="${esc(a.id)}" data-path="${esc(a.storage_path)}">Удалить</button>
-    </div>
-  `).join('');
-
-  el.querySelectorAll('[data-download]').forEach(a => {
-    a.addEventListener('click', async (e) => {
-      e.preventDefault();
-      try {
-        const { data, error } = await sb.storage.from('attachments').createSignedUrl(a.dataset.download, 60);
-        if (error) throw error;
-        window.open(data.signedUrl, '_blank');
-      } catch (err) { toast('Ошибка: ' + err.message, 'error'); }
+  /* ---------- ОТГРУЗКИ (confirmed/shipped/completed) ---------- */
+  function renderShipments(){
+    var panel=document.getElementById('m3p-shipments');
+    var ship=data.orders.filter(function(o){ return ['confirmed','shipped','completed'].indexOf(o.status)>=0; });
+    var rows=ship.filter(function(o){ return match(o.order_number)||match(o.customers&&o.customers.name); });
+    if(!ship.length){ panel.innerHTML=empty('Нет отгрузок','Подтверждённые заказы появятся здесь — их можно отгрузить и завершить.'); return; }
+    var html='<div class="m3-tablewrap"><table class="m3-tbl"><thead><tr><th>Заказ</th><th>Клиент</th><th>Статус</th><th>Отгружен</th><th class="num">Сумма</th><th></th></tr></thead><tbody>';
+    rows.forEach(function(o){
+      html+='<tr class="row"><td><div class="nm">'+U.esc(o.order_number||'—')+'</div></td>'
+        +'<td>'+U.esc((o.customers&&o.customers.name)||'—')+'</td>'
+        +'<td>'+orderStatus(o.status)+'</td>'
+        +'<td class="sub">'+(o.shipped_at?U.formatDateTime(o.shipped_at):'—')+'</td>'
+        +'<td class="num">'+U.formatMoney(orderSum(o))+'</td>'
+        +'<td><div class="m3-acts">'+orderActions(o)+'</div></td></tr>';
     });
-  });
+    html+='</tbody></table></div><div class="m3-foot"><span>В работе: <b>'+ship.length+'</b></span></div>';
+    panel.innerHTML=html;
+    panel.querySelectorAll('[data-oact]').forEach(function(b){ b.addEventListener('click', function(){
+      var id=b.getAttribute('data-id'), o=data.orders.find(function(x){return x.id===id;}), a=b.getAttribute('data-oact');
+      if(a==='view') openOrderView(o);
+      else if(a==='ship') confirmAct('Отгрузить заказ '+(o.order_number||'')+'?','Товары спишутся со склада.','Отгрузить',false,function(){ return doShip(id); });
+      else if(a==='complete') confirmAct('Завершить заказ '+(o.order_number||'')+'?','Заказ попадёт в доход казначейства.','Завершить',false,function(){ return doComplete(id); });
+      else if(a==='cancel') confirmAct('Отменить заказ '+(o.order_number||'')+'?',(o.status==='shipped'?'Товары вернутся на склад.':'Заказ будет отменён.'),'Отменить заказ',true,function(){ return doCancel(id); });
+    });});
+  }
 
-  el.querySelectorAll('[data-del-att]').forEach(b => {
-    b.addEventListener('click', async () => {
-      if (!confirm('Удалить вложение?')) return;
-      try {
-        await sb.storage.from('attachments').remove([b.dataset.path]);
-        await sb.from('attachments').delete().eq('id', b.dataset.delAtt);
-        ord.attachments = ord.attachments.filter(x => x.id !== b.dataset.delAtt);
-        renderAttachments();
-        toast('Вложение удалено', 'success');
-      } catch (err) { toast('Ошибка: ' + err.message, 'error'); }
+  /* ---------- диалог заказа (гибридные позиции) ---------- */
+  function openOrderDialog(order){
+    var isEdit=!!order;
+    if(isEdit && order.status!=='draft'){ U.toast('Редактировать можно только черновик'); return; }
+    dialog({ title:isEdit?'Заказ '+(order.order_number||''):'Новый заказ', wide:true, ok:isEdit?'Сохранить':'Создать черновик',
+      body:'<div class="m3-loading"><div class="spin"></div>Подготовка…</div>',
+      onMount:async function(ov){
+        await ensurePickers();
+        if(!data.customers.length){ var c=await sb.from('customers').select('id,name').order('name'); if(!c.error) data.customers=c.data||[]; }
+        if(!alive()) return;
+        var custOpts=data.customers.map(function(c){ return '<option value="'+c.id+'"'+(isEdit&&order.customer_id===c.id?' selected':'')+'>'+U.esc(c.name)+'</option>'; }).join('')||'<option value="">— нет клиентов —</option>';
+        var body=''
+          +'<div class="m3-row2"><div class="m3-field"><label>Клиент</label><select class="m3-select" id="o-cust">'+custOpts+'</select></div>'
+          +'<div class="m3-field"><label>Отдел продаж</label>'+unitSelectHTML('o-unitid', isEdit?order.unit_id:null)+'</div></div>'
+          +'<div class="m3-field"><label>Позиции</label><div class="m3-li-head"><span>Тип</span><span>Позиция</span><span>Кол-во</span><span>Цена</span><span></span></div><div id="o-lines"></div>'
+          +'<button class="m3-btn ghost sm" id="o-addline" style="margin-top:8px;">+ позиция</button></div>'
+          +'<div class="m3-total"><span>Итого</span><span id="o-total">'+U.formatMoney(0)+'</span></div>'
+          +'<div class="m3-field"><label>Комментарий</label><textarea class="m3-textarea" id="o-comment">'+U.esc(isEdit?(order.comment||''):'')+'</textarea></div>';
+        ov.querySelector('.m3-dbody').innerHTML=body;
+        var lines=ov.querySelector('#o-lines');
+        function recalc(){ var tot=0; ov.querySelectorAll('#o-lines .m3-li').forEach(function(r){ tot+=num(r.querySelector('.li-qty').value)*num(r.querySelector('.li-price').value); }); ov.querySelector('#o-total').textContent=U.formatMoney(tot); }
+        function addLine(pre){
+          var row=document.createElement('div'); row.className='m3-li';
+          row.innerHTML='<select class="m3-select li-type"><option value="product">Товар</option><option value="recipe">Рецепт</option></select>'
+            +'<select class="m3-select li-val"></select>'
+            +'<input class="m3-input li-qty" type="number" step="any" placeholder="0">'
+            +'<input class="m3-input li-price" type="number" step="any" placeholder="0">'
+            +'<button class="m3-li-del" title="Удалить">✕</button>';
+          row.querySelector('.m3-li-del').onclick=function(){ row.remove(); recalc(); };
+          function fillVal(type, selId){
+            var sel=row.querySelector('.li-val');
+            if(type==='recipe'){ sel.innerHTML=data.recLite.map(function(r){ return '<option value="'+r.id+'">'+U.esc(r.name)+'</option>'; }).join('')||'<option value="">нет рецептов</option>'; }
+            else { sel.innerHTML=data.whLite.filter(function(w){return w.type==='product';}).map(function(w){ return '<option value="'+w.id+'" data-price="'+(w.price||'')+'">'+U.esc(w.name)+'</option>'; }).join('')||'<option value="">нет готовой продукции</option>'; }
+            if(selId) sel.value=selId;
+            // автоцена для товара
+            sel.onchange=function(){ if(type==='product'){ var opt=sel.options[sel.selectedIndex]; var p=opt&&opt.getAttribute('data-price'); if(p && !row.querySelector('.li-price').value){ row.querySelector('.li-price').value=p; recalc(); } } };
+          }
+          row.querySelector('.li-type').addEventListener('change', function(e){ fillVal(e.target.value); });
+          var t=(pre&&pre.type)||'product'; row.querySelector('.li-type').value=t; fillVal(t, pre&&pre.val);
+          if(pre){ if(pre.qty!=null) row.querySelector('.li-qty').value=pre.qty; if(pre.price!=null) row.querySelector('.li-price').value=pre.price; }
+          row.querySelector('.li-qty').addEventListener('input',recalc); row.querySelector('.li-price').addEventListener('input',recalc);
+          lines.appendChild(row);
+        }
+        ov.querySelector('#o-addline').onclick=function(){ addLine(null); };
+        if(isEdit){ var items=order.sales_order_items||[]; items.forEach(function(i){ addLine({ type:i.recipe_id?'recipe':'product', val:i.recipe_id||i.warehouse_item_id, qty:num(i.quantity), price:num(i.price) }); }); if(!items.length) addLine(null); }
+        else addLine(null);
+        recalc();
+      },
+      onOk:async function(ov){
+        var custId=val(ov,'#o-cust')||null;
+        var unitId=(ov.querySelector('#o-unitid')||{}).value||resolveSalesUnit();
+        var rows=Array.prototype.map.call(ov.querySelectorAll('#o-lines .m3-li'), function(r){
+          var type=r.querySelector('.li-type').value, v=r.querySelector('.li-val').value, q=parseFloat(r.querySelector('.li-qty').value), p=parseFloat(r.querySelector('.li-price').value);
+          if(!v||!(q>0)) return null;
+          return { type:type, val:v, qty:q, price:isFinite(p)?p:0 };
+        }).filter(Boolean);
+        if(!rows.length){ U.toast('Добавьте хотя бы одну позицию'); return false; }
+        var orderId;
+        if(isEdit){ var up=await sb.from('sales_orders').update({ customer_id:custId, unit_id:unitId, comment:val(ov,'#o-comment')||null }).eq('id',order.id); if(up.error){ U.toast('Ошибка: '+up.error.message); return false; } orderId=order.id; await sb.from('sales_order_items').delete().eq('order_id',orderId); }
+        else { var ins=await sb.from('sales_orders').insert({ group_id:groupId(), customer_id:custId, unit_id:unitId, status:'draft', comment:val(ov,'#o-comment')||null }).select().single(); if(ins.error){ U.toast('Ошибка: '+ins.error.message); return false; } orderId=ins.data.id; }
+        var items=rows.map(function(x){ return x.type==='recipe'
+          ? { order_id:orderId, recipe_id:x.val, warehouse_item_id:null, quantity:x.qty, price:x.price }
+          : { order_id:orderId, warehouse_item_id:x.val, recipe_id:null, quantity:x.qty, price:x.price }; });
+        var insI=await sb.from('sales_order_items').insert(items); if(insI.error){ U.toast('Позиции с ошибкой: '+insI.error.message); }
+        U.toast(isEdit?'Заказ сохранён':'Черновик создан'); await loadTab('orders');
+      }});
+  }
+  function openOrderView(o){
+    var items=o.sales_order_items||[];
+    var rows=items.length?('<div class="m3-tablewrap"><table class="m3-tbl"><thead><tr><th>Позиция</th><th>Тип</th><th class="num">Кол-во</th><th class="num">Цена</th><th class="num">Сумма</th></tr></thead><tbody>'
+      +items.map(function(i){
+        var nm = i.recipe_id ? ((data.recLite.find(function(r){return r.id===i.recipe_id;})||{}).name||'рецепт') : ((data.whLite.find(function(w){return w.id===i.warehouse_item_id;})||{}).name||'товар');
+        return '<tr><td>'+U.esc(nm)+'</td><td>'+(i.recipe_id?'<span class="it-recipe">рецепт</span>':'<span class="it-prod">товар</span>')+'</td><td class="num">'+U.formatQuantity(i.quantity)+'</td><td class="num">'+U.formatMoney(i.price)+'</td><td class="num">'+U.formatMoney(num(i.quantity)*num(i.price))+'</td></tr>';
+      }).join('')+'</tbody></table></div>'):'<div class="m3-hint">Без позиций.</div>';
+    ensurePickers().then(function(){
+      dialog({ title:'Заказ '+(o.order_number||''), wide:true, ok:false, cancel:'Закрыть',
+        body:'<div class="m3-field"><div class="m3-hint">Клиент: <b style="color:var(--text)">'+U.esc((o.customers&&o.customers.name)||'—')+'</b> · '+orderStatus(o.status)+' · '+payChip(o.payment_status)+' · создан '+U.formatDate(o.created_at)+'</div></div>'+rows
+          +'<div class="m3-total"><span>Итого</span><span>'+U.formatMoney(orderSum(o))+'</span></div>', onOk:function(){} });
     });
-  });
-}
-
-$('m3-order-file-input').addEventListener('change', async (e) => {
-  const files = Array.from(e.target.files || []);
-  e.target.value = '';
-  if (files.length === 0) return;
-
-  if (!ord.editing) {
-    toast('Сначала сохраните заказ, затем прикрепите файлы', 'warning');
-    return;
   }
 
-  const maxSize = 49 * 1024 * 1024;
-  for (const f of files) {
-    if (f.size > maxSize) {
-      toast(`"${f.name}" больше 49 МБ, пропущен`, 'error');
-      continue;
-    }
-    try {
-      const path = `${groupId}/sales_order/${ord.editing}/${Date.now()}_${f.name}`;
-      const { error: upErr } = await sb.storage.from('attachments').upload(path, f, { contentType: f.type || 'application/octet-stream' });
-      if (upErr) throw upErr;
+  async function doConfirm(id){ var r=await sb.from('sales_orders').update({status:'confirmed', confirmed_at:new Date().toISOString()}).eq('id',id); if(r.error){ U.toast('Ошибка: '+r.error.message); return; } U.toast('Заказ подтверждён'); await loadTab(curTab); }
+  async function doShip(id){ var r=await RIVA.rpc('ship_sales_order',{p_order_id:id}); if(!(r&&r.ok)){ U.toast('Ошибка: '+(deficitText(r)||(r&&r.error)||'')); return false; } U.toast('Заказ отгружен, склад списан'); await loadTab(curTab); }
+  async function doComplete(id){ var r=await RIVA.rpc('complete_sales_order',{p_order_id:id}); if(!(r&&r.ok)){ U.toast('Ошибка: '+((r&&r.error)||'')); return false; } U.toast('Заказ завершён'); await loadTab(curTab); }
+  async function doCancel(id){ var r=await RIVA.rpc('cancel_sales_order',{p_order_id:id}); if(!(r&&r.ok)){ U.toast('Ошибка: '+((r&&r.error)||'')); return false; } U.toast('Заказ отменён'); await loadTab(curTab); }
+  async function delOrder(id){ var r=await sb.from('sales_orders').delete().eq('id',id); if(r.error){ U.toast('Ошибка: '+r.error.message); return false; } U.toast('Удалено'); await loadTab(curTab); }
+  function deficitText(r){ if(r&&r.error==='INSUFFICIENT_STOCK'&&r.deficit&&r.deficit.length){ return 'не хватает: '+r.deficit.map(function(d){return d.name+' ('+U.formatQuantity(d.missing)+' '+(d.unit||'')+')';}).join(', '); } return null; }
 
-      const { data: row, error: insErr } = await sb.from('attachments').insert({
-        group_id: groupId,
-        entity_type: 'sales_order',
-        entity_id: ord.editing,
-        file_name: f.name,
-        file_size: f.size,
-        storage_path: path,
-        uploaded_by: state.authUser.id
-      }).select().single();
-      if (insErr) throw insErr;
-
-      ord.attachments.unshift(row);
-      renderAttachments();
-      toast(`"${f.name}" загружен`, 'success');
-    } catch (err) { toast(`Ошибка загрузки "${f.name}": ` + err.message, 'error'); }
+  /* ---------- общие ---------- */
+  function unitSelectHTML(selId, preset){
+    var us=salesUnits(); var fixed=activeSalesUnit();
+    if(fixed && !preset){ var u=us.find(function(x){return x.id===fixed;}); return '<input class="m3-input" value="'+U.esc(u?u.name:'отдел')+'" disabled><input type="hidden" id="'+selId+'" value="'+fixed+'">'; }
+    var pre=preset||fixed||defaultSalesUnit();
+    return '<select class="m3-select" id="'+selId+'">'+us.map(function(u){return '<option value="'+u.id+'"'+(u.id===pre?' selected':'')+'>'+U.esc(u.name)+(u.is_default?' (по умолч.)':'')+'</option>';}).join('')+'</select>';
   }
-});
+  function empty(t,d){ return '<div class="m3-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 3h2l2.4 12.3a2 2 0 0 0 2 1.7h7.7a2 2 0 0 0 2-1.6L22 8H6"/><circle cx="9" cy="20" r="1.6"/><circle cx="18" cy="20" r="1.6"/></svg><div class="t">'+t+'</div><div class="d">'+d+'</div></div>'; }
+  function svgEdit(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>'; }
+  function svgTrash(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>'; }
+  function svgX(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6 6 18M6 6l12 12"/></svg>'; }
+  function ic(act,title,id,svg,danger,attr,extra){ return '<button class="m3-ic'+(danger?' danger':'')+(extra?(' '+extra):'')+'" title="'+title+'" data-'+(attr||'act')+'="'+act+'" data-id="'+id+'">'+svg+'</button>'; }
 
-// ---- Actions ----
-function renderOrderActions() {
-  const el = $('m3-order-actions');
-  const o = ord.current;
-  if (!o || !canWrite) { el.innerHTML = ''; return; }
-
-  const buttons = [];
-
-  if (o.status === 'draft') {
-    buttons.push(`<button id="m3-btn-confirm" class="btn-secondary px-4 py-2 rounded-lg text-sm">Подтвердить</button>`);
+  function dialog(opts){
+    var ov=document.createElement('div'); ov.className='m3-overlay';
+    ov.innerHTML='<div class="m3-dialog'+(opts.wide?' wide':'')+'"><div class="m3-dhead"><h3>'+U.esc(opts.title)+'</h3><button class="m3-dclose">✕</button></div><div class="m3-dbody">'+opts.body+'</div><div class="m3-dfoot"><button class="m3-btn ghost" data-x="cancel">'+(opts.cancel||'Отмена')+'</button>'+(opts.ok===false?'':'<button class="m3-btn" data-x="ok">'+(opts.ok||'Сохранить')+'</button>')+'</div></div>';
+    document.body.appendChild(ov);
+    function close(){ ov.remove(); }
+    ov.querySelector('.m3-dclose').onclick=close; ov.querySelector('[data-x="cancel"]').onclick=close;
+    ov.addEventListener('mousedown', function(e){ if(e.target===ov) close(); });
+    var okb=ov.querySelector('[data-x="ok"]'); if(okb) okb.onclick=async function(){ okb.disabled=true; try{ var r=await opts.onOk(ov); if(r!==false) close(); } finally { if(okb) okb.disabled=false; } };
+    if(opts.onMount) opts.onMount(ov);
+    return ov;
   }
-  if (['draft','confirmed'].includes(o.status)) {
-    buttons.push(`<button id="m3-btn-ship" class="btn-primary px-4 py-2 rounded-lg text-sm">Отгрузить</button>`);
-  }
-  if (o.status === 'shipped') {
-    const disabled = o.payment_status !== 'paid';
-    buttons.push(`<button id="m3-btn-complete" class="btn-primary px-4 py-2 rounded-lg text-sm" ${disabled ? 'disabled title="Сначала отметьте оплату"' : ''}>Закрыть заказ</button>`);
-  }
-  if (!['completed','cancelled'].includes(o.status)) {
-    const label = o.status === 'shipped' ? 'Отменить (вернуть на склад)' : 'Отменить';
-    buttons.push(`<button id="m3-btn-cancel" class="btn-secondary px-4 py-2 rounded-lg text-sm">${label}</button>`);
-  }
+  function val(ov,s){ var e=ov.querySelector(s); return e?e.value.trim():''; }
+  function confirmAct(title,text,okLabel,danger,fn){ var ov=dialog({ title:title, ok:okLabel, body:'<p style="color:var(--text-2);font-size:.92rem;line-height:1.5;">'+U.esc(text)+'</p>', onOk:async function(){ return await fn(); } }); if(danger){ var b=ov.querySelector('[data-x="ok"]'); if(b){ b.style.background='var(--st-cancelled)'; b.style.color='#fff'; b.style.boxShadow='none'; } } }
 
-  el.innerHTML = buttons.join('');
-
-  $('m3-btn-confirm')?.addEventListener('click', confirmOrder);
-  $('m3-btn-ship')?.addEventListener('click', shipOrder);
-  $('m3-btn-complete')?.addEventListener('click', completeOrder);
-  $('m3-btn-cancel')?.addEventListener('click', cancelOrder);
-}
-
-function validateOrderForm() {
-  const readOnly = ord.current && ['completed','cancelled'].includes(ord.current.status);
-  if (readOnly && ord.current.status === 'completed') {
-    $('m3-order-save').disabled = true;
-    return;
-  }
-  $('m3-order-save').disabled = false;
-}
-
-// ---- Save ----
-async function resolveCustomerId() {
-  const name = $('m3-order-f-customer').value.trim();
-  if (!name) return null;
-  const match = cache.customers.find(c => c.name.toLowerCase() === name.toLowerCase());
-  if (match) return match.id;
-  const { data, error } = await sb.from('customers').insert({ group_id: groupId, name }).select().single();
-  if (error) throw error;
-  cache.customers.push({ id: data.id, name: data.name });
-  return data.id;
-}
-
-async function persistOrder() {
-  const customerId = await resolveCustomerId();
-  const paymentValue = paymentValueFromLabel();
-
-  let orderId = ord.editing;
-
-  if (orderId) {
-    const patch = { customer_id: customerId, payment_status: paymentValue };
-    const { error } = await sb.from('sales_orders').update(patch).eq('id', orderId);
-    if (error) throw error;
-  } else {
-    const { data, error } = await sb.from('sales_orders').insert({
-      group_id: groupId, customer_id: customerId, status: 'draft', payment_status: paymentValue
-    }).select().single();
-    if (error) throw error;
-    orderId = data.id;
-    ord.editing = orderId;
-  }
-
-  await sb.from('sales_order_items').delete().eq('order_id', orderId);
-  const payload = ord.items
-    .filter(it => Number(it.quantity) > 0 && ((it.source === 'recipe' && it.recipe_id) || (it.source === 'warehouse' && it.warehouse_item_id)))
-    .map(it => ({
-      order_id: orderId,
-      warehouse_item_id: it.source === 'warehouse' ? it.warehouse_item_id : null,
-      recipe_id: it.source === 'recipe' ? it.recipe_id : null,
-      quantity: Number(it.quantity),
-      price: it.price === null || it.price === '' ? null : Number(it.price)
-    }));
-  if (payload.length) {
-    const { error } = await sb.from('sales_order_items').insert(payload);
-    if (error) throw error;
-  }
-
-  return orderId;
-}
-
-$('m3-order-save').addEventListener('click', async () => {
-  const btn = $('m3-order-save');
-  btn.disabled = true;
-  btn.textContent = 'Сохраняем…';
-  try {
-    await persistOrder();
-    toast('Заказ сохранён', 'success');
-    $('m3-order-modal').classList.add('hidden');
-    await loadActive();
-  } catch (e) {
-    toast('Ошибка: ' + e.message, 'error');
-  } finally {
-    btn.textContent = 'Сохранить';
-    validateOrderForm();
-  }
-});
-
-$('m3-order-delete').addEventListener('click', async () => {
-  if (!ord.editing) return;
-  if (!confirm('Удалить заказ? Все позиции и вложения будут удалены.')) return;
-  try {
-    if (ord.attachments.length) {
-      await sb.storage.from('attachments').remove(ord.attachments.map(a => a.storage_path));
-    }
-    await sb.from('attachments').delete().eq('entity_type', 'sales_order').eq('entity_id', ord.editing);
-    const { error } = await sb.from('sales_orders').delete().eq('id', ord.editing);
-    if (error) throw error;
-    toast('Заказ удалён', 'success');
-    $('m3-order-modal').classList.add('hidden');
-    await loadActive();
-  } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
-});
-
-async function confirmOrder() {
-  try {
-    await persistOrder();
-    const { error } = await sb.from('sales_orders').update({ status: 'confirmed' }).eq('id', ord.editing);
-    if (error) throw error;
-    toast('Заказ подтверждён', 'success');
-    $('m3-order-modal').classList.add('hidden');
-    await loadActive();
-  } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
-}
-
-async function shipOrder() {
-  try {
-    $('m3-order-deficit').classList.add('hidden');
-    await persistOrder();
-    const { data, error } = await sb.rpc('ship_sales_order', { p_order_id: ord.editing });
-    if (error) throw error;
-    if (!data?.ok) {
-      if (data?.error === 'INSUFFICIENT_STOCK' && Array.isArray(data.deficit)) {
-        $('m3-order-deficit').classList.remove('hidden');
-        $('m3-order-deficit-list').innerHTML = data.deficit.map(d =>
-          `<div>• ${esc(d.name)}: не хватает ${formatNumber(d.missing)} ${esc(d.unit || '')} (нужно ${formatNumber(d.need)}, есть ${formatNumber(d.have)})</div>`
-        ).join('');
-        toast('Недостаточно продукции на складе', 'error');
-        return;
-      }
-      if (data?.error === 'NO_ITEMS') throw new Error('В заказе нет позиций');
-      if (data?.error === 'ITEM_NOT_LINKED') throw new Error('Одна из позиций не привязана к складу или рецепту');
-      if (data?.error === 'INVALID_QUANTITY') throw new Error('Неверное количество в позиции');
-      throw new Error(data?.error || 'UNKNOWN');
-    }
-    toast('Заказ отгружен, товар списан со склада', 'success');
-    $('m3-order-modal').classList.add('hidden');
-    await loadActive();
-  } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
-}
-
-async function completeOrder() {
-  try {
-    await sb.from('sales_orders').update({ payment_status: paymentValueFromLabel() }).eq('id', ord.editing);
-    const { data, error } = await sb.rpc('complete_sales_order', { p_order_id: ord.editing });
-    if (error) throw error;
-    if (!data?.ok) {
-      if (data?.error === 'NOT_PAID') throw new Error('Нельзя закрыть неоплаченный заказ');
-      throw new Error(data?.error || 'UNKNOWN');
-    }
-    toast('Заказ закрыт', 'success');
-    $('m3-order-modal').classList.add('hidden');
-    await loadActive();
-  } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
-}
-
-async function cancelOrder() {
-  const wasShipped = ord.current?.status === 'shipped';
-  const msg = wasShipped
-    ? 'Отменить заказ? Товар будет возвращён на склад.'
-    : 'Отменить заказ?';
-  if (!confirm(msg)) return;
-  try {
-    const { data, error } = await sb.rpc('cancel_sales_order', { p_order_id: ord.editing });
-    if (error) throw error;
-    if (!data?.ok) throw new Error(data?.error || 'UNKNOWN');
-    toast('Заказ отменён', 'success');
-    $('m3-order-modal').classList.add('hidden');
-    await loadActive();
-  } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
-}
-
-// ---- helpers ----
-function pluralize(n, forms) {
-  const mod100 = Math.abs(n) % 100;
-  const mod10 = mod100 % 10;
-  if (mod100 >= 11 && mod100 <= 19) return forms[2];
-  if (mod10 === 1) return forms[0];
-  if (mod10 >= 2 && mod10 <= 4) return forms[1];
-  return forms[2];
-}
-function humanFileSize(bytes) {
-  if (!bytes && bytes !== 0) return '';
-  const units = ['Б','КБ','МБ','ГБ'];
-  let i = 0; let n = Number(bytes);
-  while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
-  return `${n.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
-}
-
-// ---- init ----
-switchTab('active');
+  /* ---------- события + старт ---------- */
+  function onView(e){ if(!alive()){ document.removeEventListener('riva:view',onView); return; } var t=tabFromLabel(e.detail&&e.detail.tab); if(t!==curTab) showTab(t); }
+  function onUnits(){ if(!alive()){ document.removeEventListener('riva:units-changed',onUnits); return; } renderTools(); loadTab(curTab); }
+  document.addEventListener('riva:view',onView);
+  document.addEventListener('riva:units-changed',onUnits);
+  showTab(tabFromLabel(RIVA.state.view && RIVA.state.view.tab));
+})();
 </script>
