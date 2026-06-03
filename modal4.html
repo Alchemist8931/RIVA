@@ -1,1984 +1,585 @@
-<!-- modal4.html — Страница "Управление". -->
-<!-- Подстраницы: Казначейство (Дашборд / Операции / Регулярные), Администрирование. -->
-<!-- Доступ: admin (всё), management (без Пользователей и Настроек). -->
-
-<section id="m4">
-
-  <div class="flex items-center justify-between gap-4 flex-wrap mb-6">
-    <div class="leading-tight">
-      <h1 class="text-[17px] font-medium tracking-tight">Управление</h1>
-      <p class="text-xs text-fg-muted mt-0.5" id="m4-subtitle">—</p>
-    </div>
-    <div class="flex items-center gap-3">
-      <nav class="m4-subnav" id="m4-subnav">
-        <button class="m4-tab active" data-tab="treasury">Казначейство</button>
-        <button class="m4-tab" data-tab="admin">Администрирование</button>
-      </nav>
-      <div id="m4-chat-btn-wrap"></div>
-    </div>
-  </div>
-
-  <!-- =========================================================
-       КАЗНАЧЕЙСТВО
-  ========================================================== -->
-  <div class="m4-panel" data-panel="treasury">
-
-    <!-- Подвкладки казначейства -->
-    <div class="flex items-center gap-1 mb-5">
-      <div class="m4-segment" id="m4-tr-subnav">
-        <button class="m4-seg-btn active" data-trtab="dashboard">Дашборд</button>
-        <button class="m4-seg-btn" data-trtab="operations">Операции</button>
-        <button class="m4-seg-btn" data-trtab="recurring">Регулярные</button>
-      </div>
-    </div>
-
-    <!-- ---- ДАШБОРД КАЗНАЧЕЙСТВА ---- -->
-    <div class="m4-tr-pane" data-trpane="dashboard">
-      <div class="bg-surface rounded-2xl border border-line mb-5 flex flex-wrap items-center" style="padding:10px; gap:10px;">
-        <span class="text-sm text-fg-muted">Период:</span>
-        <div class="m4-segment" id="m4-tr-period">
-          <button class="m4-seg-btn" data-period="today">Сегодня</button>
-          <button class="m4-seg-btn" data-period="week">Неделя</button>
-          <button class="m4-seg-btn active" data-period="month">Месяц</button>
-          <button class="m4-seg-btn" data-period="quarter">Квартал</button>
-          <button class="m4-seg-btn" data-period="year">Год</button>
-          <button class="m4-seg-btn" data-period="custom">Свой</button>
-        </div>
-        <div id="m4-tr-custom-wrap" class="hidden flex items-center gap-2">
-          <input id="m4-tr-from" type="date" class="m4-input-sm">
-          <span class="text-xs text-fg-muted">—</span>
-          <input id="m4-tr-to" type="date" class="m4-input-sm">
-          <button id="m4-tr-apply" class="btn-secondary px-3 py-2 rounded-lg text-sm">Применить</button>
-        </div>
-        <span id="m4-tr-range" class="text-xs text-fg-muted ml-auto">—</span>
-      </div>
-      <div id="m4-tr-dash">
-        <div class="flex items-center justify-center py-16"><div class="w-6 h-6 loader"></div></div>
-      </div>
-    </div>
-
-    <!-- ---- ОПЕРАЦИИ (полный реестр) ---- -->
-    <div class="m4-tr-pane hidden" data-trpane="operations">
-
-      <!-- Период реестра -->
-      <div class="bg-surface rounded-2xl border border-line mb-4 flex flex-wrap items-center" style="padding:10px; gap:10px;">
-        <span class="text-sm text-fg-muted">Период:</span>
-        <div class="m4-segment" id="m4-op-period">
-          <button class="m4-seg-btn" data-period="today">Сегодня</button>
-          <button class="m4-seg-btn" data-period="week">Неделя</button>
-          <button class="m4-seg-btn active" data-period="month">Месяц</button>
-          <button class="m4-seg-btn" data-period="quarter">Квартал</button>
-          <button class="m4-seg-btn" data-period="year">Год</button>
-          <button class="m4-seg-btn" data-period="custom">Свой</button>
-        </div>
-        <div id="m4-op-custom-wrap" class="hidden flex items-center gap-2">
-          <input id="m4-op-from" type="date" class="m4-input-sm">
-          <span class="text-xs text-fg-muted">—</span>
-          <input id="m4-op-to" type="date" class="m4-input-sm">
-          <button id="m4-op-apply" class="btn-secondary px-3 py-2 rounded-lg text-sm">Применить</button>
-        </div>
-        <span id="m4-op-range" class="text-xs text-fg-muted ml-auto">—</span>
-      </div>
-
-      <!-- Тулбар -->
-      <div class="bg-surface rounded-2xl border border-line mb-4 flex flex-wrap items-center" style="padding:10px; gap:10px;">
-        <div class="flex-1 min-w-[180px]">
-          <input id="m4-op-search" type="search" placeholder="Поиск по описанию, категории, контрагенту…"
-            class="m4-bar-ctrl w-full rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors text-sm">
-        </div>
-        <div class="m4-segment" id="m4-op-src">
-          <button class="m4-seg-btn active" data-src="all">Все</button>
-          <button class="m4-seg-btn" data-src="auto">Авто</button>
-          <button class="m4-seg-btn" data-src="manual">Ручные</button>
-        </div>
-        <div class="m4-dd m4-bar-ctrl" id="m4-op-dir-dd">
-          <button type="button" class="m4-dd-btn" id="m4-op-dir-btn">
-            <span id="m4-op-dir-label">Доходы и расходы</span>
-            <svg class="m4-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="m4-dd-menu hidden" id="m4-op-dir-menu">
-            <div class="m4-dd-opt" data-value="all">Доходы и расходы</div>
-            <div class="m4-dd-opt" data-value="income">Только доходы</div>
-            <div class="m4-dd-opt" data-value="expense">Только расходы</div>
-          </div>
-        </div>
-        <button id="m4-op-new" class="btn-primary m4-bar-ctrl rounded-xl text-sm font-medium" style="padding-left:16px; padding-right:16px;">
-          + Новая операция
-        </button>
-      </div>
-
-      <div id="m4-op-summary" class="m4-op-summary mb-3">—</div>
-
-      <div id="m4-op-list" class="space-y-2">
-        <div class="flex items-center justify-center py-16"><div class="w-6 h-6 loader"></div></div>
-      </div>
-    </div>
-
-    <!-- ---- РЕГУЛЯРНЫЕ (правила повторения) ---- -->
-    <div class="m4-tr-pane hidden" data-trpane="recurring">
-      <div class="bg-surface rounded-2xl border border-line mb-4 flex flex-wrap items-center justify-between" style="padding:10px 14px; gap:10px;">
-        <span class="text-sm text-fg-muted">Правила повторяющихся операций — система сама добавляет их в реестр по расписанию.</span>
-        <button id="m4-rec-new" class="btn-primary rounded-xl text-sm font-medium" style="height:36px; padding:0 16px;">+ Новое правило</button>
-      </div>
-      <div id="m4-rec-list" class="space-y-2">
-        <div class="flex items-center justify-center py-16"><div class="w-6 h-6 loader"></div></div>
-      </div>
-    </div>
-
-  </div>
-
-  <!-- =========================================================
-       АДМИНИСТРИРОВАНИЕ
-  ========================================================== -->
-  <div class="m4-panel hidden" data-panel="admin">
-
-    <div class="flex items-center gap-1 border-b border-line overflow-x-auto mb-5">
-      <button class="m4-atab px-4 py-3 text-sm text-fg-muted hover:text-fg transition-colors relative whitespace-nowrap active" data-atab="members"><span>Пользователи</span><span class="m4-atab-bar"></span></button>
-      <button class="m4-atab px-4 py-3 text-sm text-fg-muted hover:text-fg transition-colors relative whitespace-nowrap" data-atab="suppliers"><span>Поставщики</span><span class="m4-atab-bar"></span></button>
-      <button class="m4-atab px-4 py-3 text-sm text-fg-muted hover:text-fg transition-colors relative whitespace-nowrap" data-atab="customers"><span>Клиенты</span><span class="m4-atab-bar"></span></button>
-      <button class="m4-atab px-4 py-3 text-sm text-fg-muted hover:text-fg transition-colors relative whitespace-nowrap" data-atab="reports"><span>Отчёты</span><span class="m4-atab-bar"></span></button>
-      <button class="m4-atab px-4 py-3 text-sm text-fg-muted hover:text-fg transition-colors relative whitespace-nowrap" data-atab="audit"><span>Журнал</span><span class="m4-atab-bar"></span></button>
-      <button class="m4-atab m4-atab-admin px-4 py-3 text-sm text-fg-muted hover:text-fg transition-colors relative whitespace-nowrap" data-atab="settings"><span>Настройки</span><span class="m4-atab-bar"></span></button>
-    </div>
-
-    <!-- MEMBERS -->
-    <div class="m4-apanel" data-apanel="members">
-      <div id="m4-invite-form" class="hidden bg-surface rounded-2xl border border-line p-5 mb-5">
-        <h3 class="font-medium mb-4">Пригласить коллегу</h3>
-        <div class="flex flex-col md:flex-row gap-3 md:items-start">
-          <div class="flex-1 min-w-0">
-            <label class="block">
-              <span class="text-xs text-fg-muted block mb-1.5">Email (только @gmail.com / @googlemail.com)</span>
-              <div class="relative">
-                <input id="m4-invite-email" type="email" autocomplete="off" spellcheck="false"
-                  class="w-full px-4 py-2.5 pr-20 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors"
-                  placeholder="colleague@gmail.com">
-                <span id="m4-invite-chip" class="hidden absolute right-2 top-1/2 -translate-y-1/2 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-md border">—</span>
-              </div>
-              <p id="m4-invite-email-error" class="hidden text-xs text-state-error mt-1.5"></p>
-            </label>
-          </div>
-          <div class="md:w-48">
-            <label class="block">
-              <span class="text-xs text-fg-muted block mb-1.5">Роль</span>
-              <select id="m4-invite-role" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors">
-                <option value="">Выберите…</option>
-                <option value="supply">Снабжение</option>
-                <option value="production">Производство</option>
-                <option value="sales">Продажи</option>
-                <option value="management">Управление</option>
-                <option value="admin">Администратор</option>
-              </select>
-            </label>
-          </div>
-          <div class="md:pt-[22px]">
-            <button id="m4-invite-submit" class="btn-primary w-full md:w-auto px-5 py-2.5 rounded-xl text-sm font-medium" disabled>Пригласить</button>
-          </div>
-        </div>
-        <p class="text-xs text-fg-muted mt-3 leading-relaxed">
-          Если пользователь уже есть в системе, он сразу получит доступ к группе. Если нет — ему уйдёт ссылка на вход; при первом входе через Google он присоединится автоматически.
-        </p>
-      </div>
-
-      <div id="m4-invitations-block" class="hidden bg-surface rounded-2xl border border-line p-5 mb-5">
-        <h3 class="font-medium mb-3">Отправленные приглашения</h3>
-        <div id="m4-invitations-list" class="space-y-2"></div>
-      </div>
-
-      <div class="bg-surface rounded-2xl border border-line overflow-hidden">
-        <div class="px-5 py-4 border-b border-line flex items-center justify-between">
-          <h3 class="font-medium">Участники группы</h3>
-          <span id="m4-members-count" class="text-xs text-fg-muted">—</span>
-        </div>
-        <div id="m4-members-list" class="divide-y divide-line-light">
-          <div class="px-5 py-10 flex items-center justify-center"><div class="w-6 h-6 loader"></div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- SUPPLIERS -->
-    <div class="m4-apanel hidden" data-apanel="suppliers">
-      <div id="m4-supplier-form" class="bg-surface rounded-2xl border border-line p-5 mb-5">
-        <h3 class="font-medium mb-4" id="m4-supplier-form-title">Новый поставщик</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <label class="block"><span class="text-xs text-fg-muted block mb-1.5">Название *</span>
-            <input id="m4-supplier-name" type="text" maxlength="200" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm" placeholder="ООО «Сырьё»">
-          </label>
-          <label class="block"><span class="text-xs text-fg-muted block mb-1.5">Контактное лицо</span>
-            <input id="m4-supplier-contact" type="text" maxlength="200" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm" placeholder="Иван Петров">
-          </label>
-          <label class="block"><span class="text-xs text-fg-muted block mb-1.5">Телефон</span>
-            <input id="m4-supplier-phone" type="tel" maxlength="50" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm" placeholder="+7 999 123-45-67">
-          </label>
-          <label class="block"><span class="text-xs text-fg-muted block mb-1.5">Email</span>
-            <input id="m4-supplier-email" type="email" maxlength="200" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm" placeholder="info@example.com">
-          </label>
-          <label class="block md:col-span-2"><span class="text-xs text-fg-muted block mb-1.5">Комментарий</span>
-            <textarea id="m4-supplier-comment" rows="2" maxlength="1000" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm resize-none"></textarea>
-          </label>
-        </div>
-        <div class="flex items-center gap-2 mt-4">
-          <button id="m4-supplier-save" class="btn-primary px-5 py-2.5 rounded-xl text-sm font-medium" disabled>Добавить</button>
-          <button id="m4-supplier-cancel" class="hidden btn-secondary px-5 py-2.5 rounded-xl text-sm font-medium">Отмена</button>
-        </div>
-      </div>
-      <div class="bg-surface rounded-2xl border border-line overflow-hidden">
-        <div class="px-5 py-4 border-b border-line flex items-center justify-between gap-3 flex-wrap">
-          <h3 class="font-medium">Справочник поставщиков</h3>
-          <div class="flex items-center gap-3">
-            <input id="m4-supplier-search" type="search" placeholder="Поиск…" class="px-3 py-1.5 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm w-44">
-            <span id="m4-suppliers-count" class="text-xs text-fg-muted">—</span>
-          </div>
-        </div>
-        <div id="m4-suppliers-list" class="divide-y divide-line-light">
-          <div class="px-5 py-10 flex items-center justify-center"><div class="w-6 h-6 loader"></div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- CUSTOMERS -->
-    <div class="m4-apanel hidden" data-apanel="customers">
-      <div id="m4-customer-form" class="bg-surface rounded-2xl border border-line p-5 mb-5">
-        <h3 class="font-medium mb-4" id="m4-customer-form-title">Новый клиент</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-          <label class="block"><span class="text-xs text-fg-muted block mb-1.5">Название *</span>
-            <input id="m4-customer-name" type="text" maxlength="200" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-          </label>
-          <label class="block"><span class="text-xs text-fg-muted block mb-1.5">Контактное лицо</span>
-            <input id="m4-customer-contact" type="text" maxlength="200" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-          </label>
-          <label class="block"><span class="text-xs text-fg-muted block mb-1.5">Телефон</span>
-            <input id="m4-customer-phone" type="tel" maxlength="50" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-          </label>
-          <label class="block"><span class="text-xs text-fg-muted block mb-1.5">Email</span>
-            <input id="m4-customer-email" type="email" maxlength="200" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-          </label>
-          <label class="block md:col-span-2"><span class="text-xs text-fg-muted block mb-1.5">Адрес</span>
-            <input id="m4-customer-address" type="text" maxlength="500" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-          </label>
-          <label class="block md:col-span-2"><span class="text-xs text-fg-muted block mb-1.5">Комментарий</span>
-            <textarea id="m4-customer-comment" rows="2" maxlength="1000" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm resize-none"></textarea>
-          </label>
-        </div>
-        <div class="flex items-center gap-2 mt-4">
-          <button id="m4-customer-save" class="btn-primary px-5 py-2.5 rounded-xl text-sm font-medium" disabled>Добавить</button>
-          <button id="m4-customer-cancel" class="hidden btn-secondary px-5 py-2.5 rounded-xl text-sm font-medium">Отмена</button>
-        </div>
-      </div>
-      <div class="bg-surface rounded-2xl border border-line overflow-hidden">
-        <div class="px-5 py-4 border-b border-line flex items-center justify-between gap-3 flex-wrap">
-          <h3 class="font-medium">Справочник клиентов</h3>
-          <div class="flex items-center gap-3">
-            <input id="m4-customer-search" type="search" placeholder="Поиск…" class="px-3 py-1.5 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm w-44">
-            <span id="m4-customers-count" class="text-xs text-fg-muted">—</span>
-          </div>
-        </div>
-        <div id="m4-customers-list" class="divide-y divide-line-light">
-          <div class="px-5 py-10 flex items-center justify-center"><div class="w-6 h-6 loader"></div></div>
-        </div>
-      </div>
-    </div>
-
-    <!-- REPORTS -->
-    <div class="m4-apanel hidden" data-apanel="reports">
-      <div class="bg-surface rounded-2xl border border-line p-4 mb-5 flex flex-wrap items-center gap-3">
-        <select id="m4-rep-type" class="px-3 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-          <option value="warehouse">Остатки по складу</option>
-          <option value="sales">Продажи за период</option>
-          <option value="supply">Закупки за период</option>
-          <option value="production">Производство за период</option>
-          <option value="treasury">Казначейство за период</option>
-        </select>
-        <div id="m4-rep-period-wrap" class="flex items-center gap-2">
-          <input id="m4-rep-from" type="date" class="px-3 py-2 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-          <span class="text-xs text-fg-muted">—</span>
-          <input id="m4-rep-to" type="date" class="px-3 py-2 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-        </div>
-        <button id="m4-rep-run" class="btn-primary px-4 py-2.5 rounded-xl text-sm font-medium">Построить</button>
-        <button id="m4-rep-csv" class="btn-secondary px-4 py-2.5 rounded-xl text-sm font-medium" disabled>Экспорт CSV</button>
-        <span id="m4-rep-count" class="text-xs text-fg-muted ml-auto">—</span>
-      </div>
-
-      <div class="bg-surface rounded-2xl border border-line overflow-hidden">
-        <div id="m4-rep-table" class="overflow-x-auto">
-          <div class="px-5 py-16 text-center text-sm text-fg-muted">Выберите отчёт и нажмите «Построить»</div>
-        </div>
-      </div>
-    </div>
-
-    <!-- AUDIT -->
-    <div class="m4-apanel hidden" data-apanel="audit">
-      <div class="bg-surface rounded-2xl border border-line p-4 mb-5 flex flex-wrap items-center gap-3">
-        <input id="m4-audit-search" type="search" placeholder="Поиск в описаниях…" class="flex-1 min-w-[180px] px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-        <select id="m4-audit-user" class="px-3 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-          <option value="">Все пользователи</option>
-        </select>
-        <select id="m4-audit-action" class="px-3 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-          <option value="">Все действия</option>
-        </select>
-        <input id="m4-audit-from" type="date" class="px-3 py-2 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-        <input id="m4-audit-to" type="date" class="px-3 py-2 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-        <button id="m4-audit-refresh" class="btn-secondary px-4 py-2.5 rounded-xl text-sm font-medium">Обновить</button>
-        <button id="m4-audit-csv" class="btn-secondary px-4 py-2.5 rounded-xl text-sm font-medium">Экспорт CSV</button>
-      </div>
-      <div class="bg-surface rounded-2xl border border-line overflow-hidden">
-        <div id="m4-audit-list" class="divide-y divide-line-light">
-          <div class="px-5 py-10 flex items-center justify-center"><div class="w-6 h-6 loader"></div></div>
-        </div>
-        <div id="m4-audit-pager" class="px-5 py-3 border-t border-line-light text-xs text-fg-muted text-center"></div>
-      </div>
-    </div>
-
-    <!-- SETTINGS -->
-    <div class="m4-apanel hidden" data-apanel="settings">
-      <div id="m4-settings-body" class="space-y-5"></div>
-    </div>
-
-  </div>
-
-</section>
-
-<!-- MODAL: операция казначейства (разовая или повторяющаяся) -->
-<div id="m4-op-modal" class="hidden fixed inset-0 z-40 bg-black/30 flex items-center justify-center px-4 py-8 overflow-y-auto">
-  <div class="bg-surface rounded-2xl border border-line w-full max-w-lg my-auto">
-    <div class="px-5 py-4 border-b border-line flex items-center justify-between">
-      <h3 class="font-medium" id="m4-op-modal-title">Новая операция</h3>
-      <button class="m4-op-close p-1 rounded-lg hover:bg-surface-alt">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
-      </button>
-    </div>
-    <div class="p-5 space-y-4">
-      <div>
-        <span class="text-xs text-fg-muted block mb-1.5">Тип операции *</span>
-        <div class="m4-segment m4-segment--full" id="m4-op-dir-seg">
-          <button type="button" class="m4-seg-btn active" data-dir="expense">Расход</button>
-          <button type="button" class="m4-seg-btn" data-dir="income">Доход</button>
-        </div>
-      </div>
-
-      <label class="block">
-        <span class="text-xs text-fg-muted block mb-1.5">Категория *</span>
-        <div class="m4-dd m4-dd--block" id="m4-op-cat-dd">
-          <button type="button" class="m4-dd-btn m4-dd-btn--block" id="m4-op-cat-btn">
-            <span id="m4-op-cat-label">— выберите —</span>
-            <svg class="m4-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="m4-dd-menu hidden" id="m4-op-cat-menu"></div>
-        </div>
-      </label>
-
-      <div id="m4-op-rec-wrap">
-        <span class="text-xs text-fg-muted block mb-1.5">Периодичность *</span>
-        <div class="m4-segment m4-segment--full" id="m4-op-rec-seg" style="flex-wrap:wrap;">
-          <button type="button" class="m4-seg-btn active" data-rec="none">Разовая</button>
-          <button type="button" class="m4-seg-btn" data-rec="weekly">Еженедельно</button>
-          <button type="button" class="m4-seg-btn" data-rec="monthly">Ежемесячно</button>
-          <button type="button" class="m4-seg-btn" data-rec="quarterly">Ежеквартально</button>
-          <button type="button" class="m4-seg-btn" data-rec="yearly">Ежегодно</button>
-        </div>
-      </div>
-
-      <div class="grid grid-cols-2 gap-3">
-        <label class="block">
-          <span class="text-xs text-fg-muted block mb-1.5">Сумма, ₽ *</span>
-          <input id="m4-op-amount" type="text" inputmode="decimal" class="w-full px-3 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-        </label>
-        <label class="block">
-          <span class="text-xs text-fg-muted block mb-1.5" id="m4-op-date-label">Дата *</span>
-          <input id="m4-op-date" type="date" class="w-full px-3 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-        </label>
-      </div>
-
-      <label class="block hidden" id="m4-op-end-wrap">
-        <span class="text-xs text-fg-muted block mb-1.5">Дата окончания (необязательно)</span>
-        <input id="m4-op-end" type="date" class="w-full px-3 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-      </label>
-
-      <label class="block">
-        <span class="text-xs text-fg-muted block mb-1.5">Контрагент</span>
-        <input id="m4-op-counterparty" type="text" maxlength="200" class="w-full px-3 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm" placeholder="Кому/от кого (необязательно)">
-      </label>
-
-      <label class="block">
-        <span class="text-xs text-fg-muted block mb-1.5">Описание</span>
-        <textarea id="m4-op-desc" rows="2" maxlength="1000" class="w-full px-3 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm resize-none"></textarea>
-      </label>
-    </div>
-    <div class="px-5 py-4 border-t border-line flex items-center justify-end gap-2">
-      <button class="m4-op-close btn-secondary px-4 py-2 rounded-lg text-sm">Отмена</button>
-      <button id="m4-op-save" class="btn-primary px-4 py-2 rounded-lg text-sm" disabled>Сохранить</button>
-    </div>
-  </div>
-</div>
-
 <style>
-  /* Подстраничная навигация — segmented control */
-  .m4-subnav {
-    height: var(--ctrl-h, 38px);
-    background: var(--bg-card);
-    border: 1px solid var(--line);
-    border-radius: var(--ctrl-radius, 12px);
-    padding: 4px;
-    display: inline-flex;
-    align-items: stretch;
-    gap: 0;
-  }
-  .m4-subnav .m4-tab {
-    padding: 0 14px;
-    border: none; background: none; cursor: pointer;
-    border-radius: calc(var(--ctrl-radius, 12px) - 4px);
-    color: var(--fg-muted); font-size: 13px; white-space: nowrap;
-    display: inline-flex; align-items: center;
-    transition: all .15s ease-in-out;
-  }
-  .m4-subnav .m4-tab:hover { color: var(--fg); }
-  .m4-subnav .m4-tab.active {
-    background: var(--bg); color: var(--fg); font-weight: 600;
-    box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 0 0 1px rgba(0,0,0,.04);
-  }
+/* ============================================================ RIVA · modal4 — Управление ============================================================ */
+.m4{ color:var(--text); }
+.m4-head{ display:flex; align-items:center; justify-content:space-between; gap:var(--sp-4); margin-bottom:var(--sp-5); flex-wrap:wrap; }
+.m4-title{ font-size:1.35rem; font-weight:700; letter-spacing:-.02em; }
+.m4-tools{ display:flex; align-items:center; gap:var(--sp-3); flex-wrap:wrap; }
+.m4-pill{ display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 var(--sp-3); border-radius:var(--r); background:var(--accent-soft); color:var(--accent); border:1px solid var(--accent-line); font-size:.8rem; font-weight:600; }
+.m4-pill.muted{ background:var(--card); color:var(--text-3); border-color:var(--border); font-weight:500; }
+.m4-pill svg{ width:14px; height:14px; }
+.m4-seg{ display:inline-flex; padding:3px; gap:2px; background:var(--card); border:1px solid var(--border); border-radius:var(--r); }
+.m4-seg button{ font-size:.8rem; color:var(--text-3); padding:6px 12px; border-radius:var(--r-sm); white-space:nowrap; }
+.m4-seg button.on{ background:var(--accent-soft); color:var(--accent); }
+.m4-search{ display:flex; align-items:center; gap:var(--sp-2); height:38px; padding:0 var(--sp-3); background:var(--card); border:1px solid var(--border); border-radius:var(--r); color:var(--text-3); min-width:180px; }
+.m4-search:focus-within{ border-color:var(--accent-line); }
+.m4-search svg{ width:15px; height:15px; }
+.m4-search input{ flex:1; background:none; border:none; outline:none; color:var(--text); font-size:.875rem; min-width:0; }
 
-  /* Сегмент-переключатель (подвкладки/период) */
-  .m4-segment {
-    height: 36px;
-    background: var(--bg-card);
-    border: 1px solid var(--line);
-    border-radius: var(--ctrl-radius, 12px);
-    padding: 4px; display: inline-flex; align-items: stretch; gap: 0;
-    flex-wrap: wrap;
-  }
-  .m4-segment--full { display: flex; width: 100%; height: auto; }
-  .m4-segment--full .m4-seg-btn { flex: 1; justify-content: center; padding: 8px 14px; }
-  .m4-seg-btn {
-    padding: 0 14px; border: none; background: none; cursor: pointer;
-    border-radius: calc(var(--ctrl-radius, 12px) - 4px);
-    color: var(--fg-muted); font-size: 13px; white-space: nowrap;
-    display: inline-flex; align-items: center;
-    transition: all .15s ease-in-out;
-  }
-  .m4-seg-btn:hover { color: var(--fg); }
-  .m4-seg-btn.active {
-    background: var(--bg); color: var(--fg); font-weight: 600;
-    box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 0 0 1px rgba(0,0,0,.04);
-  }
+.m4-btn{ display:inline-flex; align-items:center; gap:var(--sp-2); height:38px; padding:0 var(--sp-4); border-radius:var(--r); background:var(--btn-bg); color:var(--btn-fg); font-size:.875rem; font-weight:600; box-shadow:var(--shadow-card); transition:transform var(--dur-fast) var(--ease),opacity var(--dur-fast) var(--ease); white-space:nowrap; }
+.m4-btn:hover{ transform:translateY(-1px); opacity:.92; }
+.m4-btn:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
+.m4-btn svg{ width:16px; height:16px; }
+.m4-btn.ghost{ background:var(--card); color:var(--text); border:1px solid var(--border-strong); box-shadow:none; }
+.m4-btn.ghost:hover{ background:var(--card-hover); }
+.m4-btn.sm{ height:32px; padding:0 var(--sp-3); font-size:.82rem; }
 
-  .m4-input-sm {
-    height: 36px; padding: 0 10px;
-    border-radius: 10px; background: var(--bg); border: 1px solid var(--line);
-    color: var(--fg); font-size: 13px; outline: none;
-  }
-  .m4-input-sm:focus { border-color: var(--fg); }
+.m4-panel{ display:none; }
+.m4-panel.on{ display:block; animation:m4in .3s var(--ease); }
+@keyframes m4in{ from{ opacity:0; transform:translateY(6px);} to{ opacity:1; transform:none; } }
 
-  /* Внутренние вкладки администрирования */
-  .m4-atab .m4-atab-bar { position: absolute; bottom: -1px; left: 0; right: 0; height: 1px; background: var(--fg); transform: scaleX(0); transform-origin: center; transition: transform .2s ease; }
-  .m4-atab.active { color: var(--fg); }
-  .m4-atab.active .m4-atab-bar { transform: scaleX(1); }
+.m4-kpis{ display:grid; grid-template-columns:repeat(4,1fr); gap:var(--sp-4); margin-bottom:var(--sp-5); }
+@media (max-width:1000px){ .m4-kpis{ grid-template-columns:repeat(2,1fr); } }
+@media (max-width:560px){ .m4-kpis{ grid-template-columns:1fr; } }
+.m4-kpi{ padding:var(--sp-5); border:1px solid var(--border); border-radius:var(--r-lg); background:var(--card); box-shadow:var(--shadow-card); }
+.m4-kpi .k{ font-size:.78rem; color:var(--text-3); display:flex; align-items:center; gap:6px; }
+.m4-kpi .k svg{ width:15px; height:15px; }
+.m4-kpi .v{ font-size:1.7rem; font-weight:700; letter-spacing:-.02em; margin-top:var(--sp-3); }
+.m4-kpi .s{ font-size:.8rem; margin-top:4px; color:var(--text-2); }
+.m4-kpi .s.up{ color:var(--st-completed); } .m4-kpi .s.down{ color:var(--st-cancelled); }
 
-  /* KPI-карточки */
-  .m4-kpi { border: 1px solid var(--line); background: var(--bg); border-radius: 12px; padding: 16px; }
-  .m4-kpi-delta { font-size: 12px; margin-top: 6px; display: inline-flex; align-items: center; gap: 4px; }
-  .m4-delta-up   { color: #15803D; }
-  .m4-delta-down { color: #DC2626; }
-  .m4-delta-flat { color: var(--fg-muted); }
+.m4-grid2{ display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-4); }
+@media (max-width:900px){ .m4-grid2{ grid-template-columns:1fr; } }
+.m4-card{ border:1px solid var(--border); border-radius:var(--r-lg); background:var(--card); box-shadow:var(--shadow-card); overflow:hidden; }
+.m4-card .ch{ padding:var(--sp-4) var(--sp-5); border-bottom:1px solid var(--border); font-weight:600; font-size:.95rem; display:flex; align-items:center; justify-content:space-between; }
 
-  .m4-table { width: 100%; font-size: 13px; }
-  .m4-table th { text-align: left; font-weight: 500; color: var(--fg-muted); padding: 10px 12px; border-bottom: 1px solid var(--line); font-size: 12px; white-space: nowrap; }
-  .m4-table td { padding: 10px 12px; border-bottom: 1px solid var(--line-light); vertical-align: top; }
-  .m4-table tbody tr:hover { background: var(--bg-alt); }
-  .m4-table td.num, .m4-table th.num { text-align: right; white-space: nowrap; }
+.m4-tablewrap{ overflow-x:auto; }
+table.m4-tbl{ width:100%; border-collapse:collapse; font-size:.875rem; }
+.m4-tbl th{ text-align:left; font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--text-3); font-weight:600; padding:var(--sp-3) var(--sp-4); border-bottom:1px solid var(--border); white-space:nowrap; }
+.m4-tbl td{ padding:var(--sp-3) var(--sp-4); border-bottom:1px solid var(--border); color:var(--text-2); vertical-align:middle; }
+.m4-tbl tr:last-child td{ border-bottom:none; }
+.m4-tbl tbody tr:hover{ background:var(--card-hover); }
+.m4-tbl td.num, .m4-tbl th.num{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.m4-tbl .nm{ color:var(--text); font-weight:600; }
+.m4-tbl .sub{ color:var(--text-3); font-size:.78rem; font-family:var(--font-mono); }
+.inc{ color:var(--st-completed); font-weight:600; } .exp{ color:var(--st-cancelled); font-weight:600; }
 
-  /* Бейджи категорий */
-  .m4-badge {
-    --m4-badge-pct: 13%;
-    display: inline-flex; align-items: center; justify-self: start;
-    padding: 3px 9px; border-radius: 7px; font-size: 11px; font-weight: 500;
-    line-height: 1.4; white-space: nowrap;
-    background: color-mix(in srgb, var(--badge-c, var(--fg-muted)) var(--m4-badge-pct), transparent);
-    color: var(--badge-c, var(--fg-muted));
-    backdrop-filter: blur(6px); -webkit-backdrop-filter: blur(6px);
-  }
-  .m4-badge-income  { --badge-c: #15803D; }
-  .m4-badge-expense { --badge-c: #DC2626; }
+.m4-chip{ display:inline-flex; align-items:center; gap:5px; font-size:.74rem; font-weight:500; padding:3px 9px; border-radius:var(--r-sm); border:1px solid var(--border); background:var(--card); color:var(--text-2); white-space:nowrap; }
+.m4-chip.ro{ color:var(--text-3); } .m4-chip.lock{ opacity:.7; }
+.m4-chip.on-chip{ color:var(--st-completed); } .m4-chip.off-chip{ color:var(--text-3); }
+.role-admin{ color:var(--accent); background:var(--accent-soft); border-color:var(--accent-line); }
+.dot-on{ width:8px;height:8px;border-radius:50%;background:var(--st-completed);display:inline-block; }
+.dot-off{ width:8px;height:8px;border-radius:50%;background:var(--text-3);display:inline-block; }
 
-  /* Строка операции */
-  .m4-op-row {
-    --m4-accent: var(--fg);
-    background: color-mix(in srgb, var(--m4-accent) 3%, transparent);
-    border: 1px solid color-mix(in srgb, var(--m4-accent) 8%, transparent);
-    border-radius: 12px;
-    display: grid;
-    grid-template-columns: 160px minmax(0, 1fr) 160px 40px;
-    align-items: center; gap: 12px; padding: 10px 16px; min-height: 48px;
-    transition: background .15s ease, border-color .15s ease;
-  }
-  .m4-op-row:hover {
-    background: color-mix(in srgb, var(--m4-accent) 6%, transparent);
-    border-color: color-mix(in srgb, var(--m4-accent) 18%, transparent);
-  }
-  .m4-op-main { min-width: 0; }
-  .m4-op-desc { font-size: 13px; font-weight: 500; color: var(--fg); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .m4-op-meta { font-size: 12px; color: var(--fg-muted); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .m4-op-amount { font-size: 14px; font-weight: 600; text-align: right; white-space: nowrap; }
-  .m4-op-amount--income  { color: #15803D; }
-  .m4-op-amount--expense { color: #DC2626; }
-  .m4-op-actions { display: flex; justify-content: flex-end; }
-  .m4-op-del { display: inline-flex; align-items: center; justify-content: center; width: 30px; height: 30px; border-radius: 8px; cursor: pointer; transition: background .12s ease; }
-  .m4-op-del:hover { background: var(--bg-alt); }
+.m4-acts{ display:flex; gap:6px; justify-content:flex-end; }
+.m4-ic{ width:30px; height:30px; display:grid; place-items:center; border-radius:var(--r-sm); border:1px solid var(--border); background:var(--card); color:var(--text-2); transition:all var(--dur-fast) var(--ease); }
+.m4-ic:hover{ border-color:var(--border-strong); color:var(--text); background:var(--card-hover); }
+.m4-ic.danger:hover{ color:var(--st-cancelled); border-color:var(--st-cancelled); }
+.m4-ic svg{ width:15px; height:15px; }
 
-  /* Теги источника / периодичности */
-  .m4-op-tag { display:inline-block; font-size:10px; line-height:1.4; padding:1px 6px; border-radius:6px; vertical-align:middle; margin-left:4px; font-weight:600; }
-  .m4-op-tag--auto { background: color-mix(in srgb, var(--fg) 8%, transparent); color: var(--fg-muted); }
-  .m4-op-tag--rec  { background: color-mix(in srgb, #2563EB 14%, transparent); color:#2563EB; }
-  .m4-op-row--auto { opacity:.9; }
-  .m4-op-row[data-edit="1"] { cursor:pointer; }
-  .m4-op-lock { display:inline-flex; align-items:center; justify-content:center; width:30px; height:30px; opacity:.45; }
-  .m4-rec-row { grid-template-columns: 160px minmax(0,1fr) 150px auto !important; }
-  .m4-op-summary { font-size:12px; color:var(--fg-muted); }
+.m4-empty{ display:grid; place-items:center; gap:var(--sp-2); padding:var(--sp-10) var(--sp-4); text-align:center; color:var(--text-3); }
+.m4-empty .t{ font-size:1rem; font-weight:600; color:var(--text-2); }
+.m4-empty .d{ font-size:.875rem; max-width:42ch; }
+.m4-loading{ display:grid; place-items:center; gap:var(--sp-3); padding:var(--sp-10); color:var(--text-3); }
+.m4-loading .spin{ width:24px; height:24px; border-radius:50%; border:2px solid var(--border); border-top-color:var(--accent); animation:m4spin 1s linear infinite; }
+@keyframes m4spin{ to{ transform:rotate(360deg);} }
+.m4-section-block{ margin-bottom:var(--sp-5); }
+.m4-section-block h4{ font-size:.78rem; text-transform:uppercase; letter-spacing:.08em; color:var(--text-3); margin-bottom:var(--sp-3); }
+.m4-unit-row{ display:flex; align-items:center; gap:var(--sp-3); padding:var(--sp-3) var(--sp-4); border:1px solid var(--border); border-radius:var(--r); background:var(--card); margin-bottom:8px; }
+.m4-unit-row .un{ flex:1; font-weight:600; color:var(--text); }
+.m4-cat-bar{ display:flex; flex-direction:column; gap:8px; }
+.m4-cat{ display:grid; grid-template-columns:130px 1fr 90px; gap:var(--sp-3); align-items:center; font-size:.83rem; }
+.m4-cat .track{ height:8px; border-radius:var(--r-dot); background:var(--card); overflow:hidden; }
+.m4-cat .fill{ height:100%; border-radius:var(--r-dot); }
 
-  /* Дропдаун */
-  .m4-bar-ctrl { height: 36px; padding-top: 0; padding-bottom: 0; }
-  input.m4-bar-ctrl { padding-left: 14px; padding-right: 14px; }
-  .m4-dd { position: relative; display: inline-flex; }
-  .m4-dd-btn {
-    height: 36px; display: inline-flex; align-items: center; gap: 8px;
-    padding: 0 12px 0 14px; border-radius: 12px;
-    background: var(--bg); border: 1px solid var(--line); color: var(--fg);
-    font-size: 13px; cursor: pointer; white-space: nowrap; transition: border-color .15s ease;
-  }
-  .m4-dd-btn:hover { border-color: var(--fg-muted); }
-  .m4-dd.is-open .m4-dd-btn { border-color: var(--fg); }
-  .m4-dd-chev { width: 16px; height: 16px; color: var(--fg-muted); transition: transform .18s ease; flex-shrink: 0; }
-  .m4-dd.is-open .m4-dd-chev { transform: rotate(180deg); }
-  .m4-dd-menu {
-    position: absolute; top: calc(100% + 4px); left: 0; min-width: 100%; z-index: 30;
-    max-height: 280px; overflow-y: auto;
-    background: var(--bg); border: 1px solid var(--line); border-radius: 10px;
-    box-shadow: 0 8px 24px rgba(0,0,0,.08); padding: 4px;
-  }
-  .m4-dd-menu::-webkit-scrollbar { width: 4px; }
-  .m4-dd-menu::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
-  .m4-dd-opt { padding: 8px 10px; border-radius: 7px; font-size: 13px; color: var(--fg); cursor: pointer; white-space: nowrap; transition: background .12s ease; }
-  .m4-dd-opt:hover { background: var(--bg-alt); }
-  .m4-dd-opt.is-selected { background: var(--bg-alt); font-weight: 600; }
-  .m4-dd--block { display: block; }
-  .m4-dd-btn--block { width: 100%; justify-content: space-between; }
-
-  /* Разбивка по категориям — бары */
-  .m4-cat-row { display: grid; grid-template-columns: 180px minmax(120px, 1fr) 130px; align-items: center; gap: 12px; padding: 8px 0; }
-  .m4-cat-bar { position: relative; height: 8px; border-radius: 6px; background: color-mix(in srgb, var(--fg) 10%, transparent); overflow: hidden; }
-  .m4-cat-bar-fill { position: absolute; left: 0; top: 0; bottom: 0; border-radius: 6px; transition: width .25s ease; }
-  .m4-cat-name { font-size: 13px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-  .m4-cat-val { font-size: 13px; font-weight: 600; text-align: right; white-space: nowrap; }
-
-  @media (max-width: 1024px) {
-    .m4-op-row { grid-template-columns: auto minmax(0,1fr) auto 40px; }
-    .m4-cat-row { grid-template-columns: 140px minmax(80px,1fr) 110px; }
-  }
-  @media (max-width: 700px) {
-    .m4-op-row { grid-template-columns: 1fr auto; }
-    .m4-op-amount { text-align: left; }
-    .m4-rec-row { grid-template-columns: 1fr auto !important; }
-    .m4-cat-row { grid-template-columns: 1fr auto; }
-    .m4-cat-bar { display: none; }
-  }
+/* диалоги */
+.m4-overlay{ position:fixed; inset:0; z-index:400; display:grid; place-items:center; padding:var(--sp-4); background:rgba(0,0,0,.45); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); animation:m4fade .2s var(--ease); }
+@keyframes m4fade{ from{ opacity:0;} to{ opacity:1; } }
+.m4-dialog{ width:100%; max-width:560px; max-height:90vh; display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--border-strong); border-radius:var(--r-lg); box-shadow:var(--shadow-pop); animation:m4pop .25s var(--ease); }
+@keyframes m4pop{ from{ opacity:0; transform:translateY(10px) scale(.98);} to{ opacity:1; transform:none; } }
+.m4-dhead{ display:flex; align-items:center; justify-content:space-between; padding:var(--sp-4) var(--sp-5); border-bottom:1px solid var(--border); }
+.m4-dhead h3{ font-size:1.05rem; font-weight:700; }
+.m4-dclose{ width:32px; height:32px; display:grid; place-items:center; border-radius:var(--r-sm); color:var(--text-3); }
+.m4-dclose:hover{ background:var(--card-hover); color:var(--text); }
+.m4-dbody{ padding:var(--sp-5); overflow-y:auto; }
+.m4-dfoot{ display:flex; justify-content:flex-end; gap:var(--sp-3); padding:var(--sp-4) var(--sp-5); border-top:1px solid var(--border); }
+.m4-field{ margin-bottom:var(--sp-4); } .m4-field:last-child{ margin-bottom:0; }
+.m4-field label{ display:block; font-size:.78rem; font-weight:600; color:var(--text-2); margin-bottom:6px; }
+.m4-input,.m4-select,.m4-textarea{ width:100%; height:40px; padding:0 var(--sp-3); background:var(--card); border:1px solid var(--border); border-radius:var(--r); color:var(--text); font-size:.9rem; font-family:inherit; }
+.m4-textarea{ height:auto; min-height:60px; padding:var(--sp-2) var(--sp-3); resize:vertical; }
+.m4-input:focus,.m4-select:focus,.m4-textarea:focus{ outline:none; border-color:var(--accent-line); }
+.m4-row2{ display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-3); }
+.m4-hint{ font-size:.78rem; color:var(--text-3); margin-top:6px; }
+.m4-check{ display:flex; align-items:center; gap:var(--sp-2); padding:8px 10px; border:1px solid var(--border); border-radius:var(--r-sm); margin-bottom:6px; cursor:pointer; font-size:.875rem; }
+.m4-check input{ width:16px; height:16px; }
+.m4-check.sel{ border-color:var(--accent-line); background:var(--accent-soft); }
 </style>
 
-<script type="module">
-// ================================================================
-// modal4.html — Управление (Казначейство + Администрирование)
-// ================================================================
+<div class="m4" id="m4-root">
+  <div class="m4-head">
+    <div class="m4-title" id="m4-title">Дашборд</div>
+    <div class="m4-tools" id="m4-tools"></div>
+  </div>
+  <div class="m4-panel" data-tab="dashboard" id="m4p-dashboard"></div>
+  <div class="m4-panel" data-tab="treasury" id="m4p-treasury"></div>
+  <div class="m4-panel" data-tab="org" id="m4p-org"></div>
+  <div class="m4-panel" data-tab="members" id="m4p-members"></div>
+  <div class="m4-panel" data-tab="reports" id="m4p-reports"></div>
+  <div class="m4-panel" data-tab="audit" id="m4p-audit"></div>
+</div>
 
-const { sb, state } = window.RIVA;
-const { toast, esc, formatDate, formatDateTime, formatMoney, formatNumber } = window.RIVA_UTILS;
-const $ = (id) => document.getElementById(id);
+<script>
+(function(){
+  var RIVA=window.RIVA, U=window.RIVA_UTILS;
+  if(!RIVA||!U){ var r=document.getElementById('m4-root'); if(r) r.innerHTML='<div class="m4-empty"><div class="t">Модуль не инициализирован</div></div>'; return; }
+  var sb=RIVA.sb;
+  var INSTANCE=Date.now()+'-'+Math.random(); RIVA._m4Instance=INSTANCE;
+  function alive(){ return RIVA._m4Instance===INSTANCE && document.getElementById('m4-root'); }
 
-const myRole = state.currentGroup?.role;
-const isAdmin = myRole === 'admin';
-const isManagement = myRole === 'management';
-const groupId = state.currentGroup.group_id;
-const isOwner = !!state.currentGroup?.is_owner;
+  var curTab='dashboard', period='month', trView='ops', search='';
+  var cache={ org:null };
 
-$('m4-subtitle').textContent = `Группа «${state.currentGroup.group_name}» · ${isAdmin ? 'Администратор' : isManagement ? 'Управление' : myRole}`;
+  function role(){ return (RIVA.state.currentGroup && RIVA.state.currentGroup.role)||null; }
+  function isAdmin(){ return role()==='admin'; }
+  function canManage(){ return ['admin','management'].indexOf(role())>=0; }
+  function groupId(){ return RIVA.state.currentGroup && RIVA.state.currentGroup.group_id; }
+  function meName(){ var p=RIVA.state.profile; var m=(RIVA.state.user&&RIVA.state.user.user_metadata)||{}; return (p&&p.name)||m.full_name||m.name||(RIVA.state.user&&RIVA.state.user.email)||'—'; }
+  function num(v){ var n=typeof v==='number'?v:parseFloat(v); return isFinite(n)?n:0; }
 
-if (isAdmin) $('m4-invite-form')?.classList.remove('hidden');
+  var ROLE_LABEL={admin:'Администратор',management:'Управление',supply:'Снабжение',production:'Производство',sales:'Продажи'};
+  var SECTION_LABEL={supply:'Склады',production:'Производства',sales:'Отделы продаж'};
+  var CAT_LABEL={consumables:'Расходники',logistics:'Логистика',marketing:'Маркетинг',rent:'Аренда',salary:'Зарплата',equipment:'Оборудование',taxes:'Налоги',refund:'Возврат',defect:'Брак',test_batch:'Тестовая партия',withdrawal:'Вывод средств',other_expense:'Прочий расход',other_income:'Прочий доход',auto_sales:'Продажи (авто)',auto_supply:'Закупки (авто)'};
+  var EXP_CATS=['consumables','logistics','marketing','rent','salary','equipment','taxes','refund','defect','test_batch','withdrawal','other_expense'];
+  var INC_CATS=['other_income'];
+  var INTERVAL_LABEL={weekly:'Еженедельно',monthly:'Ежемесячно',quarterly:'Ежеквартально',yearly:'Ежегодно'};
 
-// ---- Парсинг чисел ----
-function parseDecimalInput(str) {
-  if (str == null) return null;
-  const cleaned = String(str).replace(',', '.').replace(/[^\d.]/g, '');
-  if (cleaned === '' || cleaned === '.') return null;
-  const num = parseFloat(cleaned);
-  return Number.isFinite(num) ? num : null;
-}
-
-function pluralize(n, forms) {
-  const mod100 = Math.abs(n) % 100;
-  const mod10 = mod100 % 10;
-  if (mod100 >= 11 && mod100 <= 19) return forms[2];
-  if (mod10 === 1) return forms[0];
-  if (mod10 >= 2 && mod10 <= 4) return forms[1];
-  return forms[2];
-}
-function debounce(fn, ms) {
-  let t;
-  return (...args) => { clearTimeout(t); t = setTimeout(() => fn(...args), ms); };
-}
-
-// ================================================================
-// ВЕРХНЕЕ ПОДМЕНЮ
-// ================================================================
-function switchTab(name) {
-  document.querySelectorAll('#m4-subnav .m4-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
-  document.querySelectorAll('.m4-panel').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== name));
-  if (name === 'treasury') initTreasury();
-  if (name === 'admin') initAdmin();
-}
-document.querySelectorAll('#m4-subnav .m4-tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
-
-// ================================================================
-// КАЗНАЧЕЙСТВО
-// ================================================================
-
-const CATEGORY_LABELS = {
-  consumables: 'Расходники', logistics: 'Логистика', marketing: 'Реклама и маркетинг',
-  rent: 'Аренда', salary: 'Зарплаты', equipment: 'Оборудование и инструмент',
-  taxes: 'Налоги и комиссии', refund: 'Возвраты', defect: 'Брак',
-  test_batch: 'Тестовые партии', withdrawal: 'Вывод на личное', other_expense: 'Прочие расходы',
-  other_income: 'Прочие доходы',
-  auto_sales: 'Продажи', auto_supply: 'Закупки'
-};
-const EXPENSE_CATEGORIES = ['consumables','logistics','marketing','rent','salary','equipment','taxes','refund','defect','test_batch','withdrawal','other_expense'];
-const INCOME_CATEGORIES = ['other_income'];
-const INTERVAL_LABELS = { weekly:'Еженедельно', monthly:'Ежемесячно', quarterly:'Ежеквартально', yearly:'Ежегодно' };
-
-const SVG_PAUSE = '<svg class="w-4 h-4 text-fg-muted" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="5" width="4" height="14" rx="1"/><rect x="14" y="5" width="4" height="14" rx="1"/></svg>';
-const SVG_PLAY  = '<svg class="w-4 h-4 text-state-success" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg>';
-const SVG_TRASH = '<svg class="w-4 h-4 text-state-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>';
-const SVG_DEL   = '<svg class="w-4 h-4 text-state-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>';
-const SVG_LOCK  = '<svg class="w-4 h-4 text-fg-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>';
-
-const tr = {
-  inited: false,
-  subtab: 'dashboard',
-  period: 'month', from: null, to: null, prevFrom: null, prevTo: null,   // дашборд
-  opPeriod: 'month',                                                      // реестр
-  ledger: [], opSearch: '', opDir: 'all', opSrc: 'all',
-  editingDir: 'expense', editingCat: null, editingRec: 'none', editingOpId: null
-};
-
-async function initTreasury() {
-  if (!tr.inited) {
-    tr.inited = true;
-    bindTreasury();
-    // материализуем повторяющиеся операции один раз при входе
-    try { await sb.rpc('treasury_materialize_recurring'); } catch (_) {}
+  function tabFromLabel(label){ var l=(label||'').toLowerCase();
+    if(l.indexOf('казнач')>=0) return 'treasury';
+    if(l.indexOf('подразделен')>=0||l.indexOf('цепоч')>=0) return 'org';
+    if(l.indexOf('пользоват')>=0||l.indexOf('участник')>=0) return 'members';
+    if(l.indexOf('отчёт')>=0||l.indexOf('отчет')>=0) return 'reports';
+    if(l.indexOf('журнал')>=0||l.indexOf('аудит')>=0) return 'audit';
+    return 'dashboard';
   }
-  switchTrTab(tr.subtab);
-}
 
-function switchTrTab(name) {
-  tr.subtab = name;
-  document.querySelectorAll('#m4-tr-subnav .m4-seg-btn').forEach(b => b.classList.toggle('active', b.dataset.trtab === name));
-  document.querySelectorAll('.m4-tr-pane').forEach(p => p.classList.toggle('hidden', p.dataset.trpane !== name));
-  if (name === 'dashboard')  loadTreasuryDash();
-  if (name === 'operations') loadLedger();
-  if (name === 'recurring')  loadRecurring();
-}
-
-function bindTreasury() {
-  // подвкладки
-  document.querySelectorAll('#m4-tr-subnav .m4-seg-btn').forEach(b =>
-    b.addEventListener('click', () => switchTrTab(b.dataset.trtab)));
-
-  // период дашборда
-  document.querySelectorAll('#m4-tr-period .m4-seg-btn').forEach(b => {
-    b.addEventListener('click', () => {
-      tr.period = b.dataset.period;
-      document.querySelectorAll('#m4-tr-period .m4-seg-btn').forEach(x => x.classList.toggle('active', x === b));
-      if (tr.period === 'custom') {
-        $('m4-tr-custom-wrap').classList.remove('hidden');
-        const now = new Date();
-        $('m4-tr-from').value = toInputDate(new Date(now.getFullYear(), now.getMonth(), 1));
-        $('m4-tr-to').value = toInputDate(now);
-      } else { $('m4-tr-custom-wrap').classList.add('hidden'); loadTreasuryDash(); }
-    });
-  });
-  $('m4-tr-apply').addEventListener('click', loadTreasuryDash);
-
-  // период реестра
-  document.querySelectorAll('#m4-op-period .m4-seg-btn').forEach(b => {
-    b.addEventListener('click', () => {
-      tr.opPeriod = b.dataset.period;
-      document.querySelectorAll('#m4-op-period .m4-seg-btn').forEach(x => x.classList.toggle('active', x === b));
-      if (tr.opPeriod === 'custom') {
-        $('m4-op-custom-wrap').classList.remove('hidden');
-        const now = new Date();
-        $('m4-op-from').value = toInputDate(new Date(now.getFullYear(), now.getMonth(), 1));
-        $('m4-op-to').value = toInputDate(now);
-      } else { $('m4-op-custom-wrap').classList.add('hidden'); loadLedger(); }
-    });
-  });
-  $('m4-op-apply').addEventListener('click', loadLedger);
-
-  // фильтры реестра
-  $('m4-op-search').addEventListener('input', debounce((e) => { tr.opSearch = e.target.value.trim().toLowerCase(); renderLedger(); }, 200));
-  document.querySelectorAll('#m4-op-src .m4-seg-btn').forEach(b => {
-    b.addEventListener('click', () => {
-      tr.opSrc = b.dataset.src;
-      document.querySelectorAll('#m4-op-src .m4-seg-btn').forEach(x => x.classList.toggle('active', x === b));
-      renderLedger();
-    });
-  });
-  initDirDropdown();
-
-  // создание
-  $('m4-op-new').addEventListener('click', () => openOpModalNew('none'));
-  $('m4-rec-new').addEventListener('click', () => openOpModalNew('monthly'));
-  document.querySelectorAll('.m4-op-close').forEach(b => b.addEventListener('click', () => $('m4-op-modal').classList.add('hidden')));
-  bindOpModal();
-}
-
-// --- периоды (целые) ---
-function toInputDate(d) { const p = n => String(n).padStart(2,'0'); return `${d.getFullYear()}-${p(d.getMonth()+1)}-${p(d.getDate())}`; }
-function startOfWeekMonday(d) { const x = new Date(d); x.setHours(0,0,0,0); const day = (x.getDay()+6)%7; x.setDate(x.getDate()-day); return x; }
-
-function computePeriod(period, fromStr, toStr) {
-  const now = new Date();
-  let from, to, prevFrom, prevTo, label;
-  if (period === 'today') {
-    from = new Date(now); from.setHours(0,0,0,0);
-    to = new Date(from); to.setDate(to.getDate()+1);
-    prevFrom = new Date(from); prevFrom.setDate(prevFrom.getDate()-1); prevTo = new Date(from);
-    label = `Сегодня, ${formatDate(from)}`;
-  } else if (period === 'week') {
-    from = startOfWeekMonday(now); to = new Date(from); to.setDate(to.getDate()+7);
-    prevFrom = new Date(from); prevFrom.setDate(prevFrom.getDate()-7); prevTo = new Date(from);
-    const we = new Date(to); we.setDate(we.getDate()-1);
-    label = `Неделя: ${formatDate(from)} — ${formatDate(we)}`;
-  } else if (period === 'month') {
-    from = new Date(now.getFullYear(), now.getMonth(), 1);
-    to = new Date(now.getFullYear(), now.getMonth()+1, 1);
-    prevFrom = new Date(now.getFullYear(), now.getMonth()-1, 1); prevTo = from;
-    label = `Месяц: с ${formatDate(from)} (сравнение с предыдущим месяцем)`;
-  } else if (period === 'quarter') {
-    const q = Math.floor(now.getMonth()/3);
-    from = new Date(now.getFullYear(), q*3, 1); to = new Date(now.getFullYear(), q*3+3, 1);
-    prevFrom = new Date(now.getFullYear(), q*3-3, 1); prevTo = from;
-    label = `Квартал ${q+1}: с ${formatDate(from)} (сравнение с предыдущим кварталом)`;
-  } else if (period === 'year') {
-    from = new Date(now.getFullYear(), 0, 1); to = new Date(now.getFullYear()+1, 0, 1);
-    prevFrom = new Date(now.getFullYear()-1, 0, 1); prevTo = from;
-    label = `Год ${now.getFullYear()}: с ${formatDate(from)} (сравнение с предыдущим годом)`;
-  } else { // custom
-    const f = fromStr ? new Date(fromStr + 'T00:00:00') : new Date(now.getFullYear(), now.getMonth(), 1);
-    const t = toStr ? new Date(toStr + 'T00:00:00') : new Date(now);
-    from = f; to = new Date(t); to.setDate(to.getDate()+1);
-    const spanDays = Math.max(1, Math.round((to - from) / 86400000));
-    prevTo = from; prevFrom = new Date(from); prevFrom.setDate(prevFrom.getDate() - spanDays);
-    label = `Период: ${formatDate(from)} — ${formatDate(t)}`;
+  function showTab(tab){
+    curTab=tab; search='';
+    var titles={dashboard:'Дашборд',treasury:'Казначейство',org:'Подразделения и цепочки',members:'Пользователи',reports:'Отчёты',audit:'Журнал'};
+    document.getElementById('m4-title').textContent=titles[tab]||'';
+    document.querySelectorAll('#m4-root .m4-panel').forEach(function(p){ p.classList.toggle('on', p.getAttribute('data-tab')===tab); });
+    renderTools(); loadTab(tab);
   }
-  return { from, to, prevFrom, prevTo, label };
-}
 
-// --- дашборд ---
-async function loadTreasuryDash() {
-  const p = computePeriod(tr.period, $('m4-tr-from').value, $('m4-tr-to').value);
-  tr.from = p.from; tr.to = p.to; tr.prevFrom = p.prevFrom; tr.prevTo = p.prevTo;
-  $('m4-tr-range').textContent = p.label;
-  $('m4-tr-dash').innerHTML = `<div class="flex items-center justify-center py-16"><div class="w-6 h-6 loader"></div></div>`;
-
-  const { data, error } = await sb.rpc('get_treasury_summary', {
-    p_from: p.from.toISOString(), p_to: p.to.toISOString(),
-    p_prev_from: p.prevFrom.toISOString(), p_prev_to: p.prevTo.toISOString()
-  });
-  if (error) { $('m4-tr-dash').innerHTML = `<div class="text-sm text-state-error p-6">${esc(error.message)}</div>`; return; }
-  if (!data?.ok) { $('m4-tr-dash').innerHTML = `<div class="text-sm text-state-error p-6">${esc(data?.error || 'UNKNOWN')}</div>`; return; }
-  renderTreasuryDash(data);
-}
-
-function deltaHtml(cur, prev) {
-  cur = Number(cur || 0); prev = Number(prev || 0);
-  if (prev === 0 && cur === 0) return `<span class="m4-kpi-delta m4-delta-flat">без изменений</span>`;
-  const diff = cur - prev;
-  const pct = prev === 0 ? null : (diff / Math.abs(prev)) * 100;
-  const up = diff >= 0;
-  const cls = diff === 0 ? 'm4-delta-flat' : (up ? 'm4-delta-up' : 'm4-delta-down');
-  const pctText = pct === null ? '' : ` (${up ? '+' : ''}${pct.toFixed(0)}%)`;
-  return `<span class="m4-kpi-delta ${cls}">${up ? '▲' : '▼'} ${esc(formatMoney(Math.abs(diff)))}${pctText} к пред.</span>`;
-}
-
-function renderTreasuryDash(d) {
-  const incCur = Number(d.auto.income_cur) + Number(d.manual.income_cur);
-  const incPrev = Number(d.auto.income_prev) + Number(d.manual.income_prev);
-  const expCur = Number(d.auto.expense_cur) + Number(d.manual.expense_cur);
-  const expPrev = Number(d.auto.expense_prev) + Number(d.manual.expense_prev);
-  const profitCur = incCur - expCur, profitPrev = incPrev - expPrev;
-
-  const cats = d.categories || [];
-  const expRows = cats.filter(c => c.direction === 'expense').map(c => ({ name: CATEGORY_LABELS[c.category] || c.category, total: Number(c.total) }));
-  if (Number(d.auto.expense_cur) > 0) expRows.push({ name: CATEGORY_LABELS.auto_supply, total: Number(d.auto.expense_cur) });
-  expRows.sort((a,b) => b.total - a.total);
-  const incRows = cats.filter(c => c.direction === 'income').map(c => ({ name: CATEGORY_LABELS[c.category] || c.category, total: Number(c.total) }));
-  if (Number(d.auto.income_cur) > 0) incRows.push({ name: CATEGORY_LABELS.auto_sales, total: Number(d.auto.income_cur) });
-  incRows.sort((a,b) => b.total - a.total);
-  const maxExp = Math.max(1, ...expRows.map(r => r.total)), maxInc = Math.max(1, ...incRows.map(r => r.total));
-  const catRow = (r, max, color) => `
-    <div class="m4-cat-row">
-      <div class="m4-cat-name">${esc(r.name)}</div>
-      <div class="m4-cat-bar"><div class="m4-cat-bar-fill" style="width:${Math.round(r.total/max*100)}%;background:${color};"></div></div>
-      <div class="m4-cat-val">${esc(formatMoney(r.total))}</div>
-    </div>`;
-
-  $('m4-tr-dash').innerHTML = `
-    <div class="grid grid-cols-1 md:grid-cols-3 gap-3 mb-5">
-      <div class="m4-kpi">
-        <div class="text-xs text-fg-muted">Доходы за период</div>
-        <div class="text-2xl font-medium mt-2" style="color:#15803D">${esc(formatMoney(incCur))}</div>
-        ${deltaHtml(incCur, incPrev)}
-        <div class="text-xs text-fg-muted mt-1">Продажи ${esc(formatMoney(d.auto.income_cur))} + ручные ${esc(formatMoney(d.manual.income_cur))}</div>
-      </div>
-      <div class="m4-kpi">
-        <div class="text-xs text-fg-muted">Расходы за период</div>
-        <div class="text-2xl font-medium mt-2" style="color:#DC2626">${esc(formatMoney(expCur))}</div>
-        ${deltaHtml(expCur, expPrev)}
-        <div class="text-xs text-fg-muted mt-1">Закупки ${esc(formatMoney(d.auto.expense_cur))} + ручные ${esc(formatMoney(d.manual.expense_cur))}</div>
-      </div>
-      <div class="m4-kpi">
-        <div class="text-xs text-fg-muted">Прибыль (доходы − расходы)</div>
-        <div class="text-2xl font-medium mt-2" style="color:${profitCur >= 0 ? '#15803D' : '#DC2626'}">${esc(formatMoney(profitCur))}</div>
-        ${deltaHtml(profitCur, profitPrev)}
-      </div>
-    </div>
-    <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-      <div class="bg-surface rounded-2xl border border-line p-5">
-        <div class="text-sm font-medium mb-3">Структура расходов</div>
-        ${expRows.length ? expRows.map(r => catRow(r, maxExp, '#DC2626')).join('') : '<div class="text-sm text-fg-muted py-4 text-center">Нет расходов за период</div>'}
-      </div>
-      <div class="bg-surface rounded-2xl border border-line p-5">
-        <div class="text-sm font-medium mb-3">Структура доходов</div>
-        ${incRows.length ? incRows.map(r => catRow(r, maxInc, '#15803D')).join('') : '<div class="text-sm text-fg-muted py-4 text-center">Нет доходов за период</div>'}
-      </div>
-    </div>
-    <p class="text-xs text-fg-muted mt-4">
-      Доходы включают завершённые заказы продаж, расходы — оприходованные заказы снабжения за период,
-      плюс ручные и повторяющиеся операции. Полный список — на вкладке «Операции».
-    </p>`;
-}
-
-// --- фильтр направления (реестр) ---
-function initDirDropdown() {
-  const dd = $('m4-op-dir-dd'), btn = $('m4-op-dir-btn'), menu = $('m4-op-dir-menu'), label = $('m4-op-dir-label');
-  const open = () => { dd.classList.add('is-open'); menu.classList.remove('hidden'); };
-  const close = () => { dd.classList.remove('is-open'); menu.classList.add('hidden'); };
-  btn.addEventListener('click', (e) => { e.stopPropagation(); dd.classList.contains('is-open') ? close() : open(); });
-  menu.addEventListener('click', (e) => {
-    const opt = e.target.closest('.m4-dd-opt'); if (!opt) return;
-    tr.opDir = opt.dataset.value; label.textContent = opt.textContent;
-    menu.querySelectorAll('.m4-dd-opt').forEach(o => o.classList.toggle('is-selected', o === opt));
-    close(); renderLedger();
-  });
-  document.addEventListener('click', (e) => { if (!e.target.closest('#m4-op-dir-dd')) close(); });
-}
-
-// --- реестр (ledger) ---
-async function loadLedger() {
-  const p = computePeriod(tr.opPeriod, $('m4-op-from').value, $('m4-op-to').value);
-  $('m4-op-range').textContent = p.label;
-  $('m4-op-list').innerHTML = `<div class="flex items-center justify-center py-16"><div class="w-6 h-6 loader"></div></div>`;
-  const { data, error } = await sb.rpc('get_treasury_ledger', { p_from: p.from.toISOString(), p_to: p.to.toISOString() });
-  if (error) { $('m4-op-list').innerHTML = `<div class="text-sm text-state-error p-6">${esc(error.message)}</div>`; return; }
-  if (!data?.ok) { $('m4-op-list').innerHTML = `<div class="text-sm text-state-error p-6">${esc(data?.error || 'UNKNOWN')}</div>`; return; }
-  tr.ledger = data.rows || [];
-  renderLedger();
-}
-
-function ledgerFiltered() {
-  let list = tr.ledger.slice();
-  if (tr.opDir !== 'all') list = list.filter(o => o.direction === tr.opDir);
-  if (tr.opSrc === 'auto') list = list.filter(o => o.source === 'auto_sales' || o.source === 'auto_supply');
-  else if (tr.opSrc === 'manual') list = list.filter(o => o.source === 'manual' || o.source === 'recurring');
-  if (tr.opSearch) {
-    const q = tr.opSearch;
-    list = list.filter(o =>
-      (o.description || '').toLowerCase().includes(q) ||
-      (o.counterparty || '').toLowerCase().includes(q) ||
-      (CATEGORY_LABELS[o.category] || '').toLowerCase().includes(q));
+  function periodSeg(){
+    var kinds=[['today','Сегодня'],['week','Неделя'],['month','Месяц'],['quarter','Квартал'],['year','Год']];
+    var seg=document.createElement('div'); seg.className='m4-seg';
+    seg.innerHTML=kinds.map(function(k){ return '<button data-p="'+k[0]+'"'+(period===k[0]?' class="on"':'')+'>'+k[1]+'</button>'; }).join('');
+    seg.addEventListener('click', function(e){ var b=e.target.closest('button'); if(!b) return; period=b.getAttribute('data-p'); renderTools(); loadTab(curTab); });
+    return seg;
   }
-  return list;
-}
-
-function updateLedgerSummary(list) {
-  let inc = 0, exp = 0;
-  list.forEach(o => { if (o.direction === 'income') inc += Number(o.amount); else exp += Number(o.amount); });
-  const net = inc - exp;
-  $('m4-op-summary').innerHTML =
-    `Операций: ${list.length} · доходы <span style="color:#15803D;font-weight:600">${esc(formatMoney(inc))}</span> · ` +
-    `расходы <span style="color:#DC2626;font-weight:600">${esc(formatMoney(exp))}</span> · ` +
-    `итог <span style="color:${net>=0?'#15803D':'#DC2626'};font-weight:600">${esc(formatMoney(net))}</span>`;
-}
-
-function renderLedger() {
-  const list = ledgerFiltered();
-  const box = $('m4-op-list');
-  updateLedgerSummary(list);
-  if (!list.length) {
-    box.innerHTML = `<div class="text-center py-16 text-sm text-fg-muted">${tr.opSearch || tr.opDir !== 'all' || tr.opSrc !== 'all' ? 'Ничего не найдено' : 'Операций за период нет.'}</div>`;
-    return;
+  function searchBox(ph){
+    var s=document.createElement('label'); s.className='m4-search';
+    s.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>';
+    var i=document.createElement('input'); i.type='text'; i.placeholder=ph||'Поиск'; i.value=search;
+    i.addEventListener('input', function(){ search=i.value.toLowerCase(); renderCurrent(); }); s.appendChild(i); return s;
   }
-  box.innerHTML = list.map(o => {
-    const dirCls = o.direction === 'income' ? 'income' : 'expense';
-    const sign = o.direction === 'income' ? '+' : '−';
-    const catLabel = CATEGORY_LABELS[o.category] || o.category;
-    let tag = '';
-    if (o.source === 'auto_sales' || o.source === 'auto_supply') tag = '<span class="m4-op-tag m4-op-tag--auto">Авто</span>';
-    else if (o.source === 'recurring') tag = '<span class="m4-op-tag m4-op-tag--rec">Повтор</span>';
-    const meta = [formatDate(new Date(o.occurred_on))];
-    if (o.counterparty) meta.push(esc(o.counterparty));
-    if (o.user_name) meta.push(esc(o.user_name));
-    const canEdit = o.editable && o.source === 'manual';
-    const actions = o.editable
-      ? `<button class="m4-op-del" data-del="${esc(o.id)}" title="Удалить">${SVG_DEL}</button>`
-      : `<span class="m4-op-lock" title="Создаётся автоматически на другой странице">${SVG_LOCK}</span>`;
-    return `
-      <article class="m4-op-row ${o.editable ? '' : 'm4-op-row--auto'}" data-id="${esc(o.id)}" data-edit="${canEdit ? '1' : ''}">
-        <span class="m4-badge m4-badge-${dirCls}">${esc(catLabel)}</span>
-        <div class="m4-op-main">
-          <div class="m4-op-desc">${esc(o.description || catLabel)}${tag}</div>
-          <div class="m4-op-meta">${meta.join(' · ')}</div>
-        </div>
-        <span class="m4-op-amount m4-op-amount--${dirCls}">${sign} ${esc(formatMoney(Number(o.amount)))}</span>
-        <div class="m4-op-actions">${actions}</div>
-      </article>`;
-  }).join('');
-
-  box.querySelectorAll('[data-del]').forEach(btn => btn.addEventListener('click', async (e) => {
-    e.stopPropagation();
-    const id = btn.dataset.del;
-    if (!confirm('Удалить операцию?')) return;
-    try {
-      const { error } = await sb.from('treasury_operations').delete().eq('id', id);
-      if (error) throw error;
-      tr.ledger = tr.ledger.filter(x => x.id !== id);
-      renderLedger();
-      toast('Операция удалена', 'success');
-    } catch (err) { toast('Ошибка: ' + err.message, 'error'); }
-  }));
-
-  box.querySelectorAll('.m4-op-row[data-edit="1"]').forEach(row => row.addEventListener('click', (e) => {
-    if (e.target.closest('[data-del]')) return;
-    const op = tr.ledger.find(x => x.id === row.dataset.id);
-    if (op) openOpModalEdit(op);
-  }));
-}
-
-// --- повторяющиеся правила ---
-function addInterval(d, step) {
-  const x = new Date(d);
-  if (step === 'weekly') x.setDate(x.getDate()+7);
-  else if (step === 'monthly') x.setMonth(x.getMonth()+1);
-  else if (step === 'quarterly') x.setMonth(x.getMonth()+3);
-  else if (step === 'yearly') x.setFullYear(x.getFullYear()+1);
-  return x;
-}
-function nextOccurrence(rule) {
-  let d = new Date(rule.start_date + 'T00:00:00');
-  const today = new Date(); today.setHours(0,0,0,0);
-  const end = rule.end_date ? new Date(rule.end_date + 'T00:00:00') : null;
-  let guard = 0;
-  while (d <= today && guard < 2000) { d = addInterval(d, rule.interval); guard++; }
-  if (end && d > end) return null;
-  return d;
-}
-
-async function loadRecurring() {
-  $('m4-rec-list').innerHTML = `<div class="flex items-center justify-center py-16"><div class="w-6 h-6 loader"></div></div>`;
-  const { data, error } = await sb.from('treasury_recurring').select('*').order('created_at', { ascending: false });
-  if (error) { $('m4-rec-list').innerHTML = `<div class="text-sm text-state-error p-6">${esc(error.message)}</div>`; return; }
-  renderRecurring(data || []);
-}
-
-function renderRecurring(rules) {
-  const box = $('m4-rec-list');
-  if (!rules.length) {
-    box.innerHTML = `<div class="text-center py-16 text-sm text-fg-muted">Повторяющихся операций нет.<br>Создайте правило — система будет автоматически добавлять операции по расписанию.</div>`;
-    return;
-  }
-  box.innerHTML = rules.map(r => {
-    const dirCls = r.direction === 'income' ? 'income' : 'expense';
-    const sign = r.direction === 'income' ? '+' : '−';
-    const cat = CATEGORY_LABELS[r.category] || r.category;
-    const next = r.is_active ? nextOccurrence(r) : null;
-    const nextTxt = !r.is_active ? 'на паузе' : (next ? `следующая ${formatDate(next)}` : 'завершено');
-    const range = `с ${formatDate(new Date(r.start_date + 'T00:00:00'))}` + (r.end_date ? ` по ${formatDate(new Date(r.end_date + 'T00:00:00'))}` : '');
-    const meta = [range, nextTxt]; if (r.counterparty) meta.push(esc(r.counterparty));
-    return `
-      <article class="m4-op-row m4-rec-row ${r.is_active ? '' : 'm4-op-row--auto'}" data-rid="${esc(r.id)}">
-        <span class="m4-badge m4-badge-${dirCls}">${esc(cat)}</span>
-        <div class="m4-op-main">
-          <div class="m4-op-desc">${esc(r.description || cat)}<span class="m4-op-tag m4-op-tag--rec">${esc(INTERVAL_LABELS[r.interval] || r.interval)}</span></div>
-          <div class="m4-op-meta">${meta.join(' · ')}</div>
-        </div>
-        <span class="m4-op-amount m4-op-amount--${dirCls}">${sign} ${esc(formatMoney(Number(r.amount)))}</span>
-        <div class="m4-op-actions" style="gap:4px;">
-          <button class="m4-op-del" data-rec-toggle="${esc(r.id)}" title="${r.is_active ? 'Поставить на паузу' : 'Возобновить'}">${r.is_active ? SVG_PAUSE : SVG_PLAY}</button>
-          <button class="m4-op-del" data-rec-del="${esc(r.id)}" title="Удалить правило">${SVG_TRASH}</button>
-        </div>
-      </article>`;
-  }).join('');
-
-  box.querySelectorAll('[data-rec-toggle]').forEach(btn => btn.addEventListener('click', async () => {
-    const id = btn.dataset.recToggle;
-    const rule = rules.find(x => x.id === id); if (!rule) return;
-    try {
-      const { error } = await sb.from('treasury_recurring').update({ is_active: !rule.is_active, updated_at: new Date().toISOString() }).eq('id', id);
-      if (error) throw error;
-      if (!rule.is_active) await sb.rpc('treasury_materialize_recurring'); // возобновили — догенерируем пропущенные
-      toast(rule.is_active ? 'Правило поставлено на паузу' : 'Правило возобновлено', 'success');
-      await loadRecurring();
-    } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
-  }));
-
-  box.querySelectorAll('[data-rec-del]').forEach(btn => btn.addEventListener('click', async () => {
-    const id = btn.dataset.recDel;
-    if (!confirm('Удалить правило? Уже созданные операции останутся в реестре как обычные записи.')) return;
-    try {
-      const { error } = await sb.from('treasury_recurring').delete().eq('id', id);
-      if (error) throw error;
-      toast('Правило удалено', 'success');
-      await loadRecurring();
-    } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
-  }));
-}
-
-// --- модалка операции ---
-function bindOpModal() {
-  document.querySelectorAll('#m4-op-dir-seg .m4-seg-btn').forEach(b => {
-    b.addEventListener('click', () => {
-      tr.editingDir = b.dataset.dir;
-      document.querySelectorAll('#m4-op-dir-seg .m4-seg-btn').forEach(x => x.classList.toggle('active', x === b));
-      fillCatMenu(); tr.editingCat = null; $('m4-op-cat-label').textContent = '— выберите —'; validateOpForm();
-    });
-  });
-  document.querySelectorAll('#m4-op-rec-seg .m4-seg-btn').forEach(b => {
-    b.addEventListener('click', () => {
-      tr.editingRec = b.dataset.rec;
-      document.querySelectorAll('#m4-op-rec-seg .m4-seg-btn').forEach(x => x.classList.toggle('active', x === b));
-      updateRecUi(); validateOpForm();
-    });
-  });
-
-  const dd = $('m4-op-cat-dd'), btn = $('m4-op-cat-btn'), menu = $('m4-op-cat-menu');
-  const open = () => { dd.classList.add('is-open'); menu.classList.remove('hidden'); };
-  const close = () => { dd.classList.remove('is-open'); menu.classList.add('hidden'); };
-  btn.addEventListener('click', (e) => { e.stopPropagation(); dd.classList.contains('is-open') ? close() : open(); });
-  menu.addEventListener('click', (e) => {
-    const opt = e.target.closest('.m4-dd-opt'); if (!opt) return;
-    tr.editingCat = opt.dataset.value; $('m4-op-cat-label').textContent = opt.textContent;
-    menu.querySelectorAll('.m4-dd-opt').forEach(o => o.classList.toggle('is-selected', o === opt));
-    close(); validateOpForm();
-  });
-  document.addEventListener('click', (e) => { if (!e.target.closest('#m4-op-cat-dd')) close(); });
-
-  $('m4-op-amount').addEventListener('input', (e) => {
-    if (e.target.value.includes('.')) {
-      const pos = e.target.selectionStart;
-      e.target.value = e.target.value.replace(/\./g, ',');
-      try { e.target.setSelectionRange(pos, pos); } catch (_) {}
+  function renderTools(){
+    var t=document.getElementById('m4-tools'); t.innerHTML='';
+    if(curTab==='dashboard'||curTab==='treasury'||curTab==='reports') t.appendChild(periodSeg());
+    if(curTab==='treasury'){
+      var seg=document.createElement('div'); seg.className='m4-seg';
+      seg.innerHTML='<button data-v="ops"'+(trView==='ops'?' class="on"':'')+'>Операции</button><button data-v="rec"'+(trView==='rec'?' class="on"':'')+'>Регулярные</button>';
+      seg.addEventListener('click', function(e){ var b=e.target.closest('button'); if(!b) return; trView=b.getAttribute('data-v'); loadTab('treasury'); });
+      t.appendChild(seg);
+      if(canManage()){ t.appendChild(mkbtn('Операция', plus(), function(){ openOpDialog(); })); }
     }
-    validateOpForm();
-  });
-  $('m4-op-date').addEventListener('change', validateOpForm);
-  $('m4-op-save').addEventListener('click', saveOperation);
-}
+    if(curTab==='org' && isAdmin()){ t.appendChild(mkbtn('Подразделение', plus(), function(){ openUnitDialog(); })); t.appendChild(mkbtn('Цепочка', plus(), function(){ openChainDialog(); },'ghost')); }
+    if(curTab==='members'){ t.appendChild(searchBox('Поиск участника')); if(isAdmin()) t.appendChild(mkbtn('Пригласить', plus(), function(){ openInviteDialog(); })); }
+    if(curTab==='audit'){ t.appendChild(searchBox('Поиск в журнале')); }
+  }
+  function mkbtn(label,icon,on,cls){ var b=document.createElement('button'); b.className='m4-btn'+(cls?(' '+cls):''); b.innerHTML=icon+'<span>'+label+'</span>'; b.addEventListener('click',on); return b; }
+  function plus(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>'; }
 
-function fillCatMenu() {
-  const cats = tr.editingDir === 'expense' ? EXPENSE_CATEGORIES : INCOME_CATEGORIES;
-  $('m4-op-cat-menu').innerHTML = cats.map(c => `<div class="m4-dd-opt" data-value="${c}">${esc(CATEGORY_LABELS[c])}</div>`).join('');
-}
+  /* ---------- период ---------- */
+  function computePeriod(kind){
+    var now=new Date(); function D(y,m,d){ return new Date(y,m,d); } function addD(dt,n){ var x=new Date(dt); x.setDate(x.getDate()+n); return x; }
+    var from,to,pf,pt;
+    if(kind==='today'){ from=D(now.getFullYear(),now.getMonth(),now.getDate()); to=addD(from,1); pf=addD(from,-1); pt=from; }
+    else if(kind==='week'){ var wd=(now.getDay()+6)%7; from=addD(D(now.getFullYear(),now.getMonth(),now.getDate()),-wd); to=addD(from,7); pf=addD(from,-7); pt=from; }
+    else if(kind==='quarter'){ var q=Math.floor(now.getMonth()/3); from=D(now.getFullYear(),q*3,1); to=D(now.getFullYear(),q*3+3,1); pf=D(now.getFullYear(),q*3-3,1); pt=from; }
+    else if(kind==='year'){ from=D(now.getFullYear(),0,1); to=D(now.getFullYear()+1,0,1); pf=D(now.getFullYear()-1,0,1); pt=from; }
+    else { from=D(now.getFullYear(),now.getMonth(),1); to=D(now.getFullYear(),now.getMonth()+1,1); pf=D(now.getFullYear(),now.getMonth()-1,1); pt=from; }
+    return { from:from.toISOString(), to:to.toISOString(), pf:pf.toISOString(), pt:pt.toISOString() };
+  }
+  function delta(cur,prev){ if(!prev) return null; return (cur-prev)/prev*100; }
+  function deltaHtml(cur,prev,inverse){ var d=delta(cur,prev); if(d===null) return ''; var up=d>=0; var good=inverse?!up:up; return '<div class="s '+(good?'up':'down')+'">'+(up?'▲':'▼')+' '+Math.abs(d).toFixed(1)+'% к прошл.</div>'; }
 
-function updateRecUi() {
-  const isRec = tr.editingRec !== 'none';
-  $('m4-op-end-wrap').classList.toggle('hidden', !isRec);
-  $('m4-op-date-label').textContent = isRec ? 'Дата начала *' : 'Дата *';
-  $('m4-op-rec-wrap').classList.toggle('hidden', !!tr.editingOpId); // при редактировании периодичность не меняем
-}
+  /* ---------- загрузка вкладок ---------- */
+  async function loadTab(tab){
+    var panel=document.getElementById('m4p-'+tab); panel.innerHTML='<div class="m4-loading"><div class="spin"></div>Загрузка…</div>';
+    try{
+      if(tab==='dashboard') await loadDashboard(panel);
+      else if(tab==='treasury') await loadTreasury(panel);
+      else if(tab==='org') await loadOrg(panel);
+      else if(tab==='members') await loadMembers(panel);
+      else if(tab==='reports') await loadReports(panel);
+      else if(tab==='audit') await loadAudit(panel);
+    }catch(err){ if(alive()) panel.innerHTML='<div class="m4-empty"><div class="t">Не удалось загрузить</div><div class="d">'+U.esc(err.message||String(err))+'</div></div>'; }
+  }
+  function renderCurrent(){ if(curTab==='members') renderMembers(); else if(curTab==='audit') renderAudit(); }
 
-function resetOpModal() {
-  tr.editingOpId = null; tr.editingDir = 'expense'; tr.editingCat = null; tr.editingRec = 'none';
-  document.querySelectorAll('#m4-op-dir-seg .m4-seg-btn').forEach(x => x.classList.toggle('active', x.dataset.dir === 'expense'));
-  document.querySelectorAll('#m4-op-rec-seg .m4-seg-btn').forEach(x => x.classList.toggle('active', x.dataset.rec === 'none'));
-  fillCatMenu();
-  $('m4-op-cat-label').textContent = '— выберите —';
-  $('m4-op-amount').value = ''; $('m4-op-date').value = toInputDate(new Date());
-  $('m4-op-end').value = ''; $('m4-op-counterparty').value = ''; $('m4-op-desc').value = '';
-}
+  /* ============ ДАШБОРД ============ */
+  var _members=[], _pending=[], _audit=[];
+  async function loadDashboard(panel){
+    var p=computePeriod(period);
+    var d=await RIVA.rpc('get_dashboard_summary',{p_from:p.from,p_to:p.to});
+    if(!alive()) return;
+    if(!(d&&d.ok)){ panel.innerHTML='<div class="m4-empty"><div class="t">Нет доступа</div><div class="d">'+U.esc((d&&d.error)||'')+'</div></div>'; return; }
+    var s=d.sales||{}, su=d.supply||{}, pr=d.production||{}, w=d.warehouse||{};
+    var whVal=num(w.materials_value)+num(w.products_value);
+    var kpis='<div class="m4-kpis">'
+      +kpi('Выручка (завершённые продажи)', U.formatMoney(s.revenue), (s.count||0)+' заказов', 'cart')
+      +kpi('Закупки (оприходовано)', U.formatMoney(su.spent), (su.count||0)+' поставок', 'truck')
+      +kpi('Выпуск продукции', U.formatNumber(pr.output)+' ед.', (pr.runs||0)+' партий', 'box')
+      +kpi('Склад (стоимость)', U.formatMoney(whVal), (w.materials_count||0)+' мат. · '+(w.products_count||0)+' прод.', 'wh')
+      +'</div>';
+    var top=''
+      +'<div class="m4-grid2">'
+      +'<div class="m4-card"><div class="ch">Топ продаж</div>'+topTable(d.top_sales,'sales')+'</div>'
+      +'<div class="m4-card"><div class="ch">Топ поставщиков</div>'+topTable(d.top_suppliers,'sup')+'</div>'
+      +'</div>';
+    panel.innerHTML=kpis+top;
+  }
+  function kpi(k,v,s,icon){ var ic={cart:'<path d="M3 3h2l2.4 12.3a2 2 0 0 0 2 1.7h7.7a2 2 0 0 0 2-1.6L22 8H6"/>',truck:'<path d="M3 7h11v8H3zM14 10h4l3 3v2h-7z"/>',box:'<path d="M21 16V8l-9-5-9 5v8l9 5z"/><path d="m3.3 7 8.7 5 8.7-5"/>',wh:'<path d="M3 7h13l5 5v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/>'}[icon]||'';
+    return '<div class="m4-kpi"><div class="k"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round">'+ic+'</svg>'+k+'</div><div class="v">'+v+'</div><div class="s">'+s+'</div></div>'; }
+  function topTable(rows,kind){
+    rows=Array.isArray(rows)?rows:[];
+    if(!rows.length) return '<div class="m4-empty"><div class="d">Нет данных за период</div></div>';
+    var html='<div class="m4-tablewrap"><table class="m4-tbl"><tbody>';
+    rows.forEach(function(r){
+      if(kind==='sales') html+='<tr><td class="nm">'+U.esc(r.name||'—')+'</td><td class="num sub">'+U.formatQuantity(r.qty)+' '+U.esc(r.unit||'')+'</td><td class="num inc">'+U.formatMoney(r.revenue)+'</td></tr>';
+      else html+='<tr><td class="nm">'+U.esc(r.name||'—')+'</td><td class="num sub">'+(r.orders||0)+' зак.</td><td class="num exp">'+U.formatMoney(r.spent)+'</td></tr>';
+    });
+    html+='</tbody></table></div>'; return html;
+  }
 
-function openOpModalNew(presetRec) {
-  resetOpModal();
-  tr.editingRec = presetRec || 'none';
-  document.querySelectorAll('#m4-op-rec-seg .m4-seg-btn').forEach(x => x.classList.toggle('active', x.dataset.rec === tr.editingRec));
-  updateRecUi();
-  $('m4-op-modal-title').textContent = tr.editingRec === 'none' ? 'Новая операция' : 'Новая повторяющаяся операция';
-  $('m4-op-modal').classList.remove('hidden');
-  validateOpForm();
-  setTimeout(() => $('m4-op-amount').focus(), 50);
-}
-
-function openOpModalEdit(op) {
-  resetOpModal();
-  tr.editingOpId = op.id; tr.editingDir = op.direction; tr.editingCat = op.category; tr.editingRec = 'none';
-  document.querySelectorAll('#m4-op-dir-seg .m4-seg-btn').forEach(x => x.classList.toggle('active', x.dataset.dir === op.direction));
-  fillCatMenu();
-  $('m4-op-cat-label').textContent = CATEGORY_LABELS[op.category] || op.category;
-  $('m4-op-amount').value = String(op.amount).replace('.', ',');
-  $('m4-op-date').value = op.occurred_on;
-  $('m4-op-counterparty').value = op.counterparty || '';
-  $('m4-op-desc').value = op.description || '';
-  updateRecUi();
-  $('m4-op-modal-title').textContent = 'Редактирование операции';
-  $('m4-op-modal').classList.remove('hidden');
-  validateOpForm();
-}
-
-function validateOpForm() {
-  const amount = parseDecimalInput($('m4-op-amount').value);
-  $('m4-op-save').disabled = !(tr.editingCat && amount && amount > 0 && $('m4-op-date').value);
-}
-
-async function saveOperation() {
-  const btn = $('m4-op-save'); const orig = btn.textContent;
-  btn.disabled = true; btn.textContent = 'Сохраняем…';
-  try {
-    const amount = parseDecimalInput($('m4-op-amount').value);
-    const uName = state.authUser.user_metadata?.name || state.authUser.email || null;
-    const cp = $('m4-op-counterparty').value.trim() || null;
-    const desc = $('m4-op-desc').value.trim() || null;
-
-    if (tr.editingOpId) {
-      const { error } = await sb.from('treasury_operations').update({
-        direction: tr.editingDir, category: tr.editingCat, amount,
-        occurred_on: $('m4-op-date').value, counterparty: cp, description: desc,
-        updated_at: new Date().toISOString()
-      }).eq('id', tr.editingOpId);
-      if (error) throw error;
-      toast('Операция обновлена', 'success');
-    } else if (tr.editingRec === 'none') {
-      const { error } = await sb.from('treasury_operations').insert({
-        group_id: groupId, direction: tr.editingDir, category: tr.editingCat, amount,
-        occurred_on: $('m4-op-date').value, counterparty: cp, description: desc,
-        source: 'manual', user_id: state.authUser.id, user_name: uName
+  /* ============ КАЗНАЧЕЙСТВО ============ */
+  async function loadTreasury(panel){
+    try{ await RIVA.rpc('treasury_materialize_recurring'); }catch(e){}
+    if(trView==='rec'){ return loadRecurring(panel); }
+    var p=computePeriod(period);
+    var sum=await RIVA.rpc('get_treasury_summary',{p_from:p.from,p_to:p.to,p_prev_from:p.pf,p_prev_to:p.pt});
+    var led=await RIVA.rpc('get_treasury_ledger',{p_from:p.from,p_to:p.to});
+    if(!alive()) return;
+    if(!(sum&&sum.ok)){ panel.innerHTML='<div class="m4-empty"><div class="t">Нет доступа к казначейству</div></div>'; return; }
+    var incCur=num(sum.auto.income_cur)+num(sum.manual.income_cur), incPrev=num(sum.auto.income_prev)+num(sum.manual.income_prev);
+    var expCur=num(sum.auto.expense_cur)+num(sum.manual.expense_cur), expPrev=num(sum.auto.expense_prev)+num(sum.manual.expense_prev);
+    var netCur=incCur-expCur, netPrev=incPrev-expPrev;
+    var kpis='<div class="m4-kpis" style="grid-template-columns:repeat(3,1fr)">'
+      +'<div class="m4-kpi"><div class="k">Доходы</div><div class="v inc">'+U.formatMoney(incCur)+'</div>'+deltaHtml(incCur,incPrev,false)+'</div>'
+      +'<div class="m4-kpi"><div class="k">Расходы</div><div class="v exp">'+U.formatMoney(expCur)+'</div>'+deltaHtml(expCur,expPrev,true)+'</div>'
+      +'<div class="m4-kpi"><div class="k">Итог (поток)</div><div class="v" style="color:'+(netCur>=0?'var(--st-completed)':'var(--st-cancelled)')+'">'+U.formatMoney(netCur)+'</div>'+deltaHtml(netCur,netPrev,false)+'</div>'
+      +'</div>';
+    // категории расходов
+    var cats=(sum.categories||[]).filter(function(c){return c.direction==='expense';});
+    var maxCat=cats.reduce(function(m,c){return Math.max(m,num(c.total));},0);
+    var catHtml=cats.length?('<div class="m4-card" style="margin-bottom:var(--sp-5)"><div class="ch">Расходы по категориям (ручные)</div><div style="padding:var(--sp-4) var(--sp-5)"><div class="m4-cat-bar">'
+      +cats.map(function(c){ var pct=maxCat?num(c.total)/maxCat*100:0; return '<div class="m4-cat"><span>'+U.esc(CAT_LABEL[c.category]||c.category)+'</span><span class="track"><span class="fill" style="width:'+pct+'%;background:var(--st-cancelled)"></span></span><span class="num exp">'+U.formatMoney(c.total)+'</span></div>'; }).join('')
+      +'</div></div></div>'):'';
+    // лента
+    var rows=(led&&led.ok&&led.rows)||[];
+    var ledHtml='<div class="m4-card"><div class="ch">Операции за период <span class="sub">'+rows.length+'</span></div>';
+    if(!rows.length) ledHtml+='<div class="m4-empty"><div class="d">Нет операций за период</div></div>';
+    else{
+      ledHtml+='<div class="m4-tablewrap"><table class="m4-tbl"><thead><tr><th>Дата</th><th>Категория</th><th>Описание</th><th class="num">Сумма</th><th></th></tr></thead><tbody>';
+      rows.forEach(function(r){
+        var inc=r.direction==='income';
+        ledHtml+='<tr><td class="sub">'+U.formatDate(r.occurred_on)+'</td>'
+          +'<td>'+U.esc(CAT_LABEL[r.category]||r.category)+(r.source==='recurring'?' <span class="m4-chip ro">повтор</span>':'')+(r.source&&r.source.indexOf('auto')===0?' <span class="m4-chip lock">авто</span>':'')+'</td>'
+          +'<td><div class="nm" style="font-weight:500">'+U.esc(r.description||'—')+'</div>'+(r.counterparty?'<div class="sub">'+U.esc(r.counterparty)+'</div>':'')+'</td>'
+          +'<td class="num '+(inc?'inc':'exp')+'">'+(inc?'+':'−')+U.formatMoney(r.amount)+'</td>'
+          +'<td>'+(r.editable&&canManage()?('<div class="m4-acts"><button class="m4-ic danger" title="Удалить" data-del="'+U.esc(r.id)+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button></div>'):'')+'</td></tr>';
       });
-      if (error) throw error;
-      toast('Операция добавлена', 'success');
-    } else {
-      const { error } = await sb.from('treasury_recurring').insert({
-        group_id: groupId, direction: tr.editingDir, category: tr.editingCat, amount,
-        interval: tr.editingRec, start_date: $('m4-op-date').value,
-        end_date: $('m4-op-end').value || null, counterparty: cp, description: desc,
-        user_id: state.authUser.id, user_name: uName
+      ledHtml+='</tbody></table></div>';
+    }
+    ledHtml+='</div>';
+    panel.innerHTML=kpis+catHtml+ledHtml;
+    panel.querySelectorAll('[data-del]').forEach(function(b){ b.addEventListener('click', function(){ var id=b.getAttribute('data-del'); confirmAct('Удалить операцию?','Действие необратимо.','Удалить',true,async function(){ var r=await sb.from('treasury_operations').delete().eq('id',id); if(r.error){ U.toast('Ошибка: '+r.error.message); return false; } U.toast('Удалено'); await loadTab('treasury'); }); }); });
+  }
+  async function loadRecurring(panel){
+    var r=await sb.from('treasury_recurring').select('*').order('created_at',{ascending:false});
+    if(!alive()) return;
+    var rows=r.error?[]:(r.data||[]);
+    var html='<div class="m4-card"><div class="ch">Регулярные операции'+(canManage()?'<button class="m4-btn sm" id="rec-add">+ правило</button>':'')+'</div>';
+    if(!rows.length) html+='<div class="m4-empty"><div class="d">Нет регулярных правил. Добавьте аренду, зарплату и т.п. — они будут попадать в ленту автоматически.</div></div>';
+    else{
+      html+='<div class="m4-tablewrap"><table class="m4-tbl"><thead><tr><th>Описание</th><th>Категория</th><th>Период</th><th class="num">Сумма</th><th>Статус</th><th></th></tr></thead><tbody>';
+      rows.forEach(function(x){
+        var inc=x.direction==='income';
+        html+='<tr><td class="nm">'+U.esc(x.description||'—')+'</td><td>'+U.esc(CAT_LABEL[x.category]||x.category)+'</td><td class="sub">'+U.esc(INTERVAL_LABEL[x.interval]||x.interval)+'</td>'
+          +'<td class="num '+(inc?'inc':'exp')+'">'+(inc?'+':'−')+U.formatMoney(x.amount)+'</td>'
+          +'<td>'+(x.is_active?'<span class="dot-on"></span> активно':'<span class="dot-off"></span> пауза')+'</td>'
+          +'<td>'+(canManage()?('<div class="m4-acts"><button class="m4-ic" title="'+(x.is_active?'Пауза':'Включить')+'" data-toggle="'+x.id+'" data-on="'+(x.is_active?'1':'0')+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">'+(x.is_active?'<path d="M8 5v14M16 5v14"/>':'<path d="m6 4 14 8-14 8z"/>')+'</svg></button><button class="m4-ic danger" title="Удалить" data-delrec="'+x.id+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button></div>'):'')+'</td></tr>';
       });
-      if (error) throw error;
-      await sb.rpc('treasury_materialize_recurring');
-      toast('Повторяющаяся операция создана', 'success');
+      html+='</tbody></table></div>';
     }
-
-    $('m4-op-modal').classList.add('hidden');
-    if (tr.subtab === 'operations') await loadLedger();
-    else if (tr.subtab === 'recurring') await loadRecurring();
-  } catch (e) {
-    toast('Ошибка: ' + e.message, 'error');
-  } finally {
-    btn.textContent = orig; validateOpForm();
+    html+='</div>';
+    panel.innerHTML=html;
+    var add=panel.querySelector('#rec-add'); if(add) add.onclick=function(){ openRecurringDialog(); };
+    panel.querySelectorAll('[data-toggle]').forEach(function(b){ b.addEventListener('click', async function(){ var on=b.getAttribute('data-on')==='1'; var r=await sb.from('treasury_recurring').update({is_active:!on}).eq('id',b.getAttribute('data-toggle')); if(r.error){ U.toast('Ошибка'); return; } await loadTab('treasury'); }); });
+    panel.querySelectorAll('[data-delrec]').forEach(function(b){ b.addEventListener('click', function(){ confirmAct('Удалить правило?','Действие необратимо.','Удалить',true,async function(){ var r=await sb.from('treasury_recurring').delete().eq('id',b.getAttribute('data-delrec')); if(r.error){ U.toast('Ошибка'); return false; } U.toast('Удалено'); await loadTab('treasury'); }); }); });
   }
-}
-
-// ================================================================
-// АДМИНИСТРИРОВАНИЕ
-// ================================================================
-
-const adm = { inited: false, atab: 'members' };
-
-function initAdmin() {
-  if (!adm.inited) {
-    adm.inited = true;
-    if (!isAdmin) {
-      document.querySelectorAll('.m4-atab-admin').forEach(t => t.classList.add('hidden'));
-    }
-    document.querySelectorAll('.m4-atab').forEach(t => t.addEventListener('click', () => switchATab(t.dataset.atab)));
+  function catOptions(dir){ var arr=dir==='income'?INC_CATS:EXP_CATS; return arr.map(function(c){ return '<option value="'+c+'">'+U.esc(CAT_LABEL[c])+'</option>'; }).join(''); }
+  function openOpDialog(){
+    var today=new Date().toISOString().slice(0,10);
+    var body=''
+      +'<div class="m4-row2"><div class="m4-field"><label>Направление</label><select class="m4-select" id="o-dir"><option value="expense">Расход</option><option value="income">Доход</option></select></div>'
+      +'<div class="m4-field"><label>Категория</label><select class="m4-select" id="o-cat">'+catOptions('expense')+'</select></div></div>'
+      +'<div class="m4-row2"><div class="m4-field"><label>Сумма, ₽</label><input class="m4-input" id="o-amt" type="number" step="any"></div>'
+      +'<div class="m4-field"><label>Дата</label><input class="m4-input" id="o-date" type="date" value="'+today+'"></div></div>'
+      +'<div class="m4-field"><label>Описание</label><input class="m4-input" id="o-desc"></div>'
+      +'<div class="m4-field"><label>Контрагент</label><input class="m4-input" id="o-cp"></div>';
+    var ov=dialog({ title:'Новая операция', ok:'Добавить', body:body, onMount:function(ov){ ov.querySelector('#o-dir').addEventListener('change', function(e){ ov.querySelector('#o-cat').innerHTML=catOptions(e.target.value); }); },
+      onOk:async function(ov){
+        var amt=parseFloat(ov.querySelector('#o-amt').value); if(!(amt>0)){ U.toast('Укажите сумму'); return false; }
+        var rec={ group_id:groupId(), direction:val(ov,'#o-dir'), category:val(ov,'#o-cat'), amount:amt, occurred_on:val(ov,'#o-date'), description:val(ov,'#o-desc')||null, counterparty:val(ov,'#o-cp')||null, source:'manual', user_name:meName() };
+        var r=await sb.from('treasury_operations').insert(rec); if(r.error){ U.toast('Ошибка: '+r.error.message); return false; }
+        U.toast('Операция добавлена'); await loadTab('treasury');
+      }});
+    return ov;
   }
-  switchATab(adm.atab);
-}
-
-function switchATab(name) {
-  adm.atab = name;
-  document.querySelectorAll('.m4-atab').forEach(t => t.classList.toggle('active', t.dataset.atab === name));
-  document.querySelectorAll('.m4-apanel').forEach(p => p.classList.toggle('hidden', p.dataset.apanel !== name));
-  if (name === 'members')   loadMembersTab();
-  if (name === 'suppliers') loadSuppliersTab();
-  if (name === 'customers') loadCustomersTab();
-  if (name === 'reports')   initReports();
-  if (name === 'audit')     initAudit();
-  if (name === 'settings')  initSettings();
-}
-
-// ================================================================
-// MEMBERS
-// ================================================================
-
-const EMAIL_DOMAIN_RE = /^[^\s@]+@([^\s@]+\.[^\s@]+)$/;
-const GOOGLE_DOMAINS = new Set(['gmail.com','googlemail.com']);
-
-function detectProvider(email) {
-  const m = email.trim().toLowerCase().match(EMAIL_DOMAIN_RE);
-  if (!m) return null;
-  return GOOGLE_DOMAINS.has(m[1]) ? 'google' : 'unsupported';
-}
-function updateInviteButton() {
-  const email = $('m4-invite-email').value.trim();
-  const role = $('m4-invite-role').value;
-  const chip = $('m4-invite-chip');
-  const errEl = $('m4-invite-email-error');
-  let valid = false;
-  if (email === '') { chip.classList.add('hidden'); errEl.classList.add('hidden'); }
-  else {
-    const prov = detectProvider(email);
-    if (prov === 'google') {
-      chip.className = 'absolute right-2 top-1/2 -translate-y-1/2 text-[10px] uppercase tracking-wider px-2 py-0.5 rounded-md border border-line-light bg-surface-alt text-fg-secondary';
-      chip.textContent = 'Google';
-      chip.classList.remove('hidden');
-      errEl.classList.add('hidden');
-      valid = true;
-    } else if (prov === 'unsupported') {
-      chip.classList.add('hidden');
-      errEl.textContent = 'Разрешены только @gmail.com и @googlemail.com';
-      errEl.classList.remove('hidden');
-    } else {
-      chip.classList.add('hidden'); errEl.classList.add('hidden');
-    }
+  function openRecurringDialog(){
+    var today=new Date().toISOString().slice(0,10);
+    var body=''
+      +'<div class="m4-row2"><div class="m4-field"><label>Направление</label><select class="m4-select" id="r-dir"><option value="expense">Расход</option><option value="income">Доход</option></select></div>'
+      +'<div class="m4-field"><label>Категория</label><select class="m4-select" id="r-cat">'+catOptions('expense')+'</select></div></div>'
+      +'<div class="m4-row2"><div class="m4-field"><label>Сумма, ₽</label><input class="m4-input" id="r-amt" type="number" step="any"></div>'
+      +'<div class="m4-field"><label>Периодичность</label><select class="m4-select" id="r-int"><option value="monthly">Ежемесячно</option><option value="weekly">Еженедельно</option><option value="quarterly">Ежеквартально</option><option value="yearly">Ежегодно</option></select></div></div>'
+      +'<div class="m4-row2"><div class="m4-field"><label>Начало</label><input class="m4-input" id="r-start" type="date" value="'+today+'"></div>'
+      +'<div class="m4-field"><label>Конец (необяз.)</label><input class="m4-input" id="r-end" type="date"></div></div>'
+      +'<div class="m4-field"><label>Описание</label><input class="m4-input" id="r-desc" placeholder="Аренда помещения"></div>';
+    dialog({ title:'Регулярная операция', ok:'Создать', body:body, onMount:function(ov){ ov.querySelector('#r-dir').addEventListener('change', function(e){ ov.querySelector('#r-cat').innerHTML=catOptions(e.target.value); }); },
+      onOk:async function(ov){
+        var amt=parseFloat(ov.querySelector('#r-amt').value); if(!(amt>0)){ U.toast('Укажите сумму'); return false; }
+        var rec={ group_id:groupId(), direction:val(ov,'#r-dir'), category:val(ov,'#r-cat'), amount:amt, interval:val(ov,'#r-int'), start_date:val(ov,'#r-start'), end_date:val(ov,'#r-end')||null, is_active:true, description:val(ov,'#r-desc')||null };
+        var r=await sb.from('treasury_recurring').insert(rec); if(r.error){ U.toast('Ошибка: '+r.error.message); return false; }
+        try{ await RIVA.rpc('treasury_materialize_recurring'); }catch(e){}
+        U.toast('Правило создано'); trView='rec'; await loadTab('treasury');
+      }});
   }
-  $('m4-invite-submit').disabled = !(valid && role !== '');
-}
-$('m4-invite-email')?.addEventListener('input', updateInviteButton);
-$('m4-invite-role')?.addEventListener('change', updateInviteButton);
 
-$('m4-invite-submit')?.addEventListener('click', async () => {
-  const email = $('m4-invite-email').value.trim();
-  const role = $('m4-invite-role').value;
-  const btn = $('m4-invite-submit');
-  btn.disabled = true;
-  btn.textContent = 'Обработка…';
-  try {
-    const { data, error } = await sb.rpc('invite_member', { p_email: email, p_role: role });
-    if (error) throw error;
-    if (!data?.ok) {
-      const map = {
-        INVALID_EMAIL: 'Некорректный email',
-        DOMAIN_NOT_ALLOWED: 'Разрешены только Gmail-адреса',
-        INVALID_ROLE: 'Неверная роль',
-        NOT_ADMIN: 'Только администратор может приглашать',
-        NO_CURRENT_GROUP: 'Группа не выбрана'
-      };
-      throw new Error(map[data?.error] || data?.error || 'UNKNOWN');
-    }
-    if (data.mode === 'invited') {
-      const redirectTo = window.location.origin + window.location.pathname;
-      const { error: mlErr } = await sb.auth.signInWithOtp({
-        email, options: { shouldCreateUser: true, emailRedirectTo: redirectTo }
+  /* ============ ПОДРАЗДЕЛЕНИЯ И ЦЕПОЧКИ ============ */
+  async function loadOrg(panel){
+    var org=await RIVA.rpc('get_org_structure');
+    if(!alive()) return;
+    if(!(org&&org.ok)){ panel.innerHTML='<div class="m4-empty"><div class="t">Нет доступа</div></div>'; return; }
+    cache.org=org;
+    var unitsBySec={supply:[],production:[],sales:[]};
+    (org.units||[]).forEach(function(u){ if(unitsBySec[u.section]) unitsBySec[u.section].push(u); });
+    var unitName={}; (org.units||[]).forEach(function(u){ unitName[u.id]=u.name; });
+
+    var unitsHtml='<div class="m4-card" style="margin-bottom:var(--sp-5)"><div class="ch">Подразделения</div><div style="padding:var(--sp-4) var(--sp-5)">';
+    ['supply','production','sales'].forEach(function(sec){
+      unitsHtml+='<div class="m4-section-block"><h4>'+SECTION_LABEL[sec]+'</h4>';
+      var list=unitsBySec[sec]||[];
+      if(!list.length) unitsHtml+='<div class="m4-hint">Нет подразделений</div>';
+      list.forEach(function(u){
+        unitsHtml+='<div class="m4-unit-row"><span class="un">'+U.esc(u.name)+'</span>'
+          +(u.is_default?'<span class="m4-chip lock">по умолч.</span>':'')
+          +(u.is_active?'':'<span class="m4-chip off-chip">выкл</span>')
+          +(isAdmin()?('<div class="m4-acts"><button class="m4-ic" title="Переименовать" data-uren="'+u.id+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button>'
+            +(u.is_default?'':'<button class="m4-ic danger" title="Удалить" data-udel="'+u.id+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>')+'</div>'):'')
+          +'</div>';
       });
-      if (mlErr) toast('Приглашение создано, но magic-link не отправлен: ' + mlErr.message, 'warning');
-      else toast('Приглашение отправлено на ' + email, 'success');
-    } else if (data.mode === 'added_existing') toast('Пользователь добавлен в группу', 'success');
-    else if (data.mode === 'reactivated') toast('Членство обновлено', 'success');
-
-    $('m4-invite-email').value = '';
-    $('m4-invite-role').value = '';
-    updateInviteButton();
-    await loadMembersTab();
-  } catch (e) {
-    toast('Ошибка: ' + e.message, 'error');
-  } finally {
-    btn.disabled = false;
-    btn.textContent = 'Пригласить';
-    updateInviteButton();
-  }
-});
-
-const ROLE_LABEL = { admin: 'Администратор', supply: 'Снабжение', production: 'Производство', sales: 'Продажи', management: 'Управление' };
-
-async function loadMembersTab() {
-  const { data: members, error: mErr } = await sb.rpc('list_group_members');
-  if (mErr) { $('m4-members-list').innerHTML = `<div class="px-5 py-6 text-sm text-state-error">${esc(mErr.message)}</div>`; return; }
-  renderMembers(members || []);
-  if (isAdmin) {
-    const { data: invites } = await sb.rpc('list_pending_invitations');
-    renderInvitations(invites || []);
-  }
-}
-
-function renderMembers(members) {
-  $('m4-members-count').textContent = members.length + ' ' + pluralize(members.length, ['участник','участника','участников']);
-
-  $('m4-members-list').innerHTML = members.map(m => {
-    const name = esc(m.name || m.email);
-    const avatar = m.avatar_url
-      ? `<img src="${esc(m.avatar_url)}" alt="" class="w-full h-full object-cover" referrerpolicy="no-referrer">`
-      : `<svg class="w-5 h-5 text-fg-muted" viewBox="0 0 24 24" fill="currentColor"><path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/></svg>`;
-    let status = '';
-    if (!m.is_active) status = '<span class="text-xs px-2 py-0.5 rounded-md bg-state-error/10 text-state-error">Заблокирован</span>';
-    else if (m.session_active) status = '<span class="text-xs px-2 py-0.5 rounded-md bg-state-success/10 text-state-success">В сети</span>';
-    const ownerBadge = m.is_owner ? '<span class="text-xs px-2 py-0.5 rounded-md bg-surface-alt border border-line text-fg-secondary">Владелец</span>' : '';
-    const meBadge = m.is_me ? '<span class="text-xs px-2 py-0.5 rounded-md bg-surface-alt border border-line text-fg-secondary">Вы</span>' : '';
-    const lastLogin = m.last_login_at ? `Последний вход: ${formatDateTime(new Date(m.last_login_at))}` : 'Ещё не входил';
-    const showActions = isAdmin && !m.is_me && !m.is_owner;
-    const actionsHtml = showActions ? `
-      <div class="relative m4-member-actions" data-uid="${esc(m.user_id)}">
-        <button class="p-2 rounded-lg hover:bg-surface-alt transition-colors m4-actions-btn" title="Действия">
-          <svg class="w-5 h-5 text-fg-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="5" r="1.5"/><circle cx="12" cy="12" r="1.5"/><circle cx="12" cy="19" r="1.5"/></svg>
-        </button>
-        <div class="m4-actions-menu hidden absolute right-0 top-full mt-1 w-48 bg-surface rounded-xl border border-line shadow-lg shadow-black/5 py-1.5 z-10">
-          <div class="px-3 pt-1.5 pb-1 text-[11px] uppercase tracking-wider text-fg-muted">Сменить роль</div>
-          ${['supply','production','sales','management','admin'].filter(r => r !== m.role).map(r =>
-            `<button class="w-full text-left px-4 py-2 text-sm hover:bg-surface-alt" data-action="role" data-role="${r}">${ROLE_LABEL[r]}</button>`).join('')}
-          <div class="border-t border-line-light my-1"></div>
-          ${m.is_active
-            ? `<button class="w-full text-left px-4 py-2 text-sm text-state-warning hover:bg-surface-alt" data-action="block">Заблокировать</button>`
-            : `<button class="w-full text-left px-4 py-2 text-sm text-state-success hover:bg-surface-alt" data-action="unblock">Разблокировать</button>`}
-          <button class="w-full text-left px-4 py-2 text-sm text-state-error hover:bg-surface-alt" data-action="remove">Удалить из группы</button>
-        </div>
-      </div>` : '';
-
-    return `
-      <div class="px-5 py-4 flex items-center gap-4">
-        <div class="w-10 h-10 rounded-xl overflow-hidden bg-surface-alt flex items-center justify-center flex-shrink-0">${avatar}</div>
-        <div class="min-w-0 flex-1">
-          <div class="flex items-center gap-2 flex-wrap">
-            <span class="font-medium truncate">${name}</span>${ownerBadge}${meBadge}${status}
-          </div>
-          <div class="text-xs text-fg-muted truncate mt-0.5">${esc(m.email)}</div>
-          <div class="text-xs text-fg-muted mt-0.5">${lastLogin}</div>
-        </div>
-        <div class="flex items-center gap-3 flex-shrink-0">
-          <span class="text-sm text-fg-secondary whitespace-nowrap">${esc(ROLE_LABEL[m.role] || m.role)}</span>
-          ${actionsHtml}
-        </div>
-      </div>`;
-  }).join('');
-
-  document.querySelectorAll('.m4-member-actions').forEach(wrap => {
-    const btn = wrap.querySelector('.m4-actions-btn');
-    const menu = wrap.querySelector('.m4-actions-menu');
-    const userId = wrap.dataset.uid;
-    btn.addEventListener('click', (e) => { e.stopPropagation(); document.querySelectorAll('.m4-actions-menu').forEach(m => { if (m !== menu) m.classList.add('hidden'); }); menu.classList.toggle('hidden'); });
-    menu.querySelectorAll('[data-action]').forEach(item => {
-      item.addEventListener('click', async (e) => {
-        e.stopPropagation(); menu.classList.add('hidden');
-        const action = item.dataset.action;
-        try {
-          if (action === 'role') {
-            const role = item.dataset.role;
-            const { data, error } = await sb.rpc('update_member_role', { p_user_id: userId, p_role: role });
-            if (error) throw error; if (!data?.ok) throw new Error(data?.error);
-            toast('Роль обновлена', 'success');
-          } else if (action === 'block') {
-            if (!confirm('Заблокировать пользователя в этой группе?')) return;
-            const { data, error } = await sb.rpc('set_member_active', { p_user_id: userId, p_is_active: false });
-            if (error) throw error; if (!data?.ok) throw new Error(data?.error);
-            toast('Пользователь заблокирован', 'success');
-          } else if (action === 'unblock') {
-            const { data, error } = await sb.rpc('set_member_active', { p_user_id: userId, p_is_active: true });
-            if (error) throw error; if (!data?.ok) throw new Error(data?.error);
-            toast('Пользователь разблокирован', 'success');
-          } else if (action === 'remove') {
-            if (!confirm('Удалить пользователя из группы?')) return;
-            const { data, error } = await sb.rpc('remove_member', { p_user_id: userId });
-            if (error) throw error; if (!data?.ok) throw new Error(data?.error);
-            toast('Пользователь удалён из группы', 'success');
-          }
-          await loadMembersTab();
-        } catch (err) { toast('Ошибка: ' + err.message, 'error'); }
-      });
+      unitsHtml+='</div>';
     });
-  });
-}
+    unitsHtml+='</div></div>';
 
-document.addEventListener('click', () => {
-  document.querySelectorAll('#m4 .m4-actions-menu').forEach(m => m.classList.add('hidden'));
-});
-
-function renderInvitations(invites) {
-  const block = $('m4-invitations-block');
-  if (invites.length === 0) { block.classList.add('hidden'); return; }
-  block.classList.remove('hidden');
-  $('m4-invitations-list').innerHTML = invites.map(i => `
-    <div class="flex items-center gap-3 py-2">
-      <div class="w-8 h-8 rounded-lg bg-surface-alt flex items-center justify-center flex-shrink-0">
-        <svg class="w-4 h-4 text-fg-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 4h16c1.1 0 2 .9 2 2v12c0 1.1-.9 2-2 2H4c-1.1 0-2-.9-2-2V6c0-1.1.9-2 2-2z"/><polyline points="22,6 12,13 2,6"/></svg>
-      </div>
-      <div class="min-w-0 flex-1">
-        <div class="text-sm truncate">${esc(i.email)}</div>
-        <div class="text-xs text-fg-muted">${esc(ROLE_LABEL[i.role] || i.role)} · отправлено ${formatDate(new Date(i.created_at))}</div>
-      </div>
-      <button class="text-xs text-state-error hover:underline flex-shrink-0" data-revoke="${esc(i.id)}">Отозвать</button>
-    </div>
-  `).join('');
-  document.querySelectorAll('[data-revoke]').forEach(btn => {
-    btn.addEventListener('click', async () => {
-      if (!confirm('Отозвать приглашение?')) return;
-      try {
-        const { data, error } = await sb.rpc('revoke_invitation', { p_invitation_id: btn.dataset.revoke });
-        if (error) throw error; if (!data?.ok) throw new Error(data?.error);
-        toast('Приглашение отозвано', 'success');
-        await loadMembersTab();
-      } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
+    var chains=org.chains||[];
+    var chHtml='<div class="m4-card"><div class="ch">Цепочки (аналитические связки)</div><div style="padding:var(--sp-4) var(--sp-5)">';
+    if(!chains.length) chHtml+='<div class="m4-hint">Нет цепочек. Соберите склад + производство + отдел продаж в направление, чтобы видеть его результат отдельно.</div>';
+    chains.forEach(function(c){
+      var names=(c.unit_ids||[]).map(function(id){ return unitName[id]||'?'; });
+      chHtml+='<div class="m4-unit-row"><div style="flex:1"><div class="un">'+U.esc(c.name)+(c.is_active?'':' <span class="m4-chip off-chip">выкл</span>')+'</div><div class="sub" style="margin-top:2px">'+(names.length?U.esc(names.join(' · ')):'без подразделений')+'</div></div>'
+        +'<div class="m4-acts"><button class="m4-ic" title="Аналитика" data-canalytics="'+c.id+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 3v18h18"/><path d="m7 14 3-3 3 2 5-6"/></svg></button>'
+        +(isAdmin()?('<button class="m4-ic" title="Состав" data-cunits="'+c.id+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 7h6l2 2h10v9H3z"/></svg></button><button class="m4-ic" title="Переименовать" data-cren="'+c.id+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg></button><button class="m4-ic danger" title="Удалить" data-cdel="'+c.id+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>'):'')
+        +'</div></div>';
     });
-  });
-}
+    chHtml+='</div></div>';
+    panel.innerHTML=unitsHtml+chHtml;
 
-// ================================================================
-// SUPPLIERS / CUSTOMERS
-// ================================================================
-
-function makeDirectoryController(kind) {
-  const cfg = kind === 'supplier'
-    ? { table: 'suppliers', fields: ['name','contact','phone','email','comment'], labelOne: 'поставщика',
-        listId: 'm4-suppliers-list', countId: 'm4-suppliers-count', searchId: 'm4-supplier-search',
-        titleId: 'm4-supplier-form-title', saveBtn: 'm4-supplier-save', cancelBtn: 'm4-supplier-cancel',
-        fieldIds: { name: 'm4-supplier-name', contact: 'm4-supplier-contact', phone: 'm4-supplier-phone', email: 'm4-supplier-email', comment: 'm4-supplier-comment' },
-        plural: ['поставщик','поставщика','поставщиков'] }
-    : { table: 'customers', fields: ['name','contact','phone','email','address','comment'], labelOne: 'клиента',
-        listId: 'm4-customers-list', countId: 'm4-customers-count', searchId: 'm4-customer-search',
-        titleId: 'm4-customer-form-title', saveBtn: 'm4-customer-save', cancelBtn: 'm4-customer-cancel',
-        fieldIds: { name: 'm4-customer-name', contact: 'm4-customer-contact', phone: 'm4-customer-phone', email: 'm4-customer-email', address: 'm4-customer-address', comment: 'm4-customer-comment' },
-        plural: ['клиент','клиента','клиентов'] };
-
-  let editingId = null, cached = [], searchTerm = '';
-
-  const getValues = () => { const v = {}; for (const f of cfg.fields) v[f] = ($(cfg.fieldIds[f]).value || '').trim() || null; return v; };
-  const setValues = (vals) => { for (const f of cfg.fields) $(cfg.fieldIds[f]).value = vals[f] || ''; };
-  const clearForm = () => { setValues({}); editingId = null; $(cfg.titleId).textContent = kind === 'supplier' ? 'Новый поставщик' : 'Новый клиент'; $(cfg.saveBtn).textContent = 'Добавить'; $(cfg.cancelBtn).classList.add('hidden'); updateSaveState(); };
-  const updateSaveState = () => { $(cfg.saveBtn).disabled = !$(cfg.fieldIds.name).value.trim(); };
-
-  Object.values(cfg.fieldIds).forEach(id => $(id)?.addEventListener('input', updateSaveState));
-
-  $(cfg.saveBtn).addEventListener('click', async () => {
-    const btn = $(cfg.saveBtn); const values = getValues();
-    if (!values.name) return;
-    btn.disabled = true; const orig = btn.textContent; btn.textContent = 'Сохраняем…';
-    try {
-      if (editingId) {
-        const { error } = await sb.from(cfg.table).update(values).eq('id', editingId);
-        if (error) throw error;
-        toast(kind === 'supplier' ? 'Поставщик обновлён' : 'Клиент обновлён', 'success');
-      } else {
-        const { error } = await sb.from(cfg.table).insert({ ...values, group_id: groupId });
-        if (error) throw error;
-        toast(kind === 'supplier' ? 'Поставщик добавлен' : 'Клиент добавлен', 'success');
-      }
-      clearForm();
-      await load();
-    } catch (e) { toast('Ошибка: ' + e.message, 'error'); btn.textContent = orig; btn.disabled = false; }
-  });
-  $(cfg.cancelBtn).addEventListener('click', clearForm);
-  $(cfg.searchId).addEventListener('input', (e) => { searchTerm = e.target.value.toLowerCase().trim(); render(); });
-
-  async function load() {
-    const { data, error } = await sb.from(cfg.table).select('*').order('name');
-    if (error) { $(cfg.listId).innerHTML = `<div class="px-5 py-6 text-sm text-state-error">${esc(error.message)}</div>`; return; }
-    cached = data || [];
-    render();
+    // обработчики
+    panel.querySelectorAll('[data-uren]').forEach(function(b){ b.onclick=function(){ var u=(org.units||[]).find(function(x){return x.id===b.getAttribute('data-uren');}); openRenameDialog('Переименовать подразделение', u.name, async function(name){ var r=await RIVA.rpc('rename_unit',{p_unit_id:u.id,p_name:name}); return handle(r,'Переименовано','org'); }); }; });
+    panel.querySelectorAll('[data-udel]').forEach(function(b){ b.onclick=function(){ confirmAct('Удалить подразделение?','Удаление возможно только если в нём нет данных.','Удалить',true,async function(){ var r=await RIVA.rpc('delete_unit',{p_unit_id:b.getAttribute('data-udel')}); if(r&&r.ok){ U.toast('Удалено'); await RIVA.refreshUnits(); await loadTab('org'); } else { U.toast(r&&r.error==='UNIT_HAS_DATA'?'Нельзя удалить: есть привязанные данные':'Ошибка'); return false; } }); }; });
+    panel.querySelectorAll('[data-cren]').forEach(function(b){ b.onclick=function(){ var c=chains.find(function(x){return x.id===b.getAttribute('data-cren');}); openRenameDialog('Переименовать цепочку', c.name, async function(name){ var r=await RIVA.rpc('rename_chain',{p_chain_id:c.id,p_name:name}); return handle(r,'Переименовано','org'); }); }; });
+    panel.querySelectorAll('[data-cdel]').forEach(function(b){ b.onclick=function(){ confirmAct('Удалить цепочку?','Связи подразделений в цепочке будут удалены, сами подразделения останутся.','Удалить',true,async function(){ var r=await RIVA.rpc('delete_chain',{p_chain_id:b.getAttribute('data-cdel')}); return handle(r,'Удалено','org'); }); }; });
+    panel.querySelectorAll('[data-cunits]').forEach(function(b){ b.onclick=function(){ openChainUnitsDialog(chains.find(function(x){return x.id===b.getAttribute('data-cunits');}), org.units||[]); }; });
+    panel.querySelectorAll('[data-canalytics]').forEach(function(b){ b.onclick=function(){ openChainAnalytics(chains.find(function(x){return x.id===b.getAttribute('data-canalytics');})); }; });
   }
-
-  function render() {
-    const list = searchTerm
-      ? cached.filter(r => Object.values(r).some(v => v && String(v).toLowerCase().includes(searchTerm)))
-      : cached;
-    $(cfg.countId).textContent = list.length + ' ' + pluralize(list.length, cfg.plural);
-    if (list.length === 0) {
-      $(cfg.listId).innerHTML = `<div class="px-5 py-10 text-sm text-fg-muted text-center">${searchTerm ? 'Ничего не найдено' : 'Пока пусто. Добавьте первого.'}</div>`;
-      return;
-    }
-    $(cfg.listId).innerHTML = list.map(r => {
-      const lines = [];
-      if (r.contact) lines.push(esc(r.contact));
-      if (r.phone) lines.push(esc(r.phone));
-      if (r.email) lines.push(esc(r.email));
-      if (r.address) lines.push(esc(r.address));
-      const meta = lines.length ? `<div class="text-xs text-fg-muted mt-0.5">${lines.join(' · ')}</div>` : '';
-      const comment = r.comment ? `<div class="text-xs text-fg-muted mt-1 italic">${esc(r.comment)}</div>` : '';
-      return `
-        <div class="px-5 py-4 flex items-start gap-3">
-          <div class="min-w-0 flex-1">
-            <div class="font-medium truncate">${esc(r.name)}</div>
-            ${meta}${comment}
-          </div>
-          <div class="flex items-center gap-1 flex-shrink-0">
-            <button class="p-2 rounded-lg hover:bg-surface-alt transition-colors" data-edit="${esc(r.id)}" title="Редактировать">
-              <svg class="w-4 h-4 text-fg-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.12 2.12 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-            </button>
-            <button class="p-2 rounded-lg hover:bg-surface-alt transition-colors" data-delete="${esc(r.id)}" title="Удалить">
-              <svg class="w-4 h-4 text-state-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-2 14a2 2 0 0 1-2 2H9a2 2 0 0 1-2-2L5 6"/></svg>
-            </button>
-          </div>
-        </div>`;
-    }).join('');
-
-    document.querySelectorAll(`#${cfg.listId} [data-edit]`).forEach(btn => {
-      btn.addEventListener('click', () => {
-        const row = cached.find(x => x.id === btn.dataset.edit);
-        if (!row) return;
-        editingId = row.id;
-        setValues(row);
-        $(cfg.titleId).textContent = kind === 'supplier' ? 'Редактирование поставщика' : 'Редактирование клиента';
-        $(cfg.saveBtn).textContent = 'Сохранить';
-        $(cfg.cancelBtn).classList.remove('hidden');
-        updateSaveState();
-        $(cfg.fieldIds.name).focus();
-        window.scrollTo({ top: 0, behavior: 'smooth' });
-      });
+  function openUnitDialog(){
+    var body='<div class="m4-field"><label>Раздел</label><select class="m4-select" id="u-sec"><option value="supply">Склад</option><option value="production">Производство</option><option value="sales">Отдел продаж</option></select></div>'
+      +'<div class="m4-field"><label>Название</label><input class="m4-input" id="u-name" placeholder="Айвазовского 53"></div>';
+    dialog({ title:'Новое подразделение', ok:'Создать', body:body, onOk:async function(ov){ var name=val(ov,'#u-name'); if(!name){ U.toast('Укажите название'); return false; } var r=await RIVA.rpc('create_unit',{p_section:val(ov,'#u-sec'),p_name:name}); if(r&&r.ok){ U.toast('Подразделение создано'); await RIVA.refreshUnits(); await loadTab('org'); } else { U.toast('Ошибка: '+((r&&r.error)||'')); return false; } }});
+  }
+  function openChainDialog(){
+    dialog({ title:'Новая цепочка', ok:'Создать', body:'<div class="m4-field"><label>Название</label><input class="m4-input" id="ch-name" placeholder="Розница СПб"></div><div class="m4-hint">После создания добавьте в неё подразделения через «Состав».</div>', onOk:async function(ov){ var name=val(ov,'#ch-name'); if(!name){ U.toast('Укажите название'); return false; } var r=await RIVA.rpc('create_chain',{p_name:name}); return handle(r,'Цепочка создана','org'); }});
+  }
+  function openChainUnitsDialog(chain, units){
+    var sel={}; (chain.unit_ids||[]).forEach(function(id){ sel[id]=true; });
+    var body='';
+    ['supply','production','sales'].forEach(function(sec){
+      var list=units.filter(function(u){return u.section===sec && u.is_active;});
+      if(!list.length) return;
+      body+='<div class="m4-section-block"><h4>'+SECTION_LABEL[sec]+'</h4>'+list.map(function(u){ return '<label class="m4-check'+(sel[u.id]?' sel':'')+'"><input type="checkbox" data-uid="'+u.id+'"'+(sel[u.id]?' checked':'')+'><span>'+U.esc(u.name)+'</span></label>'; }).join('')+'</div>';
     });
-    document.querySelectorAll(`#${cfg.listId} [data-delete]`).forEach(btn => {
-      btn.addEventListener('click', async () => {
-        if (!confirm(`Удалить ${cfg.labelOne}?`)) return;
-        try {
-          const { error } = await sb.from(cfg.table).delete().eq('id', btn.dataset.delete);
-          if (error) throw error;
-          toast('Удалено', 'success');
-          if (editingId === btn.dataset.delete) clearForm();
-          await load();
-        } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
-      });
+    dialog({ title:'Состав цепочки «'+chain.name+'»', ok:'Сохранить', body:body||'<div class="m4-hint">Нет активных подразделений.</div>',
+      onMount:function(ov){ ov.querySelectorAll('.m4-check input').forEach(function(c){ c.addEventListener('change', function(){ c.closest('.m4-check').classList.toggle('sel', c.checked); }); }); },
+      onOk:async function(ov){ var ids=Array.prototype.map.call(ov.querySelectorAll('.m4-check input:checked'), function(c){ return c.getAttribute('data-uid'); }); var r=await RIVA.rpc('set_chain_units',{p_chain_id:chain.id,p_unit_ids:ids}); return handle(r,'Состав обновлён','org'); }});
+  }
+  function openChainAnalytics(chain){
+    var body='<div class="m4-tools" style="margin-bottom:var(--sp-4)"><div class="m4-seg" id="ca-seg"><button data-p="month" class="on">Месяц</button><button data-p="quarter">Квартал</button><button data-p="year">Год</button></div></div><div id="ca-body"><div class="m4-loading"><div class="spin"></div>Расчёт…</div></div>';
+    var ov=dialog({ title:'Аналитика цепочки «'+chain.name+'»', ok:false, cancel:'Закрыть', body:body, onOk:function(){} });
+    var per='month';
+    async function run(){
+      var box=ov.querySelector('#ca-body'); box.innerHTML='<div class="m4-loading"><div class="spin"></div>Расчёт…</div>';
+      var p=computePeriod(per); var a=await RIVA.rpc('get_chain_analytics',{p_chain_id:chain.id,p_from:p.from,p_to:p.to});
+      if(!a||!a.ok){ box.innerHTML='<div class="m4-hint">'+U.esc((a&&a.error)||'Ошибка')+'</div>'; return; }
+      box.innerHTML='<div class="m4-kpis" style="grid-template-columns:1fr 1fr;gap:var(--sp-3)">'
+        +'<div class="m4-kpi"><div class="k">Выручка</div><div class="v inc" style="font-size:1.3rem">'+U.formatMoney(a.sales.revenue)+'</div><div class="s">'+(a.sales.count||0)+' заказов</div></div>'
+        +'<div class="m4-kpi"><div class="k">Закупки</div><div class="v exp" style="font-size:1.3rem">'+U.formatMoney(a.supply.spent)+'</div><div class="s">'+(a.supply.count||0)+' поставок</div></div>'
+        +'<div class="m4-kpi"><div class="k">Выпуск</div><div class="v" style="font-size:1.3rem">'+U.formatNumber(a.production.output)+' ед.</div><div class="s">'+(a.production.runs||0)+' партий</div></div>'
+        +'<div class="m4-kpi"><div class="k">Оценка прибыли</div><div class="v" style="font-size:1.3rem;color:'+(num(a.profit_estimate)>=0?'var(--st-completed)':'var(--st-cancelled)')+'">'+U.formatMoney(a.profit_estimate)+'</div><div class="s">склад: '+U.formatMoney(a.warehouse_value)+'</div></div>'
+        +'</div>';
+    }
+    ov.querySelector('#ca-seg').addEventListener('click', function(e){ var b=e.target.closest('button'); if(!b) return; per=b.getAttribute('data-p'); ov.querySelectorAll('#ca-seg button').forEach(function(x){x.classList.remove('on');}); b.classList.add('on'); run(); });
+    run();
+  }
+
+  /* ============ ПОЛЬЗОВАТЕЛИ ============ */
+  async function loadMembers(panel){
+    var m=await RIVA.rpc('list_group_members'); _members=Array.isArray(m)?m:[];
+    var p=await RIVA.rpc('list_pending_invitations'); _pending=Array.isArray(p)?p:[];
+    if(!alive()) return; renderMembers();
+  }
+  function renderMembers(){
+    var panel=document.getElementById('m4p-members');
+    var rows=_members.filter(function(u){ return !search || (u.name||'').toLowerCase().indexOf(search)>=0 || (u.email||'').toLowerCase().indexOf(search)>=0; });
+    var html='<div class="m4-card" style="margin-bottom:var(--sp-5)"><div class="ch">Участники <span class="sub">'+_members.length+'</span></div><div class="m4-tablewrap"><table class="m4-tbl"><thead><tr><th>Участник</th><th>Роль</th><th>Статус</th><th>Сессия</th>'+(isAdmin()?'<th></th>':'')+'</tr></thead><tbody>';
+    rows.forEach(function(u){
+      html+='<tr><td><div class="nm">'+U.esc(u.name||'—')+(u.is_me?' <span class="m4-chip">вы</span>':'')+(u.is_owner?' <span class="m4-chip role-admin">владелец</span>':'')+'</div><div class="sub">'+U.esc(u.email||'')+'</div></td>'
+        +'<td><span class="m4-chip'+(u.role==='admin'?' role-admin':'')+'">'+U.esc(ROLE_LABEL[u.role]||u.role)+'</span></td>'
+        +'<td>'+(u.is_active?'<span class="dot-on"></span> активен':'<span class="dot-off"></span> отключён')+'</td>'
+        +'<td>'+(u.session_active?('<span class="dot-on"></span> '+U.esc(u.session_device||'онлайн')):'<span class="sub">—</span>')+'</td>'
+        +(isAdmin()?('<td><div class="m4-acts">'+(u.is_owner||u.is_me?'':memberActions(u))+'</div></td>'):'')+'</tr>';
     });
-  }
-
-  return { load };
-}
-
-const suppliersCtl = makeDirectoryController('supplier');
-const customersCtl = makeDirectoryController('customer');
-async function loadSuppliersTab() { await suppliersCtl.load(); }
-async function loadCustomersTab() { await customersCtl.load(); }
-
-// ================================================================
-// REPORTS
-// ================================================================
-
-const rep = { type: 'warehouse', rows: [], columns: [] };
-let reportsBound = false;
-
-function initReports() {
-  if (!reportsBound) {
-    reportsBound = true;
-    $('m4-rep-type').addEventListener('change', updateReportPeriodUi);
-    $('m4-rep-run').addEventListener('click', buildReport);
-    $('m4-rep-csv').addEventListener('click', exportReportCsv);
-  }
-  const to = new Date();
-  const from = new Date(); from.setDate(to.getDate() - 30);
-  $('m4-rep-from').value = from.toISOString().slice(0,10);
-  $('m4-rep-to').value = to.toISOString().slice(0,10);
-  updateReportPeriodUi();
-}
-
-function updateReportPeriodUi() {
-  const type = $('m4-rep-type').value;
-  $('m4-rep-period-wrap').style.visibility = type === 'warehouse' ? 'hidden' : 'visible';
-}
-
-async function buildReport() {
-  const type = $('m4-rep-type').value;
-  rep.type = type;
-  $('m4-rep-csv').disabled = true;
-  $('m4-rep-table').innerHTML = `<div class="px-5 py-16 text-center"><div class="w-6 h-6 loader inline-block"></div></div>`;
-
-  try {
-    if (type === 'warehouse') {
-      const { data, error } = await sb.from('warehouse_items').select('*').order('name');
-      if (error) throw error;
-      rep.columns = [
-        { key: 'type', label: 'Тип', fmt: v => v === 'material' ? 'Материал' : 'Продукция' },
-        { key: 'article', label: 'Артикул' },
-        { key: 'name', label: 'Название' },
-        { key: 'unit', label: 'Ед.' },
-        { key: 'quantity', label: 'Остаток', num: true, fmt: v => formatNumber(v || 0) },
-        { key: 'price', label: 'Цена', num: true, fmt: v => v == null ? '—' : formatMoney(v) },
-        { key: 'sum', label: 'Сумма', num: true, fmt: v => formatMoney(v) }
-      ];
-      rep.rows = (data || []).map(r => ({ ...r, sum: Number(r.quantity || 0) * Number(r.price || 0) }));
-    } else if (type === 'sales') {
-      const fromIso = new Date($('m4-rep-from').value).toISOString();
-      const toIso = new Date($('m4-rep-to').value + 'T23:59:59').toISOString();
-      const { data, error } = await sb.from('sales_orders')
-        .select('order_number, status, payment_status, created_at, shipped_at, completed_at, customers(name), sales_order_items(quantity, price)')
-        .gte('created_at', fromIso).lte('created_at', toIso)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      rep.columns = [
-        { key: 'order_number', label: '№ заказа' },
-        { key: 'customer', label: 'Клиент' },
-        { key: 'status', label: 'Статус', fmt: v => SALES_STATUS[v] || v },
-        { key: 'payment_status', label: 'Оплата', fmt: v => PAYMENT[v] || v },
-        { key: 'created', label: 'Создан' },
-        { key: 'total', label: 'Сумма', num: true, fmt: v => formatMoney(v) }
-      ];
-      rep.rows = (data || []).map(o => ({
-        ...o,
-        customer: o.customers?.name || '—',
-        created: formatDate(new Date(o.created_at)),
-        total: (o.sales_order_items || []).reduce((s, i) => s + Number(i.quantity || 0) * Number(i.price || 0), 0)
-      }));
-    } else if (type === 'supply') {
-      const fromIso = new Date($('m4-rep-from').value).toISOString();
-      const toIso = new Date($('m4-rep-to').value + 'T23:59:59').toISOString();
-      const { data, error } = await sb.from('supply_orders')
-        .select('order_number, status, payment_status, created_at, placed_at, received_at, suppliers(name), supply_order_items(quantity, price)')
-        .gte('created_at', fromIso).lte('created_at', toIso)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      rep.columns = [
-        { key: 'order_number', label: '№ заказа' },
-        { key: 'supplier', label: 'Поставщик' },
-        { key: 'status', label: 'Статус', fmt: v => SUPPLY_STATUS[v] || v },
-        { key: 'payment_status', label: 'Оплата', fmt: v => PAYMENT[v] || v },
-        { key: 'created', label: 'Создан' },
-        { key: 'total', label: 'Сумма', num: true, fmt: v => formatMoney(v) }
-      ];
-      rep.rows = (data || []).map(o => ({
-        ...o,
-        supplier: o.suppliers?.name || '—',
-        created: formatDate(new Date(o.created_at)),
-        total: (o.supply_order_items || []).reduce((s, i) => s + Number(i.quantity || 0) * Number(i.price || 0), 0)
-      }));
-    } else if (type === 'production') {
-      const fromIso = new Date($('m4-rep-from').value).toISOString();
-      const toIso = new Date($('m4-rep-to').value + 'T23:59:59').toISOString();
-      const { data, error } = await sb.from('production_runs')
-        .select('run_number, status, planned_quantity, actual_quantity, created_at, started_at, finished_at, recipes(name)')
-        .gte('created_at', fromIso).lte('created_at', toIso)
-        .order('created_at', { ascending: false });
-      if (error) throw error;
-      rep.columns = [
-        { key: 'run_number', label: '№ партии' },
-        { key: 'recipe', label: 'Рецепт' },
-        { key: 'status', label: 'Статус', fmt: v => PRODUCTION_STATUS[v] || v },
-        { key: 'planned_quantity', label: 'План', num: true, fmt: v => formatNumber(v || 0) },
-        { key: 'actual_quantity', label: 'Факт', num: true, fmt: v => v == null ? '—' : formatNumber(v) },
-        { key: 'created', label: 'Создана' },
-        { key: 'finished', label: 'Завершена' }
-      ];
-      rep.rows = (data || []).map(r => ({
-        ...r,
-        recipe: r.recipes?.name || '—',
-        created: formatDate(new Date(r.created_at)),
-        finished: r.finished_at ? formatDate(new Date(r.finished_at)) : '—'
-      }));
-    } else if (type === 'treasury') {
-      const fromIso = $('m4-rep-from').value;
-      const toIso = $('m4-rep-to').value;
-      const { data, error } = await sb.from('treasury_operations').select('*')
-        .gte('occurred_on', fromIso).lte('occurred_on', toIso)
-        .order('occurred_on', { ascending: false });
-      if (error) throw error;
-      rep.columns = [
-        { key: 'occurred_on', label: 'Дата', fmt: v => formatDate(new Date(v)) },
-        { key: 'direction', label: 'Тип', fmt: v => v === 'income' ? 'Доход' : 'Расход' },
-        { key: 'category', label: 'Категория', fmt: v => CATEGORY_LABELS[v] || v },
-        { key: 'counterparty', label: 'Контрагент' },
-        { key: 'description', label: 'Описание' },
-        { key: 'amount', label: 'Сумма', num: true, fmt: v => formatMoney(v) }
-      ];
-      rep.rows = data || [];
+    html+='</tbody></table></div></div>';
+    // приглашения
+    html+='<div class="m4-card"><div class="ch">Приглашения <span class="sub">'+_pending.length+'</span></div>';
+    if(!_pending.length) html+='<div class="m4-empty"><div class="d">Нет ожидающих приглашений</div></div>';
+    else{ html+='<div class="m4-tablewrap"><table class="m4-tbl"><thead><tr><th>Email</th><th>Роль</th><th>Истекает</th>'+(isAdmin()?'<th></th>':'')+'</tr></thead><tbody>';
+      _pending.forEach(function(p){ html+='<tr><td class="nm">'+U.esc(p.email)+'</td><td>'+U.esc(ROLE_LABEL[p.role]||p.role)+'</td><td class="sub">'+U.formatDate(p.expires_at)+'</td>'+(isAdmin()?('<td><div class="m4-acts"><button class="m4-ic danger" title="Отозвать" data-revoke="'+p.id+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6 6 18M6 6l12 12"/></svg></button></div></td>'):'')+'</tr>'; });
+      html+='</tbody></table></div>';
     }
-
-    renderReportTable();
-    $('m4-rep-count').textContent = rep.rows.length + ' ' + pluralize(rep.rows.length, ['запись','записи','записей']);
-    $('m4-rep-csv').disabled = rep.rows.length === 0;
-  } catch (e) {
-    $('m4-rep-table').innerHTML = `<div class="px-5 py-6 text-sm text-state-error">${esc(e.message)}</div>`;
-  }
-}
-
-const SALES_STATUS = { draft: 'Черновик', confirmed: 'Подтверждён', shipped: 'Отгружен', completed: 'Завершён', cancelled: 'Отменён' };
-const SUPPLY_STATUS = { draft: 'В работе', placed: 'Размещён', in_transit: 'В пути', received: 'На складе' };
-const PRODUCTION_STATUS = { planned: 'Запланировано', in_progress: 'В работе', done: 'Завершено', cancelled: 'Отменено' };
-const PAYMENT = { unpaid: 'Не оплачено', partial: 'Частично', paid: 'Оплачено' };
-
-function renderReportTable() {
-  if (rep.rows.length === 0) {
-    $('m4-rep-table').innerHTML = `<div class="px-5 py-16 text-center text-sm text-fg-muted">Нет данных</div>`;
-    return;
-  }
-  $('m4-rep-table').innerHTML = `
-    <table class="m4-table">
-      <thead><tr>${rep.columns.map(c => `<th class="${c.num ? 'num' : ''}">${esc(c.label)}</th>`).join('')}</tr></thead>
-      <tbody>
-        ${rep.rows.map(r => `
-          <tr>${rep.columns.map(c => {
-            const raw = r[c.key];
-            const v = c.fmt ? c.fmt(raw) : (raw ?? '—');
-            return `<td class="${c.num ? 'num' : ''}">${esc(v)}</td>`;
-          }).join('')}</tr>
-        `).join('')}
-      </tbody>
-    </table>
-  `;
-}
-
-function exportReportCsv() {
-  const header = rep.columns.map(c => csvEscape(c.label)).join(',');
-  const lines = rep.rows.map(r => rep.columns.map(c => {
-    const raw = r[c.key];
-    const v = c.fmt ? c.fmt(raw) : (raw ?? '');
-    return csvEscape(typeof v === 'string' ? v : String(v));
-  }).join(','));
-  const csv = '\uFEFF' + [header, ...lines].join('\r\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement('a');
-  a.href = url;
-  a.download = `report-${rep.type}-${new Date().toISOString().slice(0,10)}.csv`;
-  a.click();
-  URL.revokeObjectURL(url);
-}
-function csvEscape(s) { s = String(s ?? ''); return /[",\r\n]/.test(s) ? '"' + s.replace(/"/g, '""') + '"' : s; }
-
-// ================================================================
-// AUDIT LOG
-// ================================================================
-
-const audit = { page: 0, pageSize: 100, total: 0 };
-let auditBound = false;
-
-async function initAudit() {
-  if (!auditBound) {
-    auditBound = true;
-    $('m4-audit-refresh').addEventListener('click', () => { audit.page = 0; loadAudit(); });
-    $('m4-audit-search').addEventListener('input', debounce(() => { audit.page = 0; loadAudit(); }, 300));
-    $('m4-audit-user').addEventListener('change', () => { audit.page = 0; loadAudit(); });
-    $('m4-audit-action').addEventListener('change', () => { audit.page = 0; loadAudit(); });
-    $('m4-audit-from').addEventListener('change', () => { audit.page = 0; loadAudit(); });
-    $('m4-audit-to').addEventListener('change', () => { audit.page = 0; loadAudit(); });
-    $('m4-audit-csv').addEventListener('click', exportAuditCsv);
-  }
-
-  const { data: members } = await sb.rpc('list_group_members');
-  $('m4-audit-user').innerHTML = '<option value="">Все пользователи</option>' +
-    (members || []).map(m => `<option value="${esc(m.user_id)}">${esc(m.name || m.email)}</option>`).join('');
-
-  const actions = ['session.started','session.ended','group.created','group.updated','user.joined','member.added','member.role_changed','member.blocked','member.unblocked','member.removed','invitation.created','invitation.revoked','supply.received','sale.shipped','sale.completed','sale.cancelled','production.started','production.finished','production.cancelled'];
-  $('m4-audit-action').innerHTML = '<option value="">Все действия</option>' +
-    actions.map(a => `<option value="${esc(a)}">${esc(a)}</option>`).join('');
-
-  const to = new Date();
-  const from = new Date(); from.setDate(to.getDate() - 30);
-  $('m4-audit-from').value = from.toISOString().slice(0,10);
-  $('m4-audit-to').value = to.toISOString().slice(0,10);
-
-  audit.page = 0;
-  await loadAudit();
-}
-
-async function loadAudit() {
-  const q = ($('m4-audit-search').value || '').trim();
-  const u = $('m4-audit-user').value;
-  const a = $('m4-audit-action').value;
-  const from = $('m4-audit-from').value ? new Date($('m4-audit-from').value).toISOString() : null;
-  const to = $('m4-audit-to').value ? new Date($('m4-audit-to').value + 'T23:59:59').toISOString() : null;
-
-  let query = sb.from('audit_log').select('*', { count: 'exact' }).order('created_at', { ascending: false });
-  if (q) query = query.ilike('description', `%${q}%`);
-  if (u) query = query.eq('user_id', u);
-  if (a) query = query.eq('action', a);
-  if (from) query = query.gte('created_at', from);
-  if (to) query = query.lte('created_at', to);
-  query = query.range(audit.page * audit.pageSize, audit.page * audit.pageSize + audit.pageSize - 1);
-
-  const { data, count, error } = await query;
-  if (error) { $('m4-audit-list').innerHTML = `<div class="px-5 py-6 text-sm text-state-error">${esc(error.message)}</div>`; return; }
-
-  audit.total = count || 0;
-
-  if ((data || []).length === 0) {
-    $('m4-audit-list').innerHTML = `<div class="px-5 py-10 text-sm text-fg-muted text-center">Записей нет</div>`;
-    $('m4-audit-pager').textContent = '';
-    return;
-  }
-
-  $('m4-audit-list').innerHTML = (data || []).map(r => `
-    <div class="px-5 py-3 flex items-start gap-3">
-      <div class="min-w-0 flex-1">
-        <div class="text-sm">${esc(r.description || '—')}</div>
-        <div class="text-xs text-fg-muted mt-0.5">
-          ${esc(formatDateTime(new Date(r.created_at)))} · ${esc(r.user_name || '—')} · ${esc(r.action || '')}
-        </div>
-      </div>
-    </div>
-  `).join('');
-
-  const shown = Math.min((audit.page + 1) * audit.pageSize, audit.total);
-  const prev = audit.page > 0 ? `<button id="m4-audit-prev" class="text-fg-muted hover:text-fg mr-3">← Предыдущие</button>` : '';
-  const next = shown < audit.total ? `<button id="m4-audit-next" class="text-fg-muted hover:text-fg ml-3">Следующие →</button>` : '';
-  $('m4-audit-pager').innerHTML = `${prev}Показано ${shown} из ${audit.total}${next}`;
-
-  $('m4-audit-prev')?.addEventListener('click', () => { audit.page--; loadAudit(); });
-  $('m4-audit-next')?.addEventListener('click', () => { audit.page++; loadAudit(); });
-}
-
-async function exportAuditCsv() {
-  const q = ($('m4-audit-search').value || '').trim();
-  const u = $('m4-audit-user').value;
-  const a = $('m4-audit-action').value;
-  const from = $('m4-audit-from').value ? new Date($('m4-audit-from').value).toISOString() : null;
-  const to = $('m4-audit-to').value ? new Date($('m4-audit-to').value + 'T23:59:59').toISOString() : null;
-
-  let query = sb.from('audit_log').select('created_at, user_name, action, entity_type, description').order('created_at', { ascending: false }).limit(10000);
-  if (q) query = query.ilike('description', `%${q}%`);
-  if (u) query = query.eq('user_id', u);
-  if (a) query = query.eq('action', a);
-  if (from) query = query.gte('created_at', from);
-  if (to) query = query.lte('created_at', to);
-
-  const { data, error } = await query;
-  if (error) { toast('Ошибка: ' + error.message, 'error'); return; }
-
-  const header = ['Дата и время','Пользователь','Действие','Сущность','Описание'].map(csvEscape).join(',');
-  const lines = (data || []).map(r => [
-    formatDateTime(new Date(r.created_at)),
-    r.user_name || '',
-    r.action || '',
-    r.entity_type || '',
-    r.description || ''
-  ].map(csvEscape).join(','));
-  const csv = '\uFEFF' + [header, ...lines].join('\r\n');
-  const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
-  const url = URL.createObjectURL(blob);
-  const a2 = document.createElement('a');
-  a2.href = url;
-  a2.download = `audit-${new Date().toISOString().slice(0,10)}.csv`;
-  a2.click();
-  URL.revokeObjectURL(url);
-  toast(`Экспортировано ${data?.length || 0} записей`, 'success');
-}
-
-// ================================================================
-// SETTINGS (admin only)
-// ================================================================
-
-async function initSettings() {
-  if (!isAdmin) {
-    $('m4-settings-body').innerHTML = `<div class="bg-surface rounded-2xl border border-line p-6 text-sm text-fg-muted">Раздел доступен только администратору</div>`;
-    return;
-  }
-
-  const { data: group, error } = await sb.from('groups').select('*').eq('id', groupId).maybeSingle();
-  if (error) { $('m4-settings-body').innerHTML = `<div class="text-sm text-state-error p-5">${esc(error.message)}</div>`; return; }
-  const cd = group.company_details || {};
-  const trialRemaining = group.trial_ends_at ? Math.max(0, Math.ceil((new Date(group.trial_ends_at) - new Date()) / 86400000)) : 0;
-
-  $('m4-settings-body').innerHTML = `
-    <div class="bg-surface rounded-2xl border border-line p-5">
-      <h3 class="font-medium mb-4">Основные</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <label class="block md:col-span-2"><span class="text-xs text-fg-muted block mb-1.5">Название группы *</span>
-          <input id="m4-set-name" type="text" maxlength="200" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm" value="${esc(group.name || '')}" ${isOwner ? '' : 'disabled'}>
-        </label>
-      </div>
-
-      <h3 class="font-medium mt-6 mb-4">Реквизиты для счетов</h3>
-      <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-        <label class="block"><span class="text-xs text-fg-muted block mb-1.5">Юр. название</span>
-          <input id="m4-set-legal" type="text" maxlength="300" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm" value="${esc(cd.legal_name || '')}" ${isOwner ? '' : 'disabled'}>
-        </label>
-        <label class="block"><span class="text-xs text-fg-muted block mb-1.5">ИНН</span>
-          <input id="m4-set-inn" type="text" maxlength="20" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm" value="${esc(cd.inn || '')}" ${isOwner ? '' : 'disabled'}>
-        </label>
-        <label class="block"><span class="text-xs text-fg-muted block mb-1.5">КПП</span>
-          <input id="m4-set-kpp" type="text" maxlength="20" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm" value="${esc(cd.kpp || '')}" ${isOwner ? '' : 'disabled'}>
-        </label>
-        <label class="block"><span class="text-xs text-fg-muted block mb-1.5">ОГРН</span>
-          <input id="m4-set-ogrn" type="text" maxlength="20" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm" value="${esc(cd.ogrn || '')}" ${isOwner ? '' : 'disabled'}>
-        </label>
-        <label class="block md:col-span-2"><span class="text-xs text-fg-muted block mb-1.5">Адрес</span>
-          <input id="m4-set-address" type="text" maxlength="500" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm" value="${esc(cd.address || '')}" ${isOwner ? '' : 'disabled'}>
-        </label>
-        <label class="block md:col-span-2"><span class="text-xs text-fg-muted block mb-1.5">Банковские реквизиты</span>
-          <textarea id="m4-set-bank" rows="3" maxlength="2000" class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm resize-none" ${isOwner ? '' : 'disabled'}>${esc(cd.bank || '')}</textarea>
-        </label>
-      </div>
-
-      ${isOwner ? `
-        <div class="mt-5">
-          <button id="m4-set-save" class="btn-primary px-5 py-2.5 rounded-xl text-sm font-medium">Сохранить</button>
-        </div>
-      ` : `<p class="text-xs text-fg-muted mt-4">Только владелец группы может изменять эти настройки.</p>`}
-    </div>
-
-    <div class="bg-surface rounded-2xl border border-line p-5">
-      <h3 class="font-medium mb-1">Статус подписки</h3>
-      <p class="text-sm text-fg-muted mb-3">
-        ${trialRemaining > 0
-          ? `Бесплатный период: осталось ${trialRemaining} ${pluralize(trialRemaining, ['день','дня','дней'])}, до ${formatDate(new Date(group.trial_ends_at))}`
-          : 'Бесплатный период закончился'}
-      </p>
-      <p class="text-sm text-fg-muted">
-        Детали биллинга — в разделе <button id="m4-set-go-billing" class="underline hover:text-fg">Биллинг</button>
-      </p>
-    </div>
-
-    ${isOwner ? `
-      <div class="bg-state-error/5 border border-state-error/30 rounded-2xl p-5">
-        <h3 class="font-medium text-state-error mb-2">Опасная зона</h3>
-        <p class="text-sm text-fg-secondary mb-4">
-          Удаление группы приведёт к безвозвратной потере всех данных: заказов, позиций склада, рецептов, партий, журнала действий, вложений.
-          Все участники группы потеряют к ней доступ. Это действие нельзя отменить.
-        </p>
-        <button id="m4-set-delete" class="px-5 py-2.5 rounded-xl text-sm font-medium border border-state-error text-state-error hover:bg-state-error/10 transition-colors">
-          Удалить группу «${esc(group.name)}»
-        </button>
-      </div>
-    ` : ''}
-  `;
-
-  $('m4-set-save')?.addEventListener('click', async () => {
-    const btn = $('m4-set-save');
-    btn.disabled = true; btn.textContent = 'Сохраняем…';
-    try {
-      const newName = $('m4-set-name').value.trim();
-      const details = {
-        legal_name: $('m4-set-legal').value.trim() || null,
-        inn: $('m4-set-inn').value.trim() || null,
-        kpp: $('m4-set-kpp').value.trim() || null,
-        ogrn: $('m4-set-ogrn').value.trim() || null,
-        address: $('m4-set-address').value.trim() || null,
-        bank: $('m4-set-bank').value.trim() || null
-      };
-      const { data, error } = await sb.rpc('update_group_details', { p_name: newName, p_company_details: details });
-      if (error) throw error;
-      if (!data?.ok) {
-        const map = { INVALID_NAME: 'Введите название группы', NOT_OWNER: 'Только владелец может изменять настройки' };
-        throw new Error(map[data?.error] || data?.error);
-      }
-      toast('Настройки сохранены', 'success');
-    } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
-    finally { btn.disabled = false; btn.textContent = 'Сохранить'; }
-  });
-
-  $('m4-set-go-billing')?.addEventListener('click', () => window.RIVA.loadPage('billing'));
-
-  $('m4-set-delete')?.addEventListener('click', async () => {
-    const typed = prompt(`Введите название группы для подтверждения:\n\n${group.name}`);
-    if (typed !== group.name) {
-      if (typed !== null) toast('Название не совпадает, удаление отменено', 'warning');
-      return;
+    html+='</div>';
+    panel.innerHTML=html;
+    if(isAdmin()){
+      panel.querySelectorAll('[data-role]').forEach(function(b){ b.onclick=function(){ openRoleDialog(b.getAttribute('data-id')); }; });
+      panel.querySelectorAll('[data-units]').forEach(function(b){ b.onclick=function(){ openMemberUnits(b.getAttribute('data-id')); }; });
+      panel.querySelectorAll('[data-active]').forEach(function(b){ b.onclick=async function(){ var on=b.getAttribute('data-on')==='1'; var r=await RIVA.rpc('set_member_active',{p_user_id:b.getAttribute('data-id'),p_is_active:!on}); handle(r, on?'Отключён':'Включён','members'); }; });
+      panel.querySelectorAll('[data-remove]').forEach(function(b){ b.onclick=function(){ confirmAct('Удалить участника из группы?','Доступ будет отозван.','Удалить',true,async function(){ var r=await RIVA.rpc('remove_member',{p_user_id:b.getAttribute('data-remove')}); return handle(r,'Удалён','members'); }); }; });
+      panel.querySelectorAll('[data-revoke]').forEach(function(b){ b.onclick=function(){ confirmAct('Отозвать приглашение?','',' Отозвать',true,async function(){ var r=await RIVA.rpc('revoke_invitation',{p_invitation_id:b.getAttribute('data-revoke')}); return handle(r,'Отозвано','members'); }); }; });
     }
-    try {
-      const { data, error } = await sb.rpc('delete_my_group', { p_group_id: groupId });
-      if (error) throw error;
-      if (!data?.ok) throw new Error(data?.error);
-      toast('Группа удалена', 'success');
-      setTimeout(() => window.RIVA.boot(), 500);
-    } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
-  });
-}
+  }
+  function memberActions(u){
+    return '<button class="m4-ic" title="Роль" data-role="" data-id="'+u.user_id+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M12 3l7 3v6c0 4-3 7-7 8-4-1-7-4-7-8V6z"/></svg></button>'
+      +'<button class="m4-ic" title="Подразделения" data-units="" data-id="'+u.user_id+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M3 7h6l2 2h10v9H3z"/></svg></button>'
+      +'<button class="m4-ic" title="'+(u.is_active?'Отключить':'Включить')+'" data-active="" data-id="'+u.user_id+'" data-on="'+(u.is_active?'1':'0')+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8">'+(u.is_active?'<path d="M18.36 6.64A9 9 0 1 1 5.64 6.64M12 2v10"/>':'<path d="M5 12h14"/>')+'</svg></button>'
+      +'<button class="m4-ic danger" title="Удалить" data-remove="'+u.user_id+'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg></button>';
+  }
+  function openRoleDialog(userId){
+    var u=_members.find(function(x){return x.user_id===userId;}); if(!u) return;
+    var opts=Object.keys(ROLE_LABEL).map(function(r){ return '<option value="'+r+'"'+(u.role===r?' selected':'')+'>'+ROLE_LABEL[r]+'</option>'; }).join('');
+    dialog({ title:'Роль · '+(u.name||u.email), ok:'Сохранить', body:'<div class="m4-field"><label>Роль</label><select class="m4-select" id="rl">'+opts+'</select></div><div class="m4-hint">Снабжение/Производство/Продажи — рядовые роли. Управление и Администратор имеют расширенные права.</div>', onOk:async function(ov){ var r=await RIVA.rpc('update_member_role',{p_user_id:userId,p_role:val(ov,'#rl')}); return handle(r,'Роль обновлена','members'); }});
+  }
+  async function openMemberUnits(userId){
+    if(!cache.org){ cache.org=await RIVA.rpc('get_org_structure'); }
+    var org=cache.org; if(!(org&&org.ok)){ U.toast('Нет данных оргструктуры'); return; }
+    var mem=(org.members||[]).find(function(m){return m.user_id===userId;});
+    var sel={}; (mem&&mem.unit_ids||[]).forEach(function(id){ sel[id]=true; });
+    var body='<div class="m4-hint" style="margin-bottom:12px">Если ничего не отмечено — доступ ко <b>всем</b> подразделениям его раздела (общая роль). Отметьте конкретные, чтобы ограничить.</div>';
+    ['supply','production','sales'].forEach(function(sec){
+      var list=(org.units||[]).filter(function(u){return u.section===sec && u.is_active;});
+      if(!list.length) return;
+      body+='<div class="m4-section-block"><h4>'+SECTION_LABEL[sec]+'</h4>'+list.map(function(u){ return '<label class="m4-check'+(sel[u.id]?' sel':'')+'"><input type="checkbox" data-uid="'+u.id+'"'+(sel[u.id]?' checked':'')+'><span>'+U.esc(u.name)+'</span></label>'; }).join('')+'</div>';
+    });
+    dialog({ title:'Доступ к подразделениям', ok:'Сохранить', body:body,
+      onMount:function(ov){ ov.querySelectorAll('.m4-check input').forEach(function(c){ c.addEventListener('change', function(){ c.closest('.m4-check').classList.toggle('sel', c.checked); }); }); },
+      onOk:async function(ov){ var ids=Array.prototype.map.call(ov.querySelectorAll('.m4-check input:checked'), function(c){ return c.getAttribute('data-uid'); }); var r=await RIVA.rpc('set_member_units',{p_user_id:userId,p_unit_ids:ids}); if(r&&r.ok){ U.toast('Доступ обновлён'); cache.org=null; } else { U.toast('Ошибка: '+((r&&r.error)||'')); return false; } }});
+  }
+  function openInviteDialog(){
+    var opts=Object.keys(ROLE_LABEL).map(function(r){ return '<option value="'+r+'"'+(r==='supply'?' selected':'')+'>'+ROLE_LABEL[r]+'</option>'; }).join('');
+    dialog({ title:'Пригласить участника', ok:'Отправить', body:'<div class="m4-field"><label>Email (Google-аккаунт)</label><input class="m4-input" id="inv-email" type="email" placeholder="name@gmail.com"></div><div class="m4-field"><label>Роль</label><select class="m4-select" id="inv-role">'+opts+'</select></div><div class="m4-hint">Приглашение примет аккаунт с этим email при входе через Google.</div>',
+      onOk:async function(ov){ var email=val(ov,'#inv-email'); if(!email){ U.toast('Укажите email'); return false; } var r=await RIVA.rpc('invite_member',{p_email:email,p_role:val(ov,'#inv-role')}); if(r&&r.ok){ U.toast('Приглашение создано'); await loadTab('members'); } else { U.toast('Ошибка: '+((r&&r.error)||'')); return false; } }});
+  }
 
-// ---- init ----
-switchTab('treasury');
+  /* ============ ОТЧЁТЫ ============ */
+  async function loadReports(panel){
+    var p=computePeriod(period);
+    var d=await RIVA.rpc('get_dashboard_summary',{p_from:p.from,p_to:p.to});
+    var sum=await RIVA.rpc('get_treasury_summary',{p_from:p.from,p_to:p.to,p_prev_from:p.pf,p_prev_to:p.pt});
+    if(!alive()) return;
+    var s=(d&&d.ok)?d:{sales:{},supply:{},production:{},warehouse:{}};
+    var incCur=sum&&sum.ok?num(sum.auto.income_cur)+num(sum.manual.income_cur):0;
+    var expCur=sum&&sum.ok?num(sum.auto.expense_cur)+num(sum.manual.expense_cur):0;
+    var html='<div class="m4-card" style="margin-bottom:var(--sp-5)"><div class="ch">Сводка за период<button class="m4-btn sm" id="rep-csv">Экспорт ленты CSV</button></div>'
+      +'<div class="m4-tablewrap"><table class="m4-tbl"><tbody>'
+      +repRow('Выручка (продажи)', U.formatMoney(s.sales.revenue||0))
+      +repRow('Закупки (оприходовано)', U.formatMoney(s.supply.spent||0))
+      +repRow('Выпуск продукции', U.formatNumber(s.production.output||0)+' ед.')
+      +repRow('Доходы (казначейство)', U.formatMoney(incCur))
+      +repRow('Расходы (казначейство)', U.formatMoney(expCur))
+      +repRow('Денежный поток', U.formatMoney(incCur-expCur))
+      +repRow('Стоимость склада', U.formatMoney(num(s.warehouse.materials_value)+num(s.warehouse.products_value)))
+      +'</tbody></table></div></div>'
+      +'<div class="m4-hint">Аналитику по отдельным направлениям смотрите во вкладке «Подразделения и цепочки» → значок графика у цепочки. Срез по складу/цеху/отделу — выбором подразделения в верхнем меню (фильтр применится к дашборду).</div>';
+    panel.innerHTML=html;
+    panel.querySelector('#rep-csv').onclick=async function(){ var led=await RIVA.rpc('get_treasury_ledger',{p_from:p.from,p_to:p.to}); if(!(led&&led.ok)){ U.toast('Нет данных'); return; } exportLedgerCsv(led.rows||[]); };
+  }
+  function repRow(k,v){ return '<tr><td>'+k+'</td><td class="num nm">'+v+'</td></tr>'; }
+  function exportLedgerCsv(rows){
+    var head=['Дата','Направление','Категория','Описание','Контрагент','Сумма'];
+    var lines=[head.join(';')].concat(rows.map(function(r){ return [U.formatDate(r.occurred_on), r.direction==='income'?'доход':'расход', CAT_LABEL[r.category]||r.category, (r.description||'').replace(/;/g,','), (r.counterparty||'').replace(/;/g,','), num(r.amount)].join(';'); }));
+    var blob=new Blob(['\ufeff'+lines.join('\n')], {type:'text/csv;charset=utf-8;'});
+    var a=document.createElement('a'); a.href=URL.createObjectURL(blob); a.download='riva-ledger-'+period+'.csv'; a.click(); setTimeout(function(){ URL.revokeObjectURL(a.href); },1000);
+    U.toast('CSV выгружен');
+  }
+
+  /* ============ ЖУРНАЛ ============ */
+  async function loadAudit(panel){
+    var r=await sb.from('audit_log').select('*').order('created_at',{ascending:false}).limit(200);
+    if(!alive()) return; _audit=r.error?[]:(r.data||[]); renderAudit();
+  }
+  function renderAudit(){
+    var panel=document.getElementById('m4p-audit');
+    var rows=_audit.filter(function(a){ return !search || (a.description||'').toLowerCase().indexOf(search)>=0 || (a.user_name||'').toLowerCase().indexOf(search)>=0 || (a.action||'').toLowerCase().indexOf(search)>=0; });
+    if(!_audit.length){ panel.innerHTML='<div class="m4-card"><div class="m4-empty"><div class="t">Журнал пуст</div><div class="d">Здесь фиксируются действия участников: входы, операции, изменения.</div></div></div>'; return; }
+    var html='<div class="m4-card"><div class="ch">Журнал действий <span class="sub">'+_audit.length+' (последние 200)</span></div><div class="m4-tablewrap"><table class="m4-tbl"><thead><tr><th>Время</th><th>Пользователь</th><th>Действие</th><th>Описание</th></tr></thead><tbody>';
+    rows.forEach(function(a){ html+='<tr><td class="sub">'+U.formatDateTime(a.created_at)+'</td><td class="nm" style="font-weight:500">'+U.esc(a.user_name||'—')+'</td><td><span class="m4-chip ro">'+U.esc(a.action||'')+'</span></td><td>'+U.esc(a.description||'—')+'</td></tr>'; });
+    html+='</tbody></table></div></div>';
+    panel.innerHTML=html;
+  }
+
+  /* ---------- общие ---------- */
+  function handle(r, okMsg, reloadTab){ if(r&&r.ok){ U.toast(okMsg); if(reloadTab) loadTab(reloadTab); return true; } U.toast('Ошибка: '+((r&&r.error)||'')); return false; }
+  function dialog(opts){
+    var ov=document.createElement('div'); ov.className='m4-overlay';
+    ov.innerHTML='<div class="m4-dialog"><div class="m4-dhead"><h3>'+U.esc(opts.title)+'</h3><button class="m4-dclose">✕</button></div><div class="m4-dbody">'+opts.body+'</div><div class="m4-dfoot"><button class="m4-btn ghost" data-x="cancel">'+(opts.cancel||'Отмена')+'</button>'+(opts.ok===false?'':'<button class="m4-btn" data-x="ok">'+(opts.ok||'Сохранить')+'</button>')+'</div></div>';
+    document.body.appendChild(ov);
+    function close(){ ov.remove(); }
+    ov.querySelector('.m4-dclose').onclick=close; ov.querySelector('[data-x="cancel"]').onclick=close;
+    ov.addEventListener('mousedown', function(e){ if(e.target===ov) close(); });
+    var okb=ov.querySelector('[data-x="ok"]'); if(okb) okb.onclick=async function(){ okb.disabled=true; try{ var r=await opts.onOk(ov); if(r!==false) close(); } finally { if(okb) okb.disabled=false; } };
+    if(opts.onMount) opts.onMount(ov);
+    return ov;
+  }
+  function openRenameDialog(title, current, fn){ dialog({ title:title, ok:'Сохранить', body:'<div class="m4-field"><label>Название</label><input class="m4-input" id="rn-val" value="'+U.esc(current||'')+'"></div>', onMount:function(ov){ ov.querySelector('#rn-val').focus(); }, onOk:async function(ov){ var v=val(ov,'#rn-val'); if(!v){ U.toast('Укажите название'); return false; } return await fn(v); } }); }
+  function val(ov,s){ var e=ov.querySelector(s); return e?e.value.trim():''; }
+  function confirmAct(title,text,okLabel,danger,fn){ var ov=dialog({ title:title, ok:okLabel, body:'<p style="color:var(--text-2);font-size:.92rem;line-height:1.5;">'+U.esc(text)+'</p>', onOk:async function(){ return await fn(); } }); if(danger){ var b=ov.querySelector('[data-x="ok"]'); if(b){ b.style.background='var(--st-cancelled)'; b.style.color='#fff'; b.style.boxShadow='none'; } } }
+
+  /* ---------- события + старт ---------- */
+  function onView(e){ if(!alive()){ document.removeEventListener('riva:view',onView); return; } var t=tabFromLabel(e.detail&&e.detail.tab); if(t!==curTab) showTab(t); }
+  function onUnits(){ if(!alive()){ document.removeEventListener('riva:units-changed',onUnits); return; } cache.org=null; if(curTab==='dashboard'||curTab==='org') loadTab(curTab); }
+  document.addEventListener('riva:view',onView);
+  document.addEventListener('riva:units-changed',onUnits);
+  showTab(tabFromLabel(RIVA.state.view && RIVA.state.view.tab));
+})();
 </script>
