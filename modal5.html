@@ -1,578 +1,262 @@
-<!-- modal5.html — Страница "Биллинг". -->
-<!-- Доступ: только admin. -->
-
-<section id="m5" class="space-y-6">
-
-  <div class="flex items-center justify-between gap-4 flex-wrap">
-    <div>
-      <h1 class="text-2xl font-medium tracking-tight">Биллинг</h1>
-      <p class="text-sm text-fg-muted mt-1" id="m5-subtitle">—</p>
-    </div>
-  </div>
-
-  <!-- KPI ROW -->
-  <div id="m5-kpi" class="grid grid-cols-1 md:grid-cols-3 gap-3">
-    <div class="bg-surface rounded-2xl border border-line p-5">
-      <div class="text-xs text-fg-muted">Баланс группы</div>
-      <div id="m5-balance" class="text-3xl font-medium mt-2">—</div>
-      <div id="m5-balance-status" class="text-xs text-fg-muted mt-1">—</div>
-    </div>
-    <div class="bg-surface rounded-2xl border border-line p-5">
-      <div class="text-xs text-fg-muted">Следующее списание</div>
-      <div id="m5-next-charge" class="text-3xl font-medium mt-2">—</div>
-      <div id="m5-next-charge-details" class="text-xs text-fg-muted mt-1">—</div>
-    </div>
-    <div class="bg-surface rounded-2xl border border-line p-5 flex items-center">
-      <div class="flex-1">
-        <div class="text-xs text-fg-muted">Действия</div>
-        <button id="m5-topup-btn" class="btn-primary w-full mt-3 py-3 rounded-xl text-sm font-medium">
-          Пополнить баланс
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <!-- HISTORY -->
-  <div class="bg-surface rounded-2xl border border-line overflow-hidden">
-    <div class="px-5 py-4 border-b border-line flex items-center justify-between">
-      <h3 class="font-medium">Движения по балансу</h3>
-      <span id="m5-history-count" class="text-xs text-fg-muted">—</span>
-    </div>
-    <div id="m5-history" class="divide-y divide-line-light">
-      <div class="px-5 py-10 flex items-center justify-center"><div class="w-6 h-6 loader"></div></div>
-    </div>
-  </div>
-
-</section>
-
-<!-- =========================
-     MODAL: выбор способа оплаты + сумма
-========================== -->
-<div id="m5-topup-modal" class="hidden fixed inset-0 z-40 bg-black/30 flex items-start justify-center px-4 py-8 overflow-y-auto">
-  <div class="bg-surface rounded-2xl border border-line w-full max-w-xl">
-    <div class="px-5 py-4 border-b border-line flex items-center justify-between">
-      <h3 class="font-medium">Пополнить баланс</h3>
-      <button class="m5-topup-close p-1 rounded-lg hover:bg-surface-alt">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
-      </button>
-    </div>
-
-    <div class="p-5 space-y-5">
-      <!-- Amount picker -->
-      <div>
-        <div class="text-xs text-fg-muted mb-2">Сумма пополнения, ₽</div>
-        <div class="grid grid-cols-4 gap-2 mb-2">
-          <button class="m5-amount-btn px-3 py-2 rounded-lg border border-line text-sm hover:border-fg" data-amount="1000">1 000</button>
-          <button class="m5-amount-btn px-3 py-2 rounded-lg border border-line text-sm hover:border-fg" data-amount="3000">3 000</button>
-          <button class="m5-amount-btn px-3 py-2 rounded-lg border border-line text-sm hover:border-fg" data-amount="6000">6 000</button>
-          <button class="m5-amount-btn px-3 py-2 rounded-lg border border-line text-sm hover:border-fg" data-amount="12000">12 000</button>
-        </div>
-        <input id="m5-amount-input" type="number" min="100" step="100" placeholder="Или введите свою сумму…"
-          class="w-full px-4 py-2.5 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-        <div id="m5-amount-info" class="text-xs text-fg-muted mt-2">—</div>
-      </div>
-
-      <!-- Method picker -->
-      <div>
-        <div class="text-xs text-fg-muted mb-2">Способ оплаты</div>
-        <div id="m5-methods" class="space-y-2">
-          <!-- заполняется динамически в зависимости от platform_settings -->
-        </div>
-      </div>
-    </div>
-
-    <div class="px-5 py-4 border-t border-line flex items-center justify-end gap-2">
-      <button class="m5-topup-close btn-secondary px-4 py-2 rounded-lg text-sm">Отмена</button>
-    </div>
-  </div>
-</div>
-
-<!-- =========================
-     MODAL: оплата по счёту — реквизиты
-========================== -->
-<div id="m5-invoice-modal" class="hidden fixed inset-0 z-40 bg-black/30 flex items-start justify-center px-4 py-8 overflow-y-auto">
-  <div class="bg-surface rounded-2xl border border-line w-full max-w-2xl">
-    <div class="px-5 py-4 border-b border-line flex items-center justify-between">
-      <div>
-        <h3 class="font-medium">Счёт на оплату</h3>
-        <p class="text-xs text-fg-muted mt-0.5" id="m5-invoice-sub">—</p>
-      </div>
-      <button class="m5-invoice-close p-1 rounded-lg hover:bg-surface-alt">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
-      </button>
-    </div>
-    <div id="m5-invoice-body" class="p-5 space-y-4">
-      <div class="flex items-center justify-center py-10"><div class="w-6 h-6 loader"></div></div>
-    </div>
-    <div class="px-5 py-4 border-t border-line flex items-center justify-end gap-2 flex-wrap">
-      <button id="m5-invoice-print" class="btn-secondary px-4 py-2 rounded-lg text-sm">Распечатать / Сохранить PDF</button>
-      <button class="m5-invoice-close btn-primary px-4 py-2 rounded-lg text-sm">Готово</button>
-    </div>
-  </div>
-</div>
-
-<!-- =========================
-     MODAL: оплата через Telegram Stars / CryptoBot
-========================== -->
-<div id="m5-paylink-modal" class="hidden fixed inset-0 z-40 bg-black/30 flex items-center justify-center px-4 py-8 overflow-y-auto">
-  <div class="bg-surface rounded-2xl border border-line w-full max-w-md">
-    <div class="px-5 py-4 border-b border-line flex items-center justify-between">
-      <h3 class="font-medium" id="m5-paylink-title">Оплата</h3>
-      <button class="m5-paylink-close p-1 rounded-lg hover:bg-surface-alt">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
-      </button>
-    </div>
-    <div id="m5-paylink-body" class="p-5 space-y-4 text-center">
-      <div class="flex items-center justify-center py-10"><div class="w-6 h-6 loader"></div></div>
-    </div>
-    <div class="px-5 py-4 border-t border-line flex items-center justify-end gap-2 text-xs text-fg-muted">
-      <span>Окно можно закрыть — баланс пополнится автоматически после оплаты</span>
-    </div>
-  </div>
-</div>
-
 <style>
-  .m5-amount-btn.active { background: var(--fg); color: var(--bg); border-color: var(--fg); }
+/* ============================================================ RIVA · modal5 — Настройки ============================================================ */
+.m5{ color:var(--text); max-width:760px; }
+.m5-head{ display:flex; align-items:center; justify-content:space-between; gap:var(--sp-4); margin-bottom:var(--sp-5); flex-wrap:wrap; }
+.m5-title{ font-size:1.35rem; font-weight:700; letter-spacing:-.02em; }
+.m5-panel{ display:none; }
+.m5-panel.on{ display:block; animation:m5in .3s var(--ease); }
+@keyframes m5in{ from{ opacity:0; transform:translateY(6px);} to{ opacity:1; transform:none; } }
 
-  .m5-method {
-    border: 1px solid var(--line); border-radius: 12px; padding: 14px;
-    cursor: pointer; transition: all .15s ease;
-    display: flex; align-items: center; gap: 12px;
-  }
-  .m5-method:hover { border-color: var(--fg); }
-  .m5-method.disabled { opacity: .4; cursor: not-allowed; }
-  .m5-method-icon {
-    width: 40px; height: 40px; border-radius: 10px;
-    display: flex; align-items: center; justify-content: center;
-    background: var(--bg-alt); flex-shrink: 0;
-  }
+.m5-card{ border:1px solid var(--border); border-radius:var(--r-lg); background:var(--card); box-shadow:var(--shadow-card); overflow:hidden; margin-bottom:var(--sp-5); }
+.m5-card .ch{ padding:var(--sp-4) var(--sp-5); border-bottom:1px solid var(--border); font-weight:600; font-size:.95rem; display:flex; align-items:center; justify-content:space-between; }
+.m5-card .cb{ padding:var(--sp-5); }
+.m5-card .ch .sub{ font-weight:400; color:var(--text-3); font-size:.8rem; }
 
-  .m5-badge { display: inline-flex; align-items: center; gap: 4px; padding: 2px 8px; border-radius: 6px; font-size: 11px; font-weight: 500; line-height: 1.4; white-space: nowrap; }
-  .m5-badge-pending   { background: #FEF3C7; color: #92400E; }
-  .m5-badge-completed { background: #DCFCE7; color: #15803D; }
-  .m5-badge-failed    { background: #FEE2E2; color: #B91C1C; }
-  .m5-badge-cancelled { background: #F5F5F5; color: #525252; }
+.m5-id{ display:flex; align-items:center; gap:var(--sp-4); }
+.m5-avatar{ width:64px; height:64px; border-radius:var(--r-lg); display:grid; place-items:center; font-weight:700; font-size:1.3rem; color:var(--btn-fg); background:var(--btn-bg); overflow:hidden; flex:0 0 auto; }
+.m5-avatar img{ width:100%; height:100%; object-fit:cover; }
+.m5-id .who b{ font-size:1.05rem; font-weight:700; display:block; }
+.m5-id .who span{ font-size:.85rem; color:var(--text-3); }
+.m5-id .who .role{ display:inline-flex; margin-top:6px; font-size:.74rem; padding:2px 9px; border-radius:var(--r-sm); background:var(--accent-soft); color:var(--accent); border:1px solid var(--accent-line); }
 
-  .m5-invoice-doc { font-size: 13px; }
-  .m5-invoice-doc table { width: 100%; border-collapse: collapse; }
-  .m5-invoice-doc td { padding: 6px 8px; border-bottom: 1px solid var(--line-light); vertical-align: top; }
-  .m5-invoice-doc td:first-child { color: var(--fg-muted); width: 40%; }
+.m5-kv{ display:grid; grid-template-columns:160px 1fr; gap:var(--sp-2) var(--sp-4); font-size:.9rem; }
+.m5-kv .k{ color:var(--text-3); padding:6px 0; }
+.m5-kv .v{ color:var(--text); padding:6px 0; font-weight:500; }
+@media (max-width:560px){ .m5-kv{ grid-template-columns:1fr; gap:0; } .m5-kv .k{ padding-bottom:0; } .m5-kv .v{ padding-top:2px; padding-bottom:12px; } }
 
-  @media print {
-    body * { visibility: hidden !important; }
-    #m5-invoice-body, #m5-invoice-body * { visibility: visible !important; }
-    #m5-invoice-body { position: absolute; left: 0; top: 0; width: 100%; padding: 20px; }
-  }
+.m5-field{ margin-bottom:var(--sp-4); } .m5-field:last-child{ margin-bottom:0; }
+.m5-field label{ display:block; font-size:.78rem; font-weight:600; color:var(--text-2); margin-bottom:6px; }
+.m5-input, .m5-textarea{ width:100%; height:40px; padding:0 var(--sp-3); background:var(--bg-2); border:1px solid var(--border); border-radius:var(--r); color:var(--text); font-size:.9rem; font-family:inherit; }
+.m5-textarea{ height:auto; min-height:64px; padding:var(--sp-2) var(--sp-3); resize:vertical; }
+.m5-input:focus, .m5-textarea:focus{ outline:none; border-color:var(--accent-line); }
+.m5-input:disabled{ opacity:.65; }
+.m5-row2{ display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-3); }
+@media (max-width:560px){ .m5-row2{ grid-template-columns:1fr; } }
+.m5-hint{ font-size:.78rem; color:var(--text-3); margin-top:8px; }
+
+.m5-btn{ display:inline-flex; align-items:center; gap:var(--sp-2); height:38px; padding:0 var(--sp-4); border-radius:var(--r); background:var(--btn-bg); color:var(--btn-fg); font-size:.875rem; font-weight:600; box-shadow:var(--shadow-card); transition:transform var(--dur-fast) var(--ease),opacity var(--dur-fast) var(--ease); white-space:nowrap; }
+.m5-btn:hover{ transform:translateY(-1px); opacity:.92; }
+.m5-btn:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
+.m5-btn svg{ width:16px; height:16px; }
+.m5-btn.ghost{ background:var(--card); color:var(--text); border:1px solid var(--border-strong); box-shadow:none; }
+.m5-btn.ghost:hover{ background:var(--card-hover); }
+.m5-btn.danger{ background:var(--st-cancelled); color:#fff; box-shadow:none; }
+
+/* выбор темы — крупные карточки-превью */
+.m5-themes{ display:grid; grid-template-columns:repeat(4,1fr); gap:var(--sp-3); }
+@media (max-width:640px){ .m5-themes{ grid-template-columns:repeat(2,1fr); } }
+.m5-theme{ cursor:pointer; border:1px solid var(--border); border-radius:var(--r); overflow:hidden; transition:border-color var(--dur-fast) var(--ease),transform var(--dur-fast) var(--ease); background:var(--bg-2); }
+.m5-theme:hover{ transform:translateY(-2px); border-color:var(--border-strong); }
+.m5-theme.on{ border-color:var(--accent); box-shadow:0 0 0 2px var(--accent-soft); }
+.m5-theme .prev{ height:64px; position:relative; display:flex; }
+.m5-theme .prev .bar{ flex:0 0 22px; border-right:1px solid rgba(128,128,128,.25); }
+.m5-theme .prev .body{ flex:1; padding:8px; display:flex; flex-direction:column; gap:5px; }
+.m5-theme .prev .body i{ display:block; height:7px; border-radius:4px; }
+.m5-theme .lbl{ display:flex; align-items:center; justify-content:space-between; padding:8px 10px; font-size:.82rem; font-weight:600; border-top:1px solid var(--border); }
+.m5-theme .lbl .ck{ width:16px; height:16px; color:var(--accent); opacity:0; }
+.m5-theme.on .lbl .ck{ opacity:1; }
+/* превью-палитры (фиксированные, не зависят от активной темы) */
+.pv-light .bar{ background:#ffffff; } .pv-light .body{ background:#f7f7f8; } .pv-light i{ background:#15161a; } .pv-light i:nth-child(2){ background:#80858f; width:70%; } .pv-light i:nth-child(3){ background:#c8c9cc; width:50%; }
+.pv-dark .bar{ background:#111216; } .pv-dark .body{ background:#08090b; } .pv-dark i{ background:#f3f4f7; } .pv-dark i:nth-child(2){ background:#6b6f79; width:70%; } .pv-dark i:nth-child(3){ background:#2a2c31; width:50%; }
+.pv-indigo .bar{ background:#13131f; } .pv-indigo .body{ background:#0a0a12; } .pv-indigo i{ background:#7c74ff; } .pv-indigo i:nth-child(2){ background:#aaa6d0; width:70%; } .pv-indigo i:nth-child(3){ background:#2a2742; width:50%; }
+.pv-emerald .bar{ background:#0e1a14; } .pv-emerald .body{ background:#07100c; } .pv-emerald i{ background:#22c08a; } .pv-emerald i:nth-child(2){ background:#9fccb6; width:70%; } .pv-emerald i:nth-child(3){ background:#173a2b; width:50%; }
+
+.m5-group-switch{ display:flex; flex-direction:column; gap:8px; }
+.m5-group{ display:flex; align-items:center; gap:var(--sp-3); padding:var(--sp-3) var(--sp-4); border:1px solid var(--border); border-radius:var(--r); background:var(--bg-2); transition:border-color var(--dur-fast) var(--ease); }
+.m5-group:hover{ border-color:var(--border-strong); }
+.m5-group.cur{ border-color:var(--accent-line); background:var(--accent-soft); }
+.m5-group .gn{ flex:1; }
+.m5-group .gn b{ display:block; font-size:.9rem; font-weight:600; color:var(--text); }
+.m5-group .gn span{ font-size:.78rem; color:var(--text-3); }
+.m5-group .badge{ font-size:.72rem; font-family:var(--font-mono); color:var(--text-3); }
+
+.m5-empty{ display:grid; place-items:center; gap:var(--sp-2); padding:var(--sp-12) var(--sp-4); text-align:center; color:var(--text-3); }
+.m5-empty svg{ width:38px; height:38px; opacity:.5; }
+.m5-empty .t{ font-size:1.05rem; font-weight:600; color:var(--text-2); }
+.m5-empty .d{ font-size:.9rem; max-width:44ch; }
+.m5-loading{ display:grid; place-items:center; gap:var(--sp-3); padding:var(--sp-10); color:var(--text-3); }
+.m5-loading .spin{ width:24px; height:24px; border-radius:50%; border:2px solid var(--border); border-top-color:var(--accent); animation:m5spin 1s linear infinite; }
+@keyframes m5spin{ to{ transform:rotate(360deg);} }
+
+.m5-overlay{ position:fixed; inset:0; z-index:400; display:grid; place-items:center; padding:var(--sp-4); background:rgba(0,0,0,.45); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); }
+.m5-dialog{ width:100%; max-width:460px; background:var(--surface); border:1px solid var(--border-strong); border-radius:var(--r-lg); box-shadow:var(--shadow-pop); overflow:hidden; }
+.m5-dhead{ padding:var(--sp-4) var(--sp-5); border-bottom:1px solid var(--border); font-weight:700; }
+.m5-dbody{ padding:var(--sp-5); }
+.m5-dfoot{ display:flex; justify-content:flex-end; gap:var(--sp-3); padding:var(--sp-4) var(--sp-5); border-top:1px solid var(--border); }
 </style>
 
-<script type="module">
-// ================================================================
-// modal5.html — Биллинг
-// ================================================================
+<div class="m5" id="m5-root">
+  <div class="m5-head"><div class="m5-title" id="m5-title">Профиль</div></div>
+  <div class="m5-panel" data-tab="profile" id="m5p-profile"></div>
+  <div class="m5-panel" data-tab="appearance" id="m5p-appearance"></div>
+  <div class="m5-panel" data-tab="group" id="m5p-group"></div>
+</div>
 
-const { sb, state } = window.RIVA;
-const { toast, esc, formatDate, formatDateTime, formatMoney, formatNumber } = window.RIVA_UTILS;
-const $ = (id) => document.getElementById(id);
+<script>
+(function(){
+  var RIVA=window.RIVA, U=window.RIVA_UTILS;
+  if(!RIVA||!U){ var r=document.getElementById('m5-root'); if(r) r.innerHTML='<div class="m5-empty"><div class="t">Модуль не инициализирован</div></div>'; return; }
+  var sb=RIVA.sb;
+  var INSTANCE=Date.now()+'-'+Math.random(); RIVA._m5Instance=INSTANCE;
+  function alive(){ return RIVA._m5Instance===INSTANCE && document.getElementById('m5-root'); }
 
-const myRole = state.currentGroup?.role;
-const isAdmin = myRole === 'admin';
-const groupId = state.currentGroup.group_id;
+  var curTab='profile';
+  var ROLE_LABEL={admin:'Администратор',management:'Управление',supply:'Снабжение',production:'Производство',sales:'Продажи'};
+  var THEMES=[['light-bw','Светлая Ч/Б','pv-light'],['dark-bw','Тёмная Ч/Б','pv-dark'],['indigo','Indigo','pv-indigo'],['emerald','Emerald','pv-emerald']];
 
-if (!isAdmin) {
-  $('m5').innerHTML = '<div class="bg-surface rounded-2xl border border-line p-8 text-center text-fg-muted">Раздел доступен только администратору группы.</div>';
-  throw new Error('m5: not admin');
-}
+  function role(){ return (RIVA.state.currentGroup && RIVA.state.currentGroup.role)||null; }
+  function isAdmin(){ return role()==='admin'; }
+  function isOwner(){ return !!(RIVA.state.currentGroup && RIVA.state.currentGroup.is_owner); }
+  function groupId(){ return RIVA.state.currentGroup && RIVA.state.currentGroup.group_id; }
+  function meName(){ var p=RIVA.state.profile; var m=(RIVA.state.user&&RIVA.state.user.user_metadata)||{}; return (p&&p.name)||m.full_name||m.name||(RIVA.state.user&&RIVA.state.user.email)||'—'; }
+  function meEmail(){ return (RIVA.state.profile&&RIVA.state.profile.email)||(RIVA.state.user&&RIVA.state.user.email)||'—'; }
+  function meAvatar(){ var m=(RIVA.state.user&&RIVA.state.user.user_metadata)||{}; return (RIVA.state.profile&&RIVA.state.profile.avatar_url)||m.avatar_url||m.picture||null; }
+  function initials(name){ return (name||'U').trim().split(/\s+/).slice(0,2).map(function(w){return w[0]||'';}).join('').toUpperCase()||'U'; }
 
-$('m5-subtitle').textContent = `Группа «${state.currentGroup.group_name}»`;
+  function tabFromLabel(label){ var l=(label||'').toLowerCase(); if(l.indexOf('оформлен')>=0||l.indexOf('тема')>=0) return 'appearance'; if(l.indexOf('групп')>=0||l.indexOf('компан')>=0||l.indexOf('реквизит')>=0) return 'group'; return 'profile'; }
 
-const billing = {
-  balance: 0,
-  nextCharge: 0,
-  members: 0,
-  trialEndsAt: null,
-  isTrialActive: false,
-  methods: null,
-  amount: 0,
-  selectedMethod: null
-};
-
-// ---------- BOOT ----------
-async function loadBillingState() {
-  const { data, error } = await sb.rpc('get_billing_state');
-  if (error) { toast('Ошибка биллинга: ' + error.message, 'error'); return; }
-  if (!data?.ok) { toast('Биллинг недоступен: ' + (data?.error || 'unknown'), 'error'); return; }
-
-  billing.balance = Number(data.balance);
-  billing.nextCharge = Number(data.next_charge_estimate);
-  billing.members = data.active_members;
-  billing.trialEndsAt = data.trial_ends_at ? new Date(data.trial_ends_at) : null;
-  billing.isTrialActive = data.is_trial_active;
-  billing.methods = data.payment_methods;
-
-  $('m5-balance').textContent = formatMoney(billing.balance);
-  $('m5-balance').className = 'text-3xl font-medium mt-2 ' + (billing.balance < 0 ? 'text-state-error' : '');
-
-  let statusLine;
-  if (billing.isTrialActive) {
-    const daysLeft = Math.ceil((billing.trialEndsAt - new Date()) / 86400000);
-    statusLine = `Триал: осталось ${daysLeft} ${pluralize(daysLeft, ['день','дня','дней'])}`;
-  } else if (billing.balance >= billing.nextCharge) {
-    statusLine = 'Хватает на следующее списание';
-  } else if (billing.balance > 0) {
-    statusLine = 'Недостаточно для следующего списания';
-  } else {
-    statusLine = 'Требуется пополнение';
-  }
-  $('m5-balance-status').textContent = statusLine;
-
-  $('m5-next-charge').textContent = formatMoney(billing.nextCharge);
-  $('m5-next-charge-details').textContent =
-    `${billing.members} × ${formatMoney(Number(data.price_per_member))} · 1-го числа месяца`;
-}
-
-async function loadHistory() {
-  const { data, error } = await sb.rpc('list_billing_records', { p_limit: 100 });
-  if (error) { $('m5-history').innerHTML = `<div class="px-5 py-6 text-sm text-state-error">${esc(error.message)}</div>`; return; }
-  renderHistory(data || []);
-}
-
-function renderHistory(rows) {
-  $('m5-history-count').textContent = rows.length + ' ' + pluralize(rows.length, ['запись','записи','записей']);
-  if (rows.length === 0) {
-    $('m5-history').innerHTML = '<div class="px-5 py-10 text-sm text-fg-muted text-center">Движений пока не было</div>';
+  // management не видит Настройки целиком
+  if(role()==='management'){
+    document.getElementById('m5-root').innerHTML='<div class="m5-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="5" y="11" width="14" height="9" rx="2"/><path d="M8 11V8a4 4 0 0 1 8 0v3"/></svg><div class="t">Раздел недоступен</div><div class="d">Настройки профиля и группы доступны рядовым ролям и администратору. Управленческие функции — во вкладке «Управление».</div></div>';
     return;
   }
 
-  const METHOD_LABEL = {
-    invoice:        'По счёту',
-    telegram_stars: 'Telegram Stars',
-    cryptobot:      'CryptoBot',
-    manual:         'Вручную'
-  };
-  const STATUS_LABEL = {
-    pending: 'Ожидает оплаты', completed: 'Завершено', failed: 'Ошибка', cancelled: 'Отменено'
-  };
+  function showTab(tab){
+    curTab=tab;
+    var titles={profile:'Профиль',appearance:'Оформление',group:'Группа'};
+    document.getElementById('m5-title').textContent=titles[tab]||'';
+    document.querySelectorAll('#m5-root .m5-panel').forEach(function(p){ p.classList.toggle('on', p.getAttribute('data-tab')===tab); });
+    if(tab==='profile') renderProfile();
+    else if(tab==='appearance') renderAppearance();
+    else if(tab==='group') loadGroup();
+  }
 
-  $('m5-history').innerHTML = rows.map(r => {
-    const isCharge = r.type === 'charge';
-    const sign = Number(r.amount) >= 0 ? '+' : '';
-    const amountClass = Number(r.amount) >= 0 ? 'text-state-success' : 'text-fg';
-    const methodLabel = r.payment_method ? esc(METHOD_LABEL[r.payment_method] || r.payment_method) : '';
-    const showCancel = r.payment_status === 'pending';
+  /* ---------- ПРОФИЛЬ ---------- */
+  function renderProfile(){
+    var panel=document.getElementById('m5p-profile');
+    var av=meAvatar(); var name=meName();
+    panel.innerHTML=''
+      +'<div class="m5-card"><div class="cb">'
+      +'<div class="m5-id"><div class="m5-avatar">'+(av?('<img src="'+U.esc(av)+'" alt="">'):U.esc(initials(name)))+'</div>'
+      +'<div class="who"><b>'+U.esc(name)+'</b><span>'+U.esc(meEmail())+'</span><div><span class="role">'+U.esc(ROLE_LABEL[role()]||role()||'')+'</span></div></div></div>'
+      +'</div></div>'
+      +'<div class="m5-card"><div class="ch">Учётная запись</div><div class="cb">'
+      +'<div class="m5-kv">'
+      +'<div class="k">Имя</div><div class="v">'+U.esc(name)+'</div>'
+      +'<div class="k">Email</div><div class="v">'+U.esc(meEmail())+'</div>'
+      +'<div class="k">Вход</div><div class="v">Google-аккаунт</div>'
+      +'<div class="k">Текущая группа</div><div class="v">'+U.esc((RIVA.state.currentGroup&&RIVA.state.currentGroup.group_name)||'—')+'</div>'
+      +'<div class="k">Роль в группе</div><div class="v">'+U.esc(ROLE_LABEL[role()]||role()||'—')+'</div>'
+      +'</div>'
+      +'<div class="m5-hint">Имя и фото берутся из вашего Google-аккаунта. Изменить их можно в настройках Google.</div>'
+      +'</div></div>'
+      +'<div class="m5-card"><div class="ch">Сеанс</div><div class="cb">'
+      +'<p style="color:var(--text-2);font-size:.9rem;line-height:1.5;margin-bottom:var(--sp-4)">RIVA допускает один активный сеанс на аккаунт. Выход здесь завершит текущую сессию на этом устройстве.</p>'
+      +'<button class="m5-btn danger" id="m5-signout"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/><path d="m16 17 5-5-5-5M21 12H9"/></svg>Выйти из аккаунта</button>'
+      +'</div></div>';
+    var so=panel.querySelector('#m5-signout'); if(so) so.onclick=function(){ if(RIVA.signOut) RIVA.signOut(); };
+  }
 
-    return `
-      <div class="px-5 py-3 flex items-center gap-3">
-        <div class="min-w-0 flex-1">
-          <div class="text-sm">${esc(r.description || '—')}</div>
-          <div class="text-xs text-fg-muted mt-0.5">
-            ${esc(formatDateTime(new Date(r.created_at)))}
-            ${methodLabel ? '· ' + methodLabel : ''}
-            ${r.confirmed_at ? '· оплачено ' + esc(formatDateTime(new Date(r.confirmed_at))) : ''}
-          </div>
-        </div>
-        ${r.payment_status !== 'completed'
-          ? `<span class="m5-badge m5-badge-${r.payment_status}">${esc(STATUS_LABEL[r.payment_status] || r.payment_status)}</span>`
-          : ''}
-        <div class="text-right">
-          <div class="font-medium ${amountClass} whitespace-nowrap">${sign}${esc(formatMoney(Number(r.amount)))}</div>
-          ${r.balance_after !== null ? `<div class="text-xs text-fg-muted">Баланс: ${esc(formatMoney(Number(r.balance_after)))}</div>` : ''}
-        </div>
-        ${showCancel
-          ? `<button data-cancel-payment="${esc(r.id)}" class="text-xs text-state-error hover:underline whitespace-nowrap">Отменить</button>`
-          : ''}
-      </div>
-    `;
-  }).join('');
+  /* ---------- ОФОРМЛЕНИЕ ---------- */
+  function currentTheme(){ try{ return localStorage.getItem('riva-theme')||document.documentElement.getAttribute('data-theme')||'light-bw'; }catch(e){ return document.documentElement.getAttribute('data-theme')||'light-bw'; } }
+  function renderAppearance(){
+    var panel=document.getElementById('m5p-appearance');
+    var cur=currentTheme();
+    var cards=THEMES.map(function(t){
+      return '<div class="m5-theme'+(cur===t[0]?' on':'')+'" data-theme="'+t[0]+'">'
+        +'<div class="prev '+t[2]+'"><div class="bar"></div><div class="body"><i></i><i></i><i></i></div></div>'
+        +'<div class="lbl"><span>'+t[1]+'</span><svg class="ck" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="m5 12 4.5 4.5L19 7"/></svg></div>'
+        +'</div>';
+    }).join('');
+    panel.innerHTML='<div class="m5-card"><div class="ch">Тема оформления <span class="sub">сохраняется на этом устройстве</span></div><div class="cb"><div class="m5-themes">'+cards+'</div>'
+      +'<div class="m5-hint">По умолчанию — светлая чёрно-белая. Доступны тёмная Ч/Б и две цветные темы. Выбор запоминается в браузере.</div></div></div>';
+    panel.querySelectorAll('.m5-theme').forEach(function(c){ c.onclick=function(){
+      var t=c.getAttribute('data-theme');
+      if(window.RIVA_THEME && RIVA_THEME.set) RIVA_THEME.set(t); else document.documentElement.setAttribute('data-theme',t);
+      panel.querySelectorAll('.m5-theme').forEach(function(x){ x.classList.toggle('on', x===c); });
+    }; });
+  }
 
-  document.querySelectorAll('[data-cancel-payment]').forEach(b => {
-    b.addEventListener('click', async () => {
-      if (!confirm('Отменить ожидающий платёж?')) return;
-      try {
-        const { data, error } = await sb.rpc('cancel_pending_payment', { p_payment_id: b.dataset.cancelPayment });
-        if (error) throw error;
-        if (!data?.ok) throw new Error(data?.error);
-        toast('Платёж отменён', 'success');
-        await loadHistory();
-      } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
-    });
-  });
-}
+  /* ---------- ГРУППА ---------- */
+  async function loadGroup(){
+    var panel=document.getElementById('m5p-group');
+    panel.innerHTML='<div class="m5-loading"><div class="spin"></div>Загрузка…</div>';
+    var g=null;
+    try{ var r=await sb.from('groups').select('*').eq('id',groupId()).maybeSingle(); if(!r.error) g=r.data; }catch(e){}
+    if(!alive()) return;
+    renderGroup(panel, g||{});
+  }
+  function field(id,label,val,ph,disabled){ return '<div class="m5-field"><label>'+label+'</label><input class="m5-input" id="'+id+'" value="'+U.esc(val||'')+'" placeholder="'+(ph||'')+'"'+(disabled?' disabled':'')+'></div>'; }
+  function renderGroup(panel, g){
+    var canEdit=isAdmin();
+    var d=g.details||{}; // company_details (jsonb) если есть
+    function gv(k){ return g[k]!=null?g[k]:(d[k]!=null?d[k]:''); }
+    var req=''
+      +'<div class="m5-row2">'+field('g-name','Название группы', g.name, 'Моя мастерская', !canEdit)+field('g-legal','Юр. название', gv('legal_name'), 'ООО «…»', !canEdit)+'</div>'
+      +'<div class="m5-row2">'+field('g-inn','ИНН', gv('inn'), '', !canEdit)+field('g-kpp','КПП', gv('kpp'), '', !canEdit)+'</div>'
+      +'<div class="m5-row2">'+field('g-ogrn','ОГРН', gv('ogrn'), '', !canEdit)+field('g-phone','Телефон', gv('phone'), '', !canEdit)+'</div>'
+      +field('g-email','Email', gv('email'), '', !canEdit)
+      +field('g-address','Адрес', gv('address'), 'юридический / фактический', !canEdit)
+      +'<div class="m5-field"><label>Банковские реквизиты</label><textarea class="m5-textarea" id="g-bank"'+(canEdit?'':' disabled')+' placeholder="Р/с, банк, БИК, к/с">'+U.esc(gv('bank'))+'</textarea></div>';
 
-// ---------- TOPUP modal ----------
-$('m5-topup-btn').addEventListener('click', openTopup);
-document.querySelectorAll('.m5-topup-close').forEach(b => b.addEventListener('click', () => $('m5-topup-modal').classList.add('hidden')));
+    var html='<div class="m5-card"><div class="ch">Реквизиты компании'+(canEdit?'':' <span class="sub">только просмотр</span>')+'</div><div class="cb">'+req
+      +(canEdit?'<div style="margin-top:var(--sp-4)"><button class="m5-btn" id="g-save"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6 9 17l-5-5"/></svg>Сохранить реквизиты</button></div>':'<div class="m5-hint">Редактирование реквизитов доступно администратору группы.</div>')
+      +'</div></div>';
 
-function openTopup() {
-  billing.amount = 0;
-  billing.selectedMethod = null;
-  $('m5-amount-input').value = '';
-  $('m5-amount-info').textContent = '—';
-  document.querySelectorAll('.m5-amount-btn').forEach(b => b.classList.remove('active'));
-  renderMethods();
-  $('m5-topup-modal').classList.remove('hidden');
-}
+    // переключение групп
+    var groups=RIVA.state.groups||[]; var cur=groupId();
+    html+='<div class="m5-card"><div class="ch">Мои группы <span class="sub">'+groups.length+'</span></div><div class="cb"><div class="m5-group-switch">'
+      + groups.map(function(x){ var isCur=x.group_id===cur; return '<div class="m5-group'+(isCur?' cur':'')+'"><div class="gn"><b>'+U.esc(x.group_name)+'</b><span>'+U.esc(ROLE_LABEL[x.role]||x.role)+(x.is_owner?' · владелец':'')+'</span></div>'+(isCur?'<span class="badge">текущая</span>':'<button class="m5-btn ghost" data-switch="'+x.group_id+'">Переключиться</button>')+'</div>'; }).join('')
+      + '</div></div></div>';
 
-document.querySelectorAll('.m5-amount-btn').forEach(b => {
-  b.addEventListener('click', () => {
-    document.querySelectorAll('.m5-amount-btn').forEach(x => x.classList.remove('active'));
-    b.classList.add('active');
-    $('m5-amount-input').value = b.dataset.amount;
-    setAmount(Number(b.dataset.amount));
-  });
-});
+    panel.innerHTML=html;
 
-$('m5-amount-input').addEventListener('input', (e) => {
-  document.querySelectorAll('.m5-amount-btn').forEach(b => b.classList.remove('active'));
-  setAmount(Number(e.target.value || 0));
-});
-
-function setAmount(v) {
-  billing.amount = v;
-  const months = billing.nextCharge > 0 ? (v / billing.nextCharge).toFixed(1) : '∞';
-  $('m5-amount-info').textContent = v > 0
-    ? `Хватит на ~${months} ${pluralize(Math.round(months), ['месяц','месяца','месяцев'])} при текущем составе группы`
-    : 'Минимальная сумма зависит от способа оплаты';
-  renderMethods();
-}
-
-function renderMethods() {
-  const methods = billing.methods || {};
-  const items = [
-    { key: 'invoice',        title: 'По счёту',         desc: 'Банковский перевод по реквизитам', icon: bankIcon() },
-    { key: 'telegram_stars', title: 'Telegram Stars',   desc: 'Оплата звёздами в Telegram',       icon: starsIcon() },
-    { key: 'cryptobot',      title: 'Криптовалюта',     desc: 'TON / USDT через CryptoBot',        icon: cryptoIcon() }
-  ];
-
-  $('m5-methods').innerHTML = items.map(m => {
-    const cfg = methods[m.key] || {};
-    const enabled = cfg.enabled === true;
-    const minAmount = Number(cfg.min_amount || 0);
-    const amountOk = billing.amount >= minAmount && billing.amount > 0;
-    const canClick = enabled && amountOk;
-    const hint = !enabled
-      ? '<span class="text-xs text-fg-muted">Не настроено</span>'
-      : !amountOk
-        ? `<span class="text-xs text-fg-muted">от ${formatMoney(minAmount)}</span>`
-        : '<span class="text-xs text-fg-muted">→</span>';
-    return `
-      <div class="m5-method ${canClick ? '' : 'disabled'}" data-method="${m.key}">
-        <div class="m5-method-icon">${m.icon}</div>
-        <div class="flex-1 min-w-0">
-          <div class="text-sm font-medium">${esc(m.title)}</div>
-          <div class="text-xs text-fg-muted">${esc(m.desc)}</div>
-        </div>
-        <div>${hint}</div>
-      </div>
-    `;
-  }).join('');
-
-  document.querySelectorAll('.m5-method').forEach(el => {
-    el.addEventListener('click', () => {
-      if (el.classList.contains('disabled')) return;
-      handleMethodSelect(el.dataset.method);
-    });
-  });
-}
-
-function bankIcon() {
-  return `<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-    <path d="M3 21h18M3 10h18M5 6l7-3 7 3M4 10v11M20 10v11M8 14v3M12 14v3M16 14v3"/></svg>`;
-}
-function starsIcon() {
-  return `<svg class="w-5 h-5" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l2.39 7.36H22l-6.19 4.5L18.18 22 12 17.31 5.82 22l2.37-8.14L2 9.36h7.61z"/></svg>`;
-}
-function cryptoIcon() {
-  return `<svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-    <circle cx="12" cy="12" r="10"/><path d="M8 13s1.5 2 4 2 4-2 4-2M9 9h.01M15 9h.01"/></svg>`;
-}
-
-// ---------- Method handlers ----------
-async function handleMethodSelect(method) {
-  if (!billing.amount || billing.amount <= 0) return;
-
-  const { data, error } = await sb.rpc('create_payment_request', {
-    p_method: method,
-    p_amount: billing.amount,
-    p_metadata: {}
-  });
-  if (error) { toast('Ошибка: ' + error.message, 'error'); return; }
-  if (!data?.ok) {
-    const map = {
-      ADMIN_ONLY: 'Доступно только администратору',
-      METHOD_DISABLED: 'Этот способ оплаты ещё не настроен',
-      AMOUNT_BELOW_MIN: `Минимальная сумма для этого способа: ${formatMoney(data.min_amount)}`,
-      INVALID_AMOUNT: 'Неверная сумма',
-      INVALID_METHOD: 'Неверный способ'
+    var save=panel.querySelector('#g-save');
+    if(save) save.onclick=async function(){
+      save.disabled=true;
+      var details={ legal_name:val(panel,'#g-legal'), inn:val(panel,'#g-inn'), kpp:val(panel,'#g-kpp'), ogrn:val(panel,'#g-ogrn'), phone:val(panel,'#g-phone'), email:val(panel,'#g-email'), address:val(panel,'#g-address'), bank:val(panel,'#g-bank') };
+      var name=val(panel,'#g-name');
+      // 1) пробуем RPC update_group_details, 2) фолбэк на прямой update
+      var ok=false, err='';
+      try{
+        var rpc=await RIVA.rpc('update_group_details', { p_name:name, p_details:details });
+        if(rpc && rpc.ok){ ok=true; } else if(rpc && rpc.error && rpc.error!=='function not found'){ err=rpc.error; }
+      }catch(e){}
+      if(!ok){
+        // фолбэк: прямой апдейт (RLS разрешит только admin/owner)
+        var payload={ name:name }; payload.details=details;
+        var up=await sb.from('groups').update(payload).eq('id',groupId());
+        if(up.error){
+          // возможно нет колонки details — пробуем хотя бы имя
+          var up2=await sb.from('groups').update({ name:name }).eq('id',groupId());
+          if(up2.error){ err=up2.error.message; } else { ok=true; err='Сохранено только название (нет поля реквизитов в БД)'; }
+        } else ok=true;
+      }
+      save.disabled=false;
+      if(ok){ U.toast(err||'Реквизиты сохранены'); // обновить имя группы в шапке
+        if(RIVA.state.currentGroup) RIVA.state.currentGroup.group_name=name;
+        var un=document.getElementById('userGroup'); if(un) un.textContent=name;
+      } else { U.toast('Ошибка: '+(err||'не удалось сохранить')); }
     };
-    toast(map[data?.error] || data?.error || 'UNKNOWN', 'error');
-    return;
+
+    panel.querySelectorAll('[data-switch]').forEach(function(b){ b.onclick=function(){ var id=b.getAttribute('data-switch'); confirmSwitch(function(){ if(RIVA.switchGroup) RIVA.switchGroup(id); }); }; });
   }
 
-  $('m5-topup-modal').classList.add('hidden');
-
-  if (method === 'invoice')        await openInvoice(data.payment_id);
-  if (method === 'telegram_stars') await openPaymentLink('telegram_stars', data.payment_id);
-  if (method === 'cryptobot')      await openPaymentLink('cryptobot', data.payment_id);
-
-  await loadHistory();
-}
-
-// ---------- INVOICE flow ----------
-document.querySelectorAll('.m5-invoice-close').forEach(b => b.addEventListener('click', () => $('m5-invoice-modal').classList.add('hidden')));
-$('m5-invoice-print').addEventListener('click', () => window.print());
-
-async function openInvoice(paymentId) {
-  $('m5-invoice-modal').classList.remove('hidden');
-  $('m5-invoice-body').innerHTML = `<div class="flex items-center justify-center py-10"><div class="w-6 h-6 loader"></div></div>`;
-
-  // Берём реквизиты получателя и группы
-  const [{ data: recipientResp }, { data: groupRow }] = await Promise.all([
-    sb.rpc('get_recipient_details'),
-    sb.from('groups').select('*').eq('id', groupId).maybeSingle()
-  ]);
-
-  const recipient = recipientResp?.details || {};
-  const payer = groupRow?.company_details || {};
-  const groupName = groupRow?.name || '';
-  const amount = billing.amount;
-  const invoiceNumber = `RIVA-${new Date().toISOString().slice(0,10).replace(/-/g,'')}-${paymentId.slice(0,4).toUpperCase()}`;
-
-  $('m5-invoice-sub').textContent = `№ ${invoiceNumber} от ${formatDate(new Date())}`;
-
-  $('m5-invoice-body').innerHTML = `
-    <div class="m5-invoice-doc">
-      <div class="text-base font-medium mb-1">Счёт на оплату № ${esc(invoiceNumber)}</div>
-      <div class="text-fg-muted mb-4">от ${esc(formatDate(new Date()))}</div>
-
-      <div class="mb-5">
-        <div class="text-xs uppercase tracking-wider text-fg-muted mb-2">Получатель</div>
-        <table>
-          <tr><td>Наименование</td><td>${esc(recipient.legal_name || '—')}</td></tr>
-          <tr><td>ИНН</td><td>${esc(recipient.inn || '—')}</td></tr>
-          ${recipient.kpp ? `<tr><td>КПП</td><td>${esc(recipient.kpp)}</td></tr>` : ''}
-          ${recipient.ogrn ? `<tr><td>ОГРН</td><td>${esc(recipient.ogrn)}</td></tr>` : ''}
-          ${recipient.address ? `<tr><td>Адрес</td><td>${esc(recipient.address)}</td></tr>` : ''}
-          <tr><td>Банк</td><td>${esc(recipient.bank_name || '—')}</td></tr>
-          <tr><td>Р/счёт</td><td><code>${esc(recipient.bank_account || '—')}</code></td></tr>
-          <tr><td>БИК</td><td><code>${esc(recipient.bank_bik || '—')}</code></td></tr>
-          ${recipient.correspondent_account ? `<tr><td>К/счёт</td><td><code>${esc(recipient.correspondent_account)}</code></td></tr>` : ''}
-        </table>
-      </div>
-
-      <div class="mb-5">
-        <div class="text-xs uppercase tracking-wider text-fg-muted mb-2">Плательщик</div>
-        <table>
-          <tr><td>Группа</td><td>${esc(groupName)}</td></tr>
-          ${payer.legal_name ? `<tr><td>Наименование</td><td>${esc(payer.legal_name)}</td></tr>` : ''}
-          ${payer.inn ? `<tr><td>ИНН</td><td>${esc(payer.inn)}</td></tr>` : ''}
-          ${payer.kpp ? `<tr><td>КПП</td><td>${esc(payer.kpp)}</td></tr>` : ''}
-          ${payer.address ? `<tr><td>Адрес</td><td>${esc(payer.address)}</td></tr>` : ''}
-        </table>
-        ${(!payer.legal_name && !payer.inn) ? `
-          <div class="text-xs text-state-warning mt-2">
-            ⚠ Реквизиты плательщика не заполнены. Откройте «Управление → Настройки» и укажите данные группы.
-          </div>` : ''}
-      </div>
-
-      <div class="mb-5">
-        <div class="text-xs uppercase tracking-wider text-fg-muted mb-2">Назначение платежа</div>
-        <div class="px-3 py-2 bg-surface-alt rounded-lg">
-          Пополнение баланса группы «${esc(groupName)}» в сервисе RIVA. Внутренний ID: ${esc(paymentId)}
-        </div>
-      </div>
-
-      <div class="flex items-baseline justify-between border-t border-line pt-4">
-        <div class="text-sm text-fg-muted">Сумма к оплате</div>
-        <div class="text-2xl font-medium">${esc(formatMoney(amount))}</div>
-      </div>
-
-      <div class="text-xs text-fg-muted mt-4 leading-relaxed">
-        После поступления денег на расчётный счёт получателя баланс группы будет пополнен в течение 1 рабочего дня.
-        Платёж учитывается по внутреннему ID, указанному в назначении.
-      </div>
-    </div>
-  `;
-}
-
-// ---------- PAYMENT LINK flow (Telegram Stars + CryptoBot) ----------
-document.querySelectorAll('.m5-paylink-close').forEach(b => b.addEventListener('click', () => $('m5-paylink-modal').classList.add('hidden')));
-
-async function openPaymentLink(method, paymentId) {
-  $('m5-paylink-title').textContent = method === 'telegram_stars' ? 'Оплата Telegram Stars' : 'Оплата криптовалютой';
-  $('m5-paylink-body').innerHTML = `<div class="flex items-center justify-center py-10"><div class="w-6 h-6 loader"></div></div>`;
-  $('m5-paylink-modal').classList.remove('hidden');
-
-  // Вызов Edge Function: на сервере создастся реальная платёжная ссылка
-  try {
-    const { data, error } = await sb.functions.invoke('create-payment-link', {
-      body: { payment_id: paymentId, method }
-    });
-    if (error) throw error;
-    if (!data?.ok) throw new Error(data?.error || 'UNKNOWN');
-
-    renderPaymentLink(method, data);
-  } catch (e) {
-    $('m5-paylink-body').innerHTML = `
-      <div class="text-state-error text-sm mb-3">Не удалось получить платёжную ссылку</div>
-      <div class="text-xs text-fg-muted mb-4">${esc(e.message || e)}</div>
-      <div class="text-xs text-fg-muted">
-        Скорее всего, Edge Function <code>create-payment-link</code> ещё не задеплоена
-        либо не настроены токены провайдера.
-        Откройте инструкцию <code>PAYMENT_SETUP.md</code>.
-      </div>
-    `;
+  /* ---------- общие ---------- */
+  function val(scope,sel){ var e=scope.querySelector(sel); return e?e.value.trim():''; }
+  function confirmSwitch(fn){
+    var ov=document.createElement('div'); ov.className='m5-overlay';
+    ov.innerHTML='<div class="m5-dialog"><div class="m5-dhead">Переключить группу?</div><div class="m5-dbody"><p style="color:var(--text-2);font-size:.92rem;line-height:1.5">Активное пространство сменится, текущий фильтр подразделения сбросится.</p></div><div class="m5-dfoot"><button class="m5-btn ghost" data-x="c">Отмена</button><button class="m5-btn" data-x="ok">Переключиться</button></div></div>';
+    document.body.appendChild(ov);
+    function close(){ ov.remove(); }
+    ov.querySelector('[data-x="c"]').onclick=close;
+    ov.addEventListener('mousedown', function(e){ if(e.target===ov) close(); });
+    ov.querySelector('[data-x="ok"]').onclick=function(){ close(); fn(); };
   }
-}
 
-function renderPaymentLink(method, data) {
-  const html = method === 'telegram_stars'
-    ? `
-      <p class="text-sm text-fg-muted">Нажмите кнопку ниже и подтвердите оплату в Telegram.</p>
-      <a href="${esc(data.url)}" target="_blank" rel="noopener" class="btn-primary inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm font-medium">
-        Открыть в Telegram
-      </a>
-      <div class="text-xs text-fg-muted">К оплате: ~${esc(formatNumber(data.stars))} ⭐ Stars</div>
-    `
-    : `
-      <p class="text-sm text-fg-muted">Откройте CryptoBot и подтвердите оплату.</p>
-      <a href="${esc(data.url)}" target="_blank" rel="noopener" class="btn-primary inline-flex items-center justify-center px-6 py-3 rounded-xl text-sm font-medium">
-        Открыть CryptoBot
-      </a>
-      ${data.asset ? `<div class="text-xs text-fg-muted">К оплате: ${esc(data.amount_crypto)} ${esc(data.asset)}</div>` : ''}
-    `;
-  $('m5-paylink-body').innerHTML = html;
-}
-
-// ---------- Realtime для мгновенного обновления при подтверждении платежа ----------
-sb.channel('billing:' + groupId)
-  .on('postgres_changes',
-      { event: 'UPDATE', schema: 'public', table: 'billing_records', filter: `group_id=eq.${groupId}` },
-      async (payload) => {
-        const r = payload.new;
-        if (r.payment_status === 'completed' && payload.old?.payment_status !== 'completed') {
-          toast(`Баланс пополнен на ${formatMoney(r.amount)} ₽`, 'success');
-          $('m5-paylink-modal').classList.add('hidden');
-          $('m5-invoice-modal').classList.add('hidden');
-        }
-        await loadBillingState();
-        await loadHistory();
-      })
-  .on('postgres_changes',
-      { event: 'INSERT', schema: 'public', table: 'billing_records', filter: `group_id=eq.${groupId}` },
-      async () => { await loadBillingState(); await loadHistory(); })
-  .subscribe();
-
-// ---------- Helpers ----------
-function pluralize(n, forms) {
-  const mod100 = Math.abs(n) % 100;
-  const mod10 = mod100 % 10;
-  if (mod100 >= 11 && mod100 <= 19) return forms[2];
-  if (mod10 === 1) return forms[0];
-  if (mod10 >= 2 && mod10 <= 4) return forms[1];
-  return forms[2];
-}
-
-// ---------- init ----------
-loadBillingState();
-loadHistory();
+  /* ---------- события + старт ---------- */
+  function onView(e){ if(!alive()){ document.removeEventListener('riva:view',onView); return; } var t=tabFromLabel(e.detail&&e.detail.tab); if(t!==curTab) showTab(t); }
+  document.addEventListener('riva:view',onView);
+  showTab(tabFromLabel(RIVA.state.view && RIVA.state.view.tab));
+})();
 </script>
