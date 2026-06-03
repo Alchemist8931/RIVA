@@ -1,1797 +1,442 @@
-<!-- modal2.html — Страница "Производство". Подстраницы: Рецепты, Партии. -->
-<!-- Доступ: admin, production, management. -->
-
-<section id="m2">
-
-  <div class="flex items-center justify-between gap-4 flex-wrap mb-6">
-    <div class="leading-tight">
-      <h1 class="text-[17px] font-medium tracking-tight">Производство</h1>
-      <p class="text-xs text-fg-muted mt-0.5" id="m2-subtitle">—</p>
-    </div>
-    <nav class="m2-subnav" id="m2-subnav">
-      <button class="m2-tab active" data-tab="recipes">Рецепты</button>
-      <button class="m2-tab" data-tab="runs">Партии</button>
-    </nav>
-  </div>
-
-  <!-- =========================
-       RECIPES
-  ========================== -->
-  <div class="m2-panel" data-panel="recipes">
-
-    <div class="bg-surface rounded-2xl border border-line mb-5 flex flex-wrap items-center" style="padding:10px; gap:10px;">
-      <div class="flex-1 min-w-[180px]">
-        <input id="m2-rec-search" type="search" placeholder="Поиск по коду или названию…"
-          class="m2-bar-ctrl w-full rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors text-sm">
-      </div>
-      <label class="flex items-center gap-2 text-xs text-fg-secondary cursor-pointer select-none">
-        <div class="uiverse-wrapper">
-          <span class="cb-container">
-            <input type="checkbox" id="m2-rec-producible" />
-            <span class="checkmark">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12"></polyline>
-              </svg>
-            </span>
-          </span>
-        </div>
-        <span>Можно произвести</span>
-      </label>
-      <button id="m2-rec-new" class="btn-primary m2-bar-ctrl rounded-xl text-sm font-medium ml-auto" style="padding-left:16px; padding-right:16px;">
-        + Новый рецепт
-      </button>
-    </div>
-
-    <div id="m2-rec-list" class="space-y-3">
-      <div class="flex items-center justify-center py-16">
-        <div class="w-6 h-6 loader"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- =========================
-       RUNS
-  ========================== -->
-  <div class="m2-panel hidden" data-panel="runs">
-
-    <div class="bg-surface rounded-2xl border border-line mb-5 flex flex-wrap items-center" style="padding:10px; gap:10px;">
-      <div class="flex-1 min-w-[180px]">
-        <input id="m2-run-search" type="search" placeholder="Поиск по номеру или рецепту…"
-          class="m2-bar-ctrl w-full rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors text-sm">
-      </div>
-      <div class="m2-dd m2-bar-ctrl" id="m2-run-status-dd">
-        <button type="button" class="m2-dd-btn" id="m2-run-status-btn">
-          <span id="m2-run-status-label">Все статусы</span>
-          <svg class="m2-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-        <div class="m2-dd-menu hidden" id="m2-run-status-menu">
-          <div class="m2-dd-opt" data-value="all">Все статусы</div>
-          <div class="m2-dd-opt" data-value="planned">Запланировано</div>
-          <div class="m2-dd-opt" data-value="in_progress">В работе</div>
-          <div class="m2-dd-opt" data-value="done">Завершено</div>
-          <div class="m2-dd-opt" data-value="cancelled">Отменено</div>
-        </div>
-      </div>
-      <button id="m2-run-new" class="btn-primary m2-bar-ctrl rounded-xl text-sm font-medium ml-auto" style="padding-left:16px; padding-right:16px;">
-        + Новая партия
-      </button>
-    </div>
-
-    <div id="m2-run-list" class="space-y-3">
-      <div class="flex items-center justify-center py-16">
-        <div class="w-6 h-6 loader"></div>
-      </div>
-    </div>
-  </div>
-</section>
-
-<!-- ============================================================
-     ШАБЛОН СТРОКИ РЕЦЕПТА
-============================================================ -->
-<template id="m2-recipe-row-tpl">
-  <article class="m2-row m2-row--recipe" data-rec-id="">
-    <span class="m2-row__code"     data-field="code"></span>
-    <span class="m2-row__title"    data-field="name"></span>
-    <span class="m2-row__stat"     data-field="output"></span>
-    <span class="m2-row__stat"     data-field="ingredients"></span>
-    <span class="m2-row__stat"     data-field="hours"></span>
-    <span class="m2-row__product"  data-field="product"></span>
-    <span class="m2-badge"         data-field="chip"></span>
-  </article>
-</template>
-
-<!-- ============================================================
-     ШАБЛОН СТРОКИ РЕЦЕПТА — режим «Можно произвести»
-============================================================ -->
-<template id="m2-recipe-prod-row-tpl">
-  <article class="m2-row m2-row--recipe-prod" data-rec-id="">
-    <span class="m2-row__code"   data-field="code"></span>
-    <span class="m2-row__title"  data-field="name"></span>
-    <div class="m2-prod-bar-wrap">
-      <div class="m2-prod-bar"><div class="m2-prod-bar-fill" data-field="bar"></div></div>
-      <div class="m2-prod-sub" data-field="limit"></div>
-    </div>
-    <span class="m2-prod-qty" data-field="qty"></span>
-  </article>
-</template>
-
-<!-- ============================================================
-     ШАБЛОН СТРОКИ ПАРТИИ
-============================================================ -->
-<template id="m2-run-row-tpl">
-  <article class="m2-row m2-row--run" data-run-id="">
-    <span class="m2-row__code"     data-field="number"></span>
-    <span class="m2-badge"         data-field="status"></span>
-    <span class="m2-row__title"    data-field="recipe"></span>
-    <span class="m2-row__planfact" data-field="planfact"></span>
-    <span class="m2-row__date"     data-field="date"></span>
-  </article>
-</template>
-
-<!-- =========================
-     MODAL: редактор рецепта
-========================== -->
-<div id="m2-rec-modal" class="hidden fixed inset-0 z-40 bg-black/30 flex items-start justify-center px-4 py-8 overflow-y-auto">
-  <div class="bg-surface rounded-2xl border border-line w-full max-w-3xl">
-    <div class="px-5 py-4 border-b border-line flex items-center justify-between">
-      <div>
-        <h3 class="font-medium" id="m2-rec-modal-title">Новый рецепт</h3>
-        <p class="text-xs text-fg-muted mt-0.5" id="m2-rec-modal-sub"></p>
-      </div>
-      <button class="m2-rec-close p-1 rounded-lg hover:bg-surface-alt">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
-      </button>
-    </div>
-
-    <div class="p-5 space-y-4">
-      <div class="grid grid-cols-1 md:grid-cols-4 gap-3">
-        <label class="block md:col-span-1">
-          <span class="text-xs text-fg-muted block mb-1.5">Код</span>
-          <input id="m2-rec-f-code" type="text" maxlength="50" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm" placeholder="RC-001">
-        </label>
-        <label class="block md:col-span-3">
-          <span class="text-xs text-fg-muted block mb-1.5">Название *</span>
-          <input id="m2-rec-f-name" type="text" maxlength="200" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-        </label>
-      </div>
-
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <label class="block">
-          <span class="text-xs text-fg-muted block mb-1.5">Выход за цикл *</span>
-          <input id="m2-rec-f-output-qty" type="text" inputmode="decimal" value="1" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-        </label>
-        <label class="block">
-          <span class="text-xs text-fg-muted block mb-1.5">Ед. изм. *</span>
-          <input id="m2-rec-f-output-unit" type="text" maxlength="20" value="шт" placeholder="шт" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-        </label>
-        <label class="block">
-          <span class="text-xs text-fg-muted block mb-1.5">Нормо-часы</span>
-          <input id="m2-rec-f-hours" type="text" inputmode="decimal" value="0" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-        </label>
-        <label class="block">
-          <span class="text-xs text-fg-muted block mb-1.5">Ставка, ₽/час</span>
-          <input id="m2-rec-f-rate" type="text" inputmode="decimal" value="0" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-        </label>
-      </div>
-
-      <!-- Состав -->
-      <div class="border border-line rounded-xl overflow-hidden">
-        <div class="px-4 py-3 bg-surface-alt border-b border-line flex items-center justify-between">
-          <span class="text-sm font-medium">Состав</span>
-          <span class="text-xs text-fg-muted">на 1 цикл (выход: <span id="m2-rec-cycle-out">—</span>)</span>
-        </div>
-        <div id="m2-rec-ingredients" class="divide-y divide-line-light">
-          <div class="px-4 py-3 text-xs text-fg-muted">Добавьте ингредиенты</div>
-        </div>
-        <div class="px-4 py-3 border-t border-line">
-          <div class="flex items-center gap-2 flex-wrap">
-            <button id="m2-rec-add-material" class="text-sm text-fg-muted hover:text-fg transition-colors">+ Материал</button>
-            <span class="text-fg-muted">·</span>
-            <button id="m2-rec-add-subrecipe" class="text-sm text-fg-muted hover:text-fg transition-colors">+ Рецепт (вложенный)</button>
-          </div>
-          <!-- Инлайн-пикер ингредиента (материал или вложенный рецепт) -->
-          <div id="m2-rec-picker" class="hidden mt-3">
-            <div class="m2-picker">
-              <input id="m2-rec-picker-search" type="text" autocomplete="off" spellcheck="false"
-                class="m2-picker-search" placeholder="Поиск…">
-              <div id="m2-rec-picker-list" class="m2-picker-list"></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <label class="block">
-        <span class="text-xs text-fg-muted block mb-1.5">Технология</span>
-        <textarea id="m2-rec-f-desc" rows="3" maxlength="5000" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm resize-none" placeholder="Порядок операций, особенности и т.п."></textarea>
-      </label>
-
-      <!-- Себестоимость -->
-      <div class="bg-surface-alt border border-line rounded-xl p-4">
-        <div class="text-xs text-fg-muted mb-2">Расчёт себестоимости</div>
-        <div id="m2-rec-cost" class="text-sm text-fg-muted">Сохраните рецепт, чтобы увидеть себестоимость</div>
-      </div>
-    </div>
-
-    <div class="px-5 py-4 border-t border-line flex items-center justify-between gap-2">
-      <button id="m2-rec-delete" class="hidden px-4 py-2 rounded-lg text-sm text-state-error hover:bg-surface-alt transition-colors">Удалить</button>
-      <div class="flex items-center gap-2 ml-auto">
-        <button id="m2-rec-duplicate" class="hidden btn-secondary px-4 py-2 rounded-lg text-sm">Дублировать</button>
-        <button class="m2-rec-close btn-secondary px-4 py-2 rounded-lg text-sm">Отмена</button>
-        <button id="m2-rec-save" class="btn-primary px-4 py-2 rounded-lg text-sm" disabled>Сохранить</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- =========================
-     MODAL: редактор партии
-========================== -->
-<div id="m2-run-modal" class="hidden fixed inset-0 z-40 bg-black/30 flex items-start justify-center px-4 py-8 overflow-y-auto">
-  <div class="bg-surface rounded-2xl border border-line w-full max-w-2xl">
-    <div class="px-5 py-4 border-b border-line flex items-center justify-between">
-      <div>
-        <h3 class="font-medium" id="m2-run-modal-title">Новая партия</h3>
-        <p class="text-xs text-fg-muted mt-0.5" id="m2-run-modal-sub"></p>
-      </div>
-      <button class="m2-run-close p-1 rounded-lg hover:bg-surface-alt">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
-      </button>
-    </div>
-
-    <div class="p-5 space-y-4">
-      <div id="m2-run-status-row" class="hidden">
-        <span class="text-xs text-fg-muted block mb-2">Статус партии</span>
-        <div id="m2-run-status-badge" class="inline-block"></div>
-      </div>
-
-      <label class="block">
-        <span class="text-xs text-fg-muted block mb-1.5">Рецепт *</span>
-        <div class="m2-dd m2-dd--block" id="m2-run-recipe-dd">
-          <button type="button" class="m2-dd-btn m2-dd-btn--block" id="m2-run-recipe-btn">
-            <span id="m2-run-recipe-label" class="truncate">— выберите рецепт —</span>
-            <svg class="m2-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-          </button>
-          <div class="m2-dd-menu hidden" id="m2-run-recipe-menu"></div>
-        </div>
-      </label>
-
-      <div class="grid grid-cols-2 md:grid-cols-4 gap-3">
-        <label class="block">
-          <span class="text-xs text-fg-muted block mb-1.5">Плановое кол-во *</span>
-          <div class="relative">
-            <input id="m2-run-f-planned" type="text" inputmode="decimal" class="w-full px-3 py-2 pr-12 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-            <span id="m2-run-f-planned-unit" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-fg-muted">—</span>
-          </div>
-        </label>
-        <label class="block" id="m2-run-actual-wrap">
-          <span class="text-xs text-fg-muted block mb-1.5">Фактическое кол-во</span>
-          <div class="relative">
-            <input id="m2-run-f-actual" type="text" inputmode="decimal" class="w-full px-3 py-2 pr-12 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-            <span id="m2-run-f-actual-unit" class="absolute right-3 top-1/2 -translate-y-1/2 text-xs text-fg-muted">—</span>
-          </div>
-        </label>
-        <label class="block">
-          <span class="text-xs text-fg-muted block mb-1.5">Дата готовности</span>
-          <input id="m2-run-f-ready-date" type="date" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-        </label>
-        <label class="block">
-          <span class="text-xs text-fg-muted block mb-1.5">Время</span>
-          <input id="m2-run-f-ready-time" type="time" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-        </label>
-      </div>
-
-      <!-- Требования по материалам -->
-      <div id="m2-run-requirements" class="hidden border border-line rounded-xl overflow-hidden">
-        <div class="px-4 py-3 bg-surface-alt border-b border-line">
-          <span class="text-sm font-medium">Что потребуется со склада</span>
-        </div>
-        <div id="m2-run-req-list" class="divide-y divide-line-light"></div>
-      </div>
-
-      <label class="block">
-        <span class="text-xs text-fg-muted block mb-1.5">Комментарий</span>
-        <textarea id="m2-run-f-comment" rows="2" maxlength="1000" class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm resize-none"></textarea>
-      </label>
-
-      <div id="m2-run-deficit" class="hidden border border-state-error/30 bg-state-error/5 rounded-xl p-4">
-        <div class="text-sm font-medium text-state-error mb-2">Недостаточно материалов</div>
-        <div id="m2-run-deficit-list" class="text-sm space-y-1"></div>
-      </div>
-    </div>
-
-    <div class="px-5 py-4 border-t border-line flex items-center justify-between gap-2 flex-wrap">
-      <button id="m2-run-delete" class="hidden px-4 py-2 rounded-lg text-sm text-state-error hover:bg-surface-alt transition-colors">Удалить</button>
-      <div class="flex items-center gap-2 ml-auto flex-wrap">
-        <div id="m2-run-actions" class="flex items-center gap-2 flex-wrap"></div>
-        <button class="m2-run-close btn-secondary px-4 py-2 rounded-lg text-sm">Закрыть</button>
-        <button id="m2-run-save" class="btn-primary px-4 py-2 rounded-lg text-sm" disabled>Сохранить</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <style>
-  /* Подстраничная навигация — segmented control как в шапке приложения */
-  .m2-subnav {
-    height: var(--ctrl-h, 38px);
-    background: var(--bg-card);
-    border: 1px solid var(--line);
-    border-radius: var(--ctrl-radius, 12px);
-    padding: 4px;
-    display: inline-flex;
-    align-items: stretch;
-    gap: 0;
-  }
-  .m2-subnav .m2-tab {
-    padding: 0 14px;
-    border: none;
-    background: none;
-    cursor: pointer;
-    border-radius: calc(var(--ctrl-radius, 12px) - 4px);
-    color: var(--fg-muted);
-    font-size: 13px;
-    white-space: nowrap;
-    display: inline-flex;
-    align-items: center;
-    transition: all .15s ease-in-out;
-  }
-  .m2-subnav .m2-tab:hover { color: var(--fg); }
-  .m2-subnav .m2-tab.active {
-    background: var(--bg);
-    color: var(--fg);
-    font-weight: 600;
-    box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 0 0 1px rgba(0,0,0,.04);
-  }
+/* ============================================================ RIVA · modal2 — Производство ============================================================ */
+.m2{ color:var(--text); }
+.m2-head{ display:flex; align-items:center; justify-content:space-between; gap:var(--sp-4); margin-bottom:var(--sp-5); flex-wrap:wrap; }
+.m2-title{ font-size:1.35rem; font-weight:700; letter-spacing:-.02em; }
+.m2-tools{ display:flex; align-items:center; gap:var(--sp-3); flex-wrap:wrap; }
+.m2-search{ display:flex; align-items:center; gap:var(--sp-2); height:38px; padding:0 var(--sp-3); background:var(--card); border:1px solid var(--border); border-radius:var(--r); color:var(--text-3); min-width:190px; }
+.m2-search:focus-within{ border-color:var(--accent-line); }
+.m2-search svg{ width:15px; height:15px; flex:0 0 auto; }
+.m2-search input{ flex:1; background:none; border:none; outline:none; color:var(--text); font-size:.875rem; min-width:0; }
+.m2-pill{ display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 var(--sp-3); border-radius:var(--r); background:var(--accent-soft); color:var(--accent); border:1px solid var(--accent-line); font-size:.8rem; font-weight:600; }
+.m2-pill.muted{ background:var(--card); color:var(--text-3); border-color:var(--border); font-weight:500; }
+.m2-pill svg{ width:14px; height:14px; }
 
-  /* ============================================================
-     ШАБЛОН СТРОКИ (modal2 — Рецепты и Партии)
-  ============================================================ */
-  .m2-row {
-    --m2-accent: var(--fg);
-    --m2-bg-pct: 3%;
-    --m2-bg-hover: 6%;
-    --m2-border-pct: 8%;
-    --m2-blur: 3px;
+.m2-btn{ display:inline-flex; align-items:center; gap:var(--sp-2); height:38px; padding:0 var(--sp-4); border-radius:var(--r); background:var(--btn-bg); color:var(--btn-fg); font-size:.875rem; font-weight:600; box-shadow:var(--shadow-card); transition:transform var(--dur-fast) var(--ease),opacity var(--dur-fast) var(--ease); white-space:nowrap; }
+.m2-btn:hover{ transform:translateY(-1px); opacity:.92; }
+.m2-btn:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
+.m2-btn svg{ width:16px; height:16px; }
+.m2-btn.ghost{ background:var(--card); color:var(--text); border:1px solid var(--border-strong); box-shadow:none; }
+.m2-btn.ghost:hover{ background:var(--card-hover); }
+.m2-btn.sm{ height:32px; padding:0 var(--sp-3); font-size:.82rem; }
 
-    background: color-mix(in srgb, var(--m2-accent) var(--m2-bg-pct), transparent);
-    backdrop-filter: blur(var(--m2-blur));
-    -webkit-backdrop-filter: blur(var(--m2-blur));
-    border: 1px solid color-mix(in srgb, var(--m2-accent) var(--m2-border-pct), transparent);
-    border-radius: 12px;
+.m2-card{ border:1px solid var(--border); border-radius:var(--r-lg); background:var(--card); box-shadow:var(--shadow-card); overflow:hidden; }
+.m2-panel{ display:none; }
+.m2-panel.on{ display:block; animation:m2in .3s var(--ease); }
+@keyframes m2in{ from{ opacity:0; transform:translateY(6px);} to{ opacity:1; transform:none; } }
 
-    display: grid;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 16px;
-    min-height: 44px;
+.m2-tablewrap{ overflow-x:auto; }
+table.m2-tbl{ width:100%; border-collapse:collapse; font-size:.875rem; }
+.m2-tbl th{ text-align:left; font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--text-3); font-weight:600; padding:var(--sp-3) var(--sp-4); border-bottom:1px solid var(--border); white-space:nowrap; }
+.m2-tbl td{ padding:var(--sp-3) var(--sp-4); border-bottom:1px solid var(--border); color:var(--text-2); vertical-align:middle; }
+.m2-tbl tbody tr.row{ transition:background var(--dur-fast) var(--ease); }
+.m2-tbl tbody tr.row:hover{ background:var(--card-hover); }
+.m2-tbl td.num, .m2-tbl th.num{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.m2-tbl .nm{ color:var(--text); font-weight:600; }
+.m2-tbl .sub{ color:var(--text-3); font-size:.78rem; font-family:var(--font-mono); }
+.m2-clickable{ cursor:pointer; }
+.m2-caret{ display:inline-block; width:14px; transition:transform var(--dur) var(--ease); color:var(--text-3); }
+.m2-row-open .m2-caret{ transform:rotate(90deg); }
 
-    transition: background .15s ease, border-color .15s ease;
-    cursor: pointer;
-  }
-  .m2-row:hover {
-    background: color-mix(in srgb, var(--m2-accent) var(--m2-bg-hover), transparent);
-    border-color: color-mix(in srgb, var(--m2-accent) calc(var(--m2-border-pct) + 10%), transparent);
-  }
+.m2-detail td{ background:var(--bg-2); padding:0; border-bottom:1px solid var(--border); }
+.m2-detail-inner{ padding:var(--sp-4) var(--sp-5); }
+.m2-detail-grid{ display:grid; grid-template-columns:1.4fr .9fr; gap:var(--sp-5); }
+@media (max-width:780px){ .m2-detail-grid{ grid-template-columns:1fr; } }
+.m2-sub-tbl{ width:100%; border-collapse:collapse; font-size:.82rem; }
+.m2-sub-tbl th{ text-transform:uppercase; font-size:.68rem; letter-spacing:.05em; color:var(--text-3); text-align:left; padding:6px 8px; border-bottom:1px solid var(--border); }
+.m2-sub-tbl td{ padding:6px 8px; border-bottom:1px solid var(--border); color:var(--text-2); }
+.m2-sub-tbl td.num{ text-align:right; font-variant-numeric:tabular-nums; }
+.m2-cost{ display:flex; flex-direction:column; gap:8px; }
+.m2-cost .line{ display:flex; align-items:center; justify-content:space-between; font-size:.85rem; color:var(--text-2); }
+.m2-cost .line.total{ border-top:1px solid var(--border); padding-top:8px; font-weight:700; color:var(--text); font-size:.95rem; }
+.m2-cost .line b{ color:var(--text); }
 
-  .m2-row--recipe {
-    grid-template-columns:
-      110px
-      minmax(0, 1fr)
-      110px
-      110px
-      100px
-      minmax(0, 1fr)
-      90px;
-  }
+.m2-chip{ display:inline-flex; align-items:center; gap:5px; font-size:.74rem; font-weight:500; padding:3px 9px; border-radius:var(--r-sm); white-space:nowrap; border:1px solid var(--border); background:var(--card); color:var(--text-2); }
+.m2-chip::before{ content:""; width:6px; height:6px; border-radius:50%; background:currentColor; }
+.st-planned{ color:var(--st-pending); background:var(--st-pending-bg); border-color:transparent; }
+.st-progress{ color:var(--st-upcoming); background:var(--st-upcoming-bg); border-color:transparent; }
+.st-done{ color:var(--st-completed); background:var(--st-completed-bg); border-color:transparent; }
+.st-cancelled{ color:var(--st-cancelled); background:var(--st-cancelled-bg); border-color:transparent; }
+.m2-ok{ color:var(--st-completed); font-weight:600; } .m2-no{ color:var(--text-3); }
+.m2-sub-badge{ display:inline-flex; align-items:center; gap:4px; font-size:.7rem; color:var(--accent); background:var(--accent-soft); border:1px solid var(--accent-line); border-radius:var(--r-sm); padding:1px 7px; margin-left:6px; }
 
-  /* Режим «Можно произвести»: код · название · шкала · количество */
-  .m2-row--recipe-prod {
-    grid-template-columns:
-      110px
-      minmax(0, 1.4fr)
-      minmax(160px, 2fr)
-      140px;
-    min-height: 48px;
-  }
+.m2-acts{ display:flex; gap:6px; justify-content:flex-end; }
+.m2-ic{ width:30px; height:30px; display:grid; place-items:center; border-radius:var(--r-sm); border:1px solid var(--border); background:var(--card); color:var(--text-2); transition:all var(--dur-fast) var(--ease); }
+.m2-ic:hover{ border-color:var(--border-strong); color:var(--text); background:var(--card-hover); }
+.m2-ic.danger:hover{ color:var(--st-cancelled); border-color:var(--st-cancelled); }
+.m2-ic.go:hover{ color:var(--st-completed); border-color:var(--st-completed); }
+.m2-ic svg{ width:15px; height:15px; }
 
-  .m2-row--run {
-    grid-template-columns:
-      170px
-      140px
-      minmax(0, 1fr)
-      190px
-      180px;
-  }
+.m2-empty{ display:grid; place-items:center; gap:var(--sp-2); padding:var(--sp-12) var(--sp-4); text-align:center; color:var(--text-3); }
+.m2-empty svg{ width:36px; height:36px; opacity:.45; }
+.m2-empty .t{ font-size:1rem; font-weight:600; color:var(--text-2); }
+.m2-empty .d{ font-size:.875rem; max-width:42ch; }
+.m2-loading{ display:grid; place-items:center; gap:var(--sp-3); padding:var(--sp-12); color:var(--text-3); }
+.m2-loading .spin{ width:24px; height:24px; border-radius:50%; border:2px solid var(--border); border-top-color:var(--accent); animation:m2spin 1s linear infinite; }
+@keyframes m2spin{ to{ transform:rotate(360deg);} }
+.m2-foot{ display:flex; align-items:center; justify-content:space-between; padding:var(--sp-3) var(--sp-4); border-top:1px solid var(--border); font-size:.8rem; color:var(--text-3); }
+.m2-foot b{ color:var(--text); font-weight:600; }
 
-  .m2-row__code {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--fg);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .m2-row__title {
-    font-size: 13px;
-    color: var(--fg-secondary);
-    min-width: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .m2-row__stat {
-    font-size: 12px;
-    color: var(--fg);
-    white-space: nowrap;
-  }
-  .m2-row__product {
-    font-size: 12px;
-    color: var(--fg-muted);
-    min-width: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .m2-row__planfact {
-    font-size: 13px;
-    color: var(--fg);
-    text-align: right;
-    white-space: nowrap;
-  }
-  .m2-row__date {
-    font-size: 12px;
-    color: var(--fg-muted);
-    text-align: right;
-    white-space: nowrap;
-  }
+/* диалоги */
+.m2-overlay{ position:fixed; inset:0; z-index:400; display:grid; place-items:center; padding:var(--sp-4); background:rgba(0,0,0,.45); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); animation:m2fade .2s var(--ease); }
+@keyframes m2fade{ from{ opacity:0;} to{ opacity:1; } }
+.m2-dialog{ width:100%; max-width:600px; max-height:90vh; display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--border-strong); border-radius:var(--r-lg); box-shadow:var(--shadow-pop); animation:m2pop .25s var(--ease); }
+@keyframes m2pop{ from{ opacity:0; transform:translateY(10px) scale(.98);} to{ opacity:1; transform:none; } }
+.m2-dialog.wide{ max-width:760px; }
+.m2-dhead{ display:flex; align-items:center; justify-content:space-between; padding:var(--sp-4) var(--sp-5); border-bottom:1px solid var(--border); }
+.m2-dhead h3{ font-size:1.05rem; font-weight:700; letter-spacing:-.01em; }
+.m2-dclose{ width:32px; height:32px; display:grid; place-items:center; border-radius:var(--r-sm); color:var(--text-3); }
+.m2-dclose:hover{ background:var(--card-hover); color:var(--text); }
+.m2-dbody{ padding:var(--sp-5); overflow-y:auto; }
+.m2-dfoot{ display:flex; justify-content:flex-end; gap:var(--sp-3); padding:var(--sp-4) var(--sp-5); border-top:1px solid var(--border); }
+.m2-field{ margin-bottom:var(--sp-4); } .m2-field:last-child{ margin-bottom:0; }
+.m2-field label{ display:block; font-size:.78rem; font-weight:600; color:var(--text-2); margin-bottom:6px; }
+.m2-input, .m2-select, .m2-textarea{ width:100%; height:40px; padding:0 var(--sp-3); background:var(--card); border:1px solid var(--border); border-radius:var(--r); color:var(--text); font-size:.9rem; font-family:inherit; transition:border-color var(--dur-fast) var(--ease); }
+.m2-textarea{ height:auto; min-height:64px; padding:var(--sp-2) var(--sp-3); resize:vertical; }
+.m2-input:focus, .m2-select:focus, .m2-textarea:focus{ outline:none; border-color:var(--accent-line); }
+.m2-row2{ display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-3); }
+.m2-row3{ display:grid; grid-template-columns:1fr 1fr 1fr; gap:var(--sp-3); }
+.m2-hint{ font-size:.78rem; color:var(--text-3); margin-top:6px; }
+.m2-deficit{ border:1px solid var(--st-cancelled); border-radius:var(--r); padding:var(--sp-3); background:var(--st-cancelled-bg); margin-bottom:var(--sp-3); }
+.m2-deficit .dh{ font-weight:600; color:var(--st-cancelled); margin-bottom:6px; font-size:.85rem; }
+.m2-deficit .di{ display:flex; justify-content:space-between; font-size:.82rem; color:var(--text-2); padding:2px 0; }
 
-  /* Шкала производственной мощности */
-  .m2-prod-bar-wrap { min-width: 0; }
-  .m2-prod-bar {
-    position: relative;
-    height: 8px; border-radius: 6px;
-    background: color-mix(in srgb, var(--fg) 10%, transparent);
-    overflow: hidden;
-  }
-  .m2-prod-bar-fill {
-    position: absolute; left: 0; top: 0; bottom: 0;
-    border-radius: 6px;
-    transition: width .25s ease, background .25s ease;
-  }
-  .m2-prod-sub {
-    font-size: 12px;
-    color: var(--fg-muted);
-    margin-top: 4px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .m2-prod-qty {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--fg);
-    text-align: right;
-    white-space: nowrap;
-  }
-  .m2-prod-qty--zero { color: #DC2626; }
-
-  /* ============================================================
-     БЕЙДЖИ И ЧИПЫ
-  ============================================================ */
-  .m2-badge,
-  .m2-chip-sub,
-  .m2-chip-mat,
-  .m2-chip-prod {
-    --m2-badge-pct: 13%;
-    --m2-badge-blur: 6px;
-
-    display: inline-flex;
-    align-items: center;
-    justify-self: start;
-    padding: 3px 9px;
-    border-radius: 7px;
-    font-size: 11px;
-    font-weight: 500;
-    line-height: 1.4;
-    white-space: nowrap;
-    background: color-mix(in srgb, var(--badge-c, var(--fg-muted)) var(--m2-badge-pct), transparent);
-    color: var(--badge-c, var(--fg-muted));
-    backdrop-filter: blur(var(--m2-badge-blur));
-    -webkit-backdrop-filter: blur(var(--m2-badge-blur));
-  }
-  .m2-badge:empty { display: none; }
-
-  .m2-badge-planned     { --badge-c: #6B7280; }
-  .m2-badge-in_progress { --badge-c: #2563EB; }
-  .m2-badge-done        { --badge-c: #15803D; }
-  .m2-badge-cancelled   { --badge-c: #DC2626; }
-
-  .m2-chip-sub  { --badge-c: #4338CA; }
-  .m2-chip-mat  { --badge-c: #15803D; }
-  .m2-chip-prod { --badge-c: #D97706; }
-
-  /* ============================================================
-     ТУЛБАР ПОДСТРАНИЦ
-  ============================================================ */
-  :root { --m2-bar-h: 36px; }
-
-  .m2-bar-ctrl {
-    height: var(--m2-bar-h);
-    padding-top: 0;
-    padding-bottom: 0;
-  }
-  input.m2-bar-ctrl { padding-left: 14px; padding-right: 14px; }
-
-  /* ============================================================
-     ЧЕКБОКС (uiverse) — адаптирован под тему приложения (как в modal1)
-  ============================================================ */
-  .uiverse-wrapper {
-    --size: 22px;
-    --color-default: var(--line);
-    --color-active: var(--fg);
-    --transition: 0.4s cubic-bezier(0.68, -0.6, 0.32, 1.6);
-    display: inline-flex;
-  }
-  .cb-container {
-    display: block;
-    position: relative;
-    cursor: pointer;
-    width: var(--size);
-    height: var(--size);
-    user-select: none;
-  }
-  .cb-container input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-  }
-  .checkmark {
-    position: absolute;
-    top: 0; left: 0;
-    height: 100%; width: 100%;
-    background-color: var(--bg);
-    border: 3px solid var(--color-default);
-    border-radius: 7px;
-    transition: var(--transition);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 2px 2px 0px var(--color-default);
-  }
-  .checkmark svg {
-    width: 15px;
-    height: 15px;
-    color: var(--bg);
-    transform: scale(0) rotate(-45deg);
-    transition: var(--transition);
-    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
-  }
-  .cb-container:hover .checkmark {
-    transform: translate(-2px, -2px);
-    box-shadow: 4px 4px 0px var(--color-default);
-  }
-  .cb-container input:checked ~ .checkmark {
-    background-color: var(--color-active);
-    border-color: var(--color-active);
-    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.15);
-    transform: scale(1.1) rotate(5deg);
-  }
-  .cb-container input:checked ~ .checkmark svg {
-    transform: scale(1) rotate(0deg);
-  }
-  .cb-container:active .checkmark {
-    transform: translate(2px, 2px);
-    box-shadow: 2px 2px 0px var(--color-default);
-  }
-
-  /* ============================================================
-     КАСТОМНЫЙ ДРОПДАУН
-  ============================================================ */
-  .m2-dd { position: relative; display: inline-flex; }
-  .m2-dd-btn {
-    height: var(--m2-bar-h, 36px);
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0 12px 0 14px;
-    border-radius: 12px;
-    background: var(--bg);
-    border: 1px solid var(--line);
-    color: var(--fg);
-    font-size: 13px;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: border-color .15s ease;
-  }
-  .m2-dd-btn:hover { border-color: var(--fg-muted); }
-  .m2-dd.is-open .m2-dd-btn { border-color: var(--fg); }
-  .m2-dd-chev {
-    width: 16px; height: 16px;
-    color: var(--fg-muted);
-    transition: transform .18s ease;
-    flex-shrink: 0;
-  }
-  .m2-dd.is-open .m2-dd-chev { transform: rotate(180deg); }
-
-  .m2-dd-menu {
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0;
-    min-width: 100%;
-    z-index: 30;
-    max-height: 260px;
-    overflow-y: auto;
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    box-shadow: 0 8px 24px rgba(0,0,0,.08);
-    padding: 4px;
-  }
-  .m2-dd-menu::-webkit-scrollbar { width: 4px; }
-  .m2-dd-menu::-webkit-scrollbar-track { background: transparent; }
-  .m2-dd-menu::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
-  .m2-dd-menu:hover::-webkit-scrollbar-thumb { background: var(--fg-muted); }
-  .m2-dd-menu { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
-
-  .m2-dd-opt {
-    padding: 8px 10px;
-    border-radius: 7px;
-    font-size: 13px;
-    color: var(--fg);
-    cursor: pointer;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    transition: background .12s ease;
-  }
-  .m2-dd-opt:hover { background: var(--bg-alt); }
-  .m2-dd-opt.is-selected {
-    background: var(--bg-alt);
-    font-weight: 600;
-  }
-
-  .m2-dd--block { display: block; }
-  .m2-dd-btn--block { width: 100%; justify-content: space-between; }
-  .m2-dd-btn--block > span { overflow: hidden; text-overflow: ellipsis; }
-
-  /* ============================================================
-     ИНЛАЙН-ПИКЕР ИНГРЕДИЕНТА (состав рецепта)
-  ============================================================ */
-  .m2-picker {
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    background: var(--bg);
-    overflow: hidden;
-  }
-  .m2-picker-search {
-    width: 100%;
-    padding: 8px 10px;
-    border: none;
-    border-bottom: 1px solid var(--line);
-    background: var(--bg);
-    color: var(--fg);
-    font-size: 13px;
-    outline: none;
-  }
-  .m2-picker-search::placeholder { color: var(--fg-muted); }
-  .m2-picker-list {
-    max-height: 220px;
-    overflow-y: auto;
-    padding: 4px;
-  }
-  .m2-picker-list::-webkit-scrollbar { width: 4px; }
-  .m2-picker-list::-webkit-scrollbar-track { background: transparent; }
-  .m2-picker-list::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
-  .m2-picker-list:hover::-webkit-scrollbar-thumb { background: var(--fg-muted); }
-  .m2-picker-list { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
-
-  .m2-picker-opt {
-    padding: 8px 10px;
-    border-radius: 7px;
-    font-size: 13px;
-    color: var(--fg);
-    cursor: pointer;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    transition: background .12s ease;
-  }
-  .m2-picker-opt:hover,
-  .m2-picker-opt.active { background: var(--bg-alt); }
-  .m2-picker-opt--create { color: var(--fg); font-weight: 500; }
-  .m2-picker-opt--empty { color: var(--fg-muted); cursor: default; font-style: italic; }
-  .m2-picker-opt small { color: var(--fg-muted); font-weight: 400; }
-
-  /* Адаптив */
-  @media (max-width: 1024px) {
-    .m2-row--recipe,
-    .m2-row--run {
-      grid-template-columns: auto minmax(0, 1fr) auto auto;
-      gap: 10px;
-    }
-    .m2-row__product { display: none; }
-    .m2-row--recipe-prod {
-      grid-template-columns: auto minmax(0, 1fr) minmax(120px, 1.4fr) auto;
-      gap: 10px;
-    }
-  }
-  @media (max-width: 700px) {
-    .m2-row--recipe,
-    .m2-row--run,
-    .m2-row--recipe-prod {
-      grid-template-columns: 1fr;
-      gap: 4px;
-      padding: 12px 14px;
-    }
-    .m2-row__date, .m2-row__planfact { text-align: left; }
-    .m2-prod-qty { text-align: left; }
-  }
+/* строки ингредиентов */
+.m2-ing-head{ display:grid; grid-template-columns:120px 1fr 90px 30px; gap:var(--sp-2); font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; color:var(--text-3); margin-bottom:6px; padding:0 2px; }
+.m2-ing{ display:grid; grid-template-columns:120px 1fr 90px 30px; gap:var(--sp-2); align-items:center; margin-bottom:var(--sp-2); }
+.m2-ing .m2-input, .m2-ing .m2-select{ height:36px; }
+.m2-ing-del{ width:30px; height:30px; display:grid; place-items:center; border-radius:var(--r-sm); border:1px solid var(--border); color:var(--text-3); }
+.m2-ing-del:hover{ color:var(--st-cancelled); border-color:var(--st-cancelled); }
 </style>
 
-<script type="module">
-// ================================================================
-// modal2.html — Производство
-// ================================================================
+<div class="m2" id="m2-root">
+  <div class="m2-head">
+    <div class="m2-title" id="m2-title">Рецепты</div>
+    <div class="m2-tools" id="m2-tools"></div>
+  </div>
+  <div class="m2-card">
+    <div class="m2-panel" data-tab="recipes" id="m2p-recipes"></div>
+    <div class="m2-panel" data-tab="runs" id="m2p-runs"></div>
+    <div class="m2-panel" data-tab="producible" id="m2p-producible"></div>
+  </div>
+</div>
 
-const { sb, state } = window.RIVA;
-const { toast, esc, formatDate, formatDateTime, formatMoney, formatNumber, formatQuantity } = window.RIVA_UTILS;
-const $ = (id) => document.getElementById(id);
+<script>
+(function(){
+  var RIVA=window.RIVA, U=window.RIVA_UTILS;
+  if(!RIVA||!U){ var r=document.getElementById('m2-root'); if(r) r.innerHTML='<div class="m2-empty"><div class="t">Модуль не инициализирован</div></div>'; return; }
+  var sb=RIVA.sb;
+  var INSTANCE=Date.now()+'-'+Math.random(); RIVA._m2Instance=INSTANCE;
+  function alive(){ return RIVA._m2Instance===INSTANCE && document.getElementById('m2-root'); }
 
-const myRole = state.currentGroup?.role;
-const canWrite = ['admin','production','management'].includes(myRole);
-const groupId = state.currentGroup.group_id;
+  var data={ recipes:[], runs:[], producible:[], whLite:[], recById:{} };
+  var search='', curTab='recipes', openRecipe=null;
 
-$('m2-subtitle').textContent = `Группа «${state.currentGroup.group_name}»`;
+  function role(){ return (RIVA.state.currentGroup && RIVA.state.currentGroup.role)||null; }
+  function canWrite(){ return ['admin','production','management'].indexOf(role())>=0; }
+  function groupId(){ return RIVA.state.currentGroup && RIVA.state.currentGroup.group_id; }
+  function prodUnits(){ return (RIVA.unitsBySection&&RIVA.unitsBySection.production)||[]; }
+  function activeUnit(){ return RIVA.state.activeUnitId||null; }
+  function activeProdUnit(){ var id=activeUnit(); return prodUnits().some(function(u){return u.id===id;})?id:null; }
+  function activeProdName(){ var id=activeProdUnit(); var u=prodUnits().find(function(x){return x.id===id;}); return u?u.name:null; }
+  function defaultProdUnit(){ var us=prodUnits(); var d=us.find(function(u){return u.is_default;})||us[0]; return d?d.id:null; }
+  function resolveRunUnit(){ return activeProdUnit()||defaultProdUnit(); }
+  function num(v){ var n=typeof v==='number'?v:parseFloat(v); return isFinite(n)?n:0; }
 
-if (!canWrite) {
-  $('m2-rec-new')?.setAttribute('disabled', 'disabled');
-  $('m2-run-new')?.setAttribute('disabled', 'disabled');
-}
+  function tabFromLabel(label){ var l=(label||'').toLowerCase(); if(l.indexOf('парти')>=0) return 'runs'; if(l.indexOf('произвести')>=0||l.indexOf('можно')>=0) return 'producible'; return 'recipes'; }
 
-// ---- Универсальный кастомный select ----
-function initCustomSelect(ids, onChange) {
-  const dd    = $(ids.dd);
-  const btn   = $(ids.btn);
-  const menu  = $(ids.menu);
-  const label = $(ids.label);
-  if (!dd || !btn || !menu) return { set() {}, setOptions() {} };
-
-  const open  = () => { dd.classList.add('is-open'); menu.classList.remove('hidden'); };
-  const close = () => { dd.classList.remove('is-open'); menu.classList.add('hidden'); };
-
-  function mark(value) {
-    menu.querySelectorAll('.m2-dd-opt').forEach(o =>
-      o.classList.toggle('is-selected', o.dataset.value === value));
+  function showTab(tab){
+    curTab=tab; search=''; openRecipe=null;
+    var titles={recipes:'Рецепты',runs:'Партии',producible:'Можно произвести'};
+    document.getElementById('m2-title').textContent=titles[tab]||'';
+    document.querySelectorAll('#m2-root .m2-panel').forEach(function(p){ p.classList.toggle('on', p.getAttribute('data-tab')===tab); });
+    renderTools(); loadTab(tab);
   }
-  function set(value) {
-    const opt = menu.querySelector(`.m2-dd-opt[data-value="${(value ?? '').replace(/"/g, '\\"')}"]`);
-    if (opt) label.textContent = opt.textContent;
-    mark(value ?? '');
+
+  function renderTools(){
+    var t=document.getElementById('m2-tools'); t.innerHTML='';
+    if(curTab==='runs'){
+      var an=activeProdName(); var pill=document.createElement('span'); pill.className='m2-pill'+(an?'':' muted');
+      pill.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V10l6 4V10l6 4V8l6 4v9z"/></svg>'+(an?U.esc(an):'Все производства');
+      t.appendChild(pill);
+    } else if(curTab==='recipes'){
+      var pill2=document.createElement('span'); pill2.className='m2-pill muted'; pill2.textContent='Общая библиотека группы'; t.appendChild(pill2);
+    }
+    var s=document.createElement('label'); s.className='m2-search';
+    s.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>';
+    var i=document.createElement('input'); i.type='text'; i.placeholder='Поиск'; i.value=search;
+    i.addEventListener('input', function(){ search=i.value.toLowerCase(); renderCurrent(); }); s.appendChild(i); t.appendChild(s);
+    if(canWrite()){
+      if(curTab==='recipes') t.appendChild(mkbtn('Новый рецепт', iconPlus(), function(){ openRecipeDialog(null); }));
+      else if(curTab==='runs') t.appendChild(mkbtn('Новая партия', iconPlus(), function(){ openRunDialog(null); }));
+    }
   }
-  function setOptions(html) {
-    menu.innerHTML = html;
+  function mkbtn(label,icon,on,cls){ var b=document.createElement('button'); b.className='m2-btn'+(cls?(' '+cls):''); b.innerHTML=icon+'<span>'+label+'</span>'; b.addEventListener('click',on); return b; }
+  function iconPlus(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>'; }
+
+  async function ensureWhLite(){ if(data.whLite.length) return; var r=await sb.from('warehouse_items').select('id,name,unit,type,quantity').order('name'); if(!r.error) data.whLite=r.data||[]; }
+  async function ensureRecipes(){ if(data.recipes.length){ return; } var r=await sb.from('recipes').select('*').order('code',{nullsFirst:false}).order('name'); if(!r.error){ data.recipes=r.data||[]; data.recById={}; data.recipes.forEach(function(x){ data.recById[x.id]=x; }); } }
+
+  async function loadTab(tab){
+    var panel=document.getElementById('m2p-'+tab); panel.innerHTML='<div class="m2-loading"><div class="spin"></div>Загрузка…</div>';
+    try{
+      if(tab==='recipes'){ await ensureWhLite(); var r=await sb.from('recipes').select('*, recipe_ingredients(id)').order('code',{nullsFirst:false}).order('name'); if(r.error) throw r.error; data.recipes=r.data||[]; data.recById={}; data.recipes.forEach(function(x){ data.recById[x.id]=x; }); }
+      else if(tab==='runs'){ await ensureRecipes(); var ru=await sb.from('production_runs').select('*, recipes(name,output_unit), resp:app_users!responsible_id(name)').order('created_at',{ascending:false}); if(ru.error) throw ru.error; data.runs=ru.data||[]; }
+      else if(tab==='producible'){ await ensureRecipes(); var p=await RIVA.rpc('get_recipes_producible'); data.producible=Array.isArray(p)?p:[]; }
+      if(!alive()) return; renderCurrent();
+    }catch(err){ if(!alive())return; panel.innerHTML='<div class="m2-empty"><div class="t">Не удалось загрузить</div><div class="d">'+U.esc(err.message||String(err))+'</div></div>'; }
   }
 
-  btn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    dd.classList.contains('is-open') ? close() : open();
-  });
-  menu.addEventListener('click', (e) => {
-    const opt = e.target.closest('.m2-dd-opt');
-    if (!opt) return;
-    set(opt.dataset.value);
-    close();
-    onChange?.(opt.dataset.value);
-  });
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('#' + ids.dd)) close();
-  });
+  function renderCurrent(){ if(curTab==='recipes') renderRecipes(); else if(curTab==='runs') renderRuns(); else renderProducible(); }
+  function match(s){ return !search||(s||'').toLowerCase().indexOf(search)>=0; }
 
-  return { set, setOptions };
-}
-
-// ---- Парсинг чисел (запятая/точка) ----
-function parseDecimalInput(str) {
-  if (str == null) return null;
-  const cleaned = String(str).replace(',', '.').replace(/[^\d.]/g, '');
-  if (cleaned === '' || cleaned === '.') return null;
-  const num = parseFloat(cleaned);
-  return Number.isFinite(num) ? num : null;
-}
-
-// ---------- tabs ----------
-function switchTab(name) {
-  document.querySelectorAll('.m2-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
-  document.querySelectorAll('.m2-panel').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== name));
-  if (name === 'recipes') loadRecipes();
-  if (name === 'runs') loadRuns();
-}
-document.querySelectorAll('.m2-tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
-
-$('m2-rec-list').addEventListener('click', (e) => {
-  const card = e.target.closest('[data-rec-id]');
-  if (card && card.dataset.recId) openRecipeEditor(card.dataset.recId);
-});
-$('m2-run-list').addEventListener('click', (e) => {
-  const card = e.target.closest('[data-run-id]');
-  if (card && card.dataset.runId) openRunEditor(card.dataset.runId);
-});
-
-// Кэш склада и рецептов
-const cache = {
-  warehouse: [],
-  recipes: []
-};
-
-async function refreshCache() {
-  const [wh, rc] = await Promise.all([
-    sb.from('warehouse_items').select('id, article, name, unit, type, quantity, price').order('name'),
-    sb.from('recipes').select('id, code, name, output_quantity, output_unit').order('name')
-  ]);
-  cache.warehouse = wh.data || [];
-  cache.recipes = rc.data || [];
-}
-
-// ================================================================
-// RECIPES
-// ================================================================
-
-const recState = {
-  cached: [],
-  editing: null,
-  ingredients: [],
-  producibleMode: false,
-  producible: {}   // recipe_id -> { producible, limiting_material, has_materials }
-};
-
-$('m2-rec-search').addEventListener('input', renderRecipes);
-
-// Переключатель режима «Можно произвести»
-$('m2-rec-producible').addEventListener('change', async (e) => {
-  recState.producibleMode = e.target.checked;
-  if (recState.producibleMode && Object.keys(recState.producible).length === 0) {
-    await loadProducible();
-  }
-  renderRecipes();
-});
-
-async function loadProducible() {
-  try {
-    const { data, error } = await sb.rpc('get_recipes_producible');
-    if (error) throw error;
-    const map = {};
-    (data || []).forEach(row => {
-      map[row.recipe_id] = {
-        producible: Number(row.producible || 0),
-        limiting: row.limiting_material || null,
-        hasMaterials: !!row.has_materials
-      };
+  /* ---------- РЕЦЕПТЫ ---------- */
+  function renderRecipes(){
+    var panel=document.getElementById('m2p-recipes');
+    var rows=data.recipes.filter(function(r){ return match(r.name)||match(r.code); });
+    if(!data.recipes.length){ panel.innerHTML=empty('Нет рецептов','Создайте первый рецепт: укажите изделие, его состав (материалы и/или полуфабрикаты) и нормы труда.'); return; }
+    var html='<div class="m2-tablewrap"><table class="m2-tbl"><thead><tr><th style="width:32px"></th><th>Рецепт</th><th class="num">Выход</th><th class="num">Состав</th>'+(canWrite()?'<th></th>':'')+'</tr></thead><tbody>';
+    rows.forEach(function(r){
+      var ing=(r.recipe_ingredients||[]).length;
+      html+='<tr class="row m2-clickable" data-rec="'+r.id+'">'
+        +'<td><span class="m2-caret">▸</span></td>'
+        +'<td><div class="nm">'+U.esc(r.name)+'</div>'+(r.code?'<div class="sub">'+U.esc(r.code)+'</div>':'')+'</td>'
+        +'<td class="num">'+U.formatQuantity(r.output_quantity)+' '+U.esc(r.output_unit||'шт')+'</td>'
+        +'<td class="num">'+ing+'</td>'
+        +(canWrite()?('<td><div class="m2-acts">'+ic('edit','Изменить',r.id,svgEdit())+ic('del','Удалить',r.id,svgTrash(),true)+'</div></td>'):'')
+        +'</tr>'
+        +'<tr class="m2-detail" data-detail="'+r.id+'" style="display:none"><td colspan="'+(canWrite()?5:4)+'"><div class="m2-detail-inner" id="m2-det-'+r.id+'"></div></td></tr>';
     });
-    recState.producible = map;
-  } catch (e) {
-    toast('Не удалось рассчитать производственную мощность: ' + e.message, 'error');
-    recState.producible = {};
+    html+='</tbody></table></div><div class="m2-foot"><span>Рецептов: <b>'+data.recipes.length+'</b></span></div>';
+    panel.innerHTML=html;
+    panel.querySelectorAll('tr.row').forEach(function(tr){ tr.addEventListener('click', function(e){ if(e.target.closest('[data-act]')) return; toggleRecipe(tr.getAttribute('data-rec')); }); });
+    panel.querySelectorAll('[data-act]').forEach(function(b){ b.addEventListener('click', function(e){ e.stopPropagation(); var id=b.getAttribute('data-id'), rec=data.recById[id]; if(b.getAttribute('data-act')==='edit') openRecipeDialog(rec); else confirmAct('Удалить рецепт «'+rec.name+'»?','Действие необратимо. Нельзя удалить, если рецепт используется в партиях или как полуфабрикат.','Удалить',true,function(){ return delRecipe(id); }); }); });
   }
-}
-
-async function loadRecipes() {
-  await refreshCache();
-
-  const { data, error } = await sb
-    .from('recipes')
-    .select('*, recipe_ingredients!recipe_id(*)')
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    $('m2-rec-list').innerHTML = `<div class="text-sm text-state-error p-6">${esc(error.message)}</div>`;
-    return;
-  }
-  recState.cached = data || [];
-
-  // если включён режим мощности — пересчитываем (остатки могли измениться)
-  if (recState.producibleMode) {
-    await loadProducible();
-  }
-  renderRecipes();
-}
-
-function renderRecipes() {
-  const q = ($('m2-rec-search').value || '').trim().toLowerCase();
-  let list = recState.cached || [];
-  if (q) list = list.filter(r => (r.name || '').toLowerCase().includes(q) || (r.code || '').toLowerCase().includes(q));
-
-  if (list.length === 0) {
-    $('m2-rec-list').innerHTML = `<div class="text-center py-16 text-sm text-fg-muted">${q ? 'Ничего не найдено' : 'Пока нет рецептов. Создайте первый.'}</div>`;
-    return;
+  async function toggleRecipe(id){
+    var detail=document.querySelector('[data-detail="'+id+'"]'); var row=document.querySelector('tr.row[data-rec="'+id+'"]');
+    if(!detail) return;
+    var open=detail.style.display!=='none';
+    document.querySelectorAll('#m2p-recipes .m2-detail').forEach(function(d){ d.style.display='none'; });
+    document.querySelectorAll('#m2p-recipes tr.row').forEach(function(r){ r.classList.remove('m2-row-open'); });
+    if(open){ openRecipe=null; return; }
+    detail.style.display=''; row.classList.add('m2-row-open'); openRecipe=id;
+    var box=document.getElementById('m2-det-'+id); box.innerHTML='<div class="m2-loading"><div class="spin"></div>Состав…</div>';
+    try{
+      var comp=await RIVA.rpc('get_recipe_composition',{p_recipe_id:id});
+      var cost=await RIVA.rpc('get_recipe_cost',{p_recipe_id:id});
+      if(!alive())return;
+      var rows=Array.isArray(comp)?comp:[];
+      var compHtml = rows.length ? ('<table class="m2-sub-tbl"><thead><tr><th>Материал (весь состав)</th><th class="num">Нужно</th><th class="num">На складе</th><th class="num">Цена</th></tr></thead><tbody>'
+        + rows.map(function(c){ var short=num(c.material_stock)<num(c.total_quantity); return '<tr><td>'+U.esc(c.material_name)+'</td><td class="num">'+U.formatQuantity(c.total_quantity)+' '+U.esc(c.material_unit||'')+'</td><td class="num"'+(short?' style="color:var(--st-cancelled)"':'')+'>'+U.formatQuantity(c.material_stock)+'</td><td class="num">'+(c.material_price!=null?U.formatMoney(c.material_price):'—')+'</td></tr>'; }).join('')
+        + '</tbody></table>') : '<div class="m2-hint">Состав пуст — добавьте ингредиенты в рецепт.</div>';
+      var costHtml='';
+      if(cost&&cost.ok){ costHtml='<div class="m2-cost"><div class="line"><span>Материалы</span><b>'+U.formatMoney(cost.materials_cost)+'</b></div>'
+        +'<div class="line"><span>Труд</span><b>'+U.formatMoney(cost.labor_cost)+'</b></div>'
+        +'<div class="line total"><span>Себестоимость</span><b>'+U.formatMoney(cost.total_cost)+'</b></div>'
+        +'<div class="line"><span>На единицу ('+U.formatQuantity(cost.output_quantity)+')</span><b>'+U.formatMoney(cost.unit_cost)+'</b></div></div>'; }
+      var r=data.recById[id];
+      box.innerHTML='<div class="m2-detail-grid"><div><div class="sub" style="margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;font-size:.68rem;color:var(--text-3)">Полный состав (с разворотом матрёшки)</div>'+compHtml+'</div>'
+        +'<div><div class="sub" style="margin-bottom:8px;text-transform:uppercase;letter-spacing:.06em;font-size:.68rem;color:var(--text-3)">Калькуляция</div>'+costHtml
+        +(r&&r.description?('<div class="m2-hint" style="margin-top:12px">'+U.esc(r.description)+'</div>'):'')+'</div></div>';
+    }catch(err){ if(alive()) box.innerHTML='<div class="m2-hint">Ошибка: '+U.esc(err.message||String(err))+'</div>'; }
   }
 
-  const container = $('m2-rec-list');
-  container.innerHTML = '';
-  const frag = document.createDocumentFragment();
-
-  if (recState.producibleMode) {
-    // максимум по списку — для нормировки шкалы
-    const maxProducible = Math.max(
-      1,
-      ...list.map(r => recState.producible[r.id]?.producible || 0)
-    );
-    list.forEach(r => frag.appendChild(renderRecipeProdRow(r, maxProducible)));
-  } else {
-    list.forEach(r => frag.appendChild(renderRecipeRow(r)));
+  function openRecipeDialog(rec){
+    var isEdit=!!rec;
+    var body=''
+      +'<div class="m2-row2"><div class="m2-field"><label>Название изделия *</label><input class="m2-input" id="r-name" value="'+U.esc(isEdit?rec.name:'')+'"></div>'
+      +'<div class="m2-field"><label>Код</label><input class="m2-input" id="r-code" value="'+U.esc(isEdit?(rec.code||''):'')+'"></div></div>'
+      +'<div class="m2-row3"><div class="m2-field"><label>Выход, кол-во</label><input class="m2-input" id="r-outq" type="number" step="any" value="'+(isEdit?num(rec.output_quantity):1)+'"></div>'
+      +'<div class="m2-field"><label>Ед. изм.</label><input class="m2-input" id="r-unit" value="'+U.esc(isEdit?(rec.output_unit||'шт'):'шт')+'"></div>'
+      +'<div class="m2-field"><label>Часы труда</label><input class="m2-input" id="r-lh" type="number" step="any" value="'+(isEdit?num(rec.labor_hours):0)+'"></div></div>'
+      +'<div class="m2-field"><label>Ставка труда, ₽/час</label><input class="m2-input" id="r-lr" type="number" step="any" value="'+(isEdit?num(rec.labor_rate):0)+'"></div>'
+      +'<div class="m2-field"><label>Состав</label><div class="m2-ing-head"><span>Тип</span><span>Позиция</span><span>Кол-во</span><span></span></div><div id="r-ings"></div>'
+      +'<button class="m2-btn ghost sm" id="r-adding" style="margin-top:8px;">+ ингредиент</button></div>'
+      +'<div class="m2-field"><label>Описание / техпроцесс</label><textarea class="m2-textarea" id="r-desc">'+U.esc(isEdit?(rec.description||''):'')+'</textarea></div>';
+    var ov=dialog({ title:isEdit?'Рецепт':'Новый рецепт', wide:true, ok:isEdit?'Сохранить':'Создать', body:body,
+      onMount:async function(ov){
+        await ensureWhLite(); await ensureRecipes();
+        var box=ov.querySelector('#r-ings');
+        function addIng(pre){
+          var row=document.createElement('div'); row.className='m2-ing';
+          var typeSel='<select class="m2-select ing-type"><option value="material">Материал</option><option value="sub">Полуфабрикат</option></select>';
+          row.innerHTML=typeSel+'<select class="m2-select ing-val"></select><input class="m2-input ing-qty" type="number" step="any" placeholder="0"><button class="m2-ing-del" title="Удалить">✕</button>';
+          row.querySelector('.m2-ing-del').onclick=function(){ row.remove(); };
+          function fillVal(type, selId){
+            var sel=row.querySelector('.ing-val');
+            if(type==='sub'){ sel.innerHTML=data.recipes.filter(function(x){ return !isEdit || x.id!==rec.id; }).map(function(x){ return '<option value="'+x.id+'">'+U.esc(x.name)+'</option>'; }).join('')||'<option value="">нет рецептов</option>'; }
+            else { sel.innerHTML=data.whLite.map(function(w){ return '<option value="'+w.id+'">'+U.esc(w.name)+(w.type==='product'?' (продукт)':'')+'</option>'; }).join('')||'<option value="">склад пуст</option>'; }
+            if(selId) sel.value=selId;
+          }
+          row.querySelector('.ing-type').addEventListener('change', function(e){ fillVal(e.target.value); });
+          var t=(pre&&pre.type)||'material'; row.querySelector('.ing-type').value=t; fillVal(t, pre&&pre.val);
+          if(pre&&pre.qty!=null) row.querySelector('.ing-qty').value=pre.qty;
+          box.appendChild(row);
+        }
+        ov.querySelector('#r-adding').onclick=function(){ addIng(null); };
+        if(isEdit){
+          var ing=await sb.from('recipe_ingredients').select('material_id,sub_recipe_id,quantity').eq('recipe_id',rec.id);
+          (ing.data||[]).forEach(function(x){ addIng({ type:x.sub_recipe_id?'sub':'material', val:x.sub_recipe_id||x.material_id, qty:num(x.quantity) }); });
+          if(!(ing.data||[]).length) addIng(null);
+        } else { addIng(null); }
+      },
+      onOk:async function(ov){
+        var name=val(ov,'#r-name'); if(!name){ U.toast('Укажите название'); return false; }
+        var recRec={ name:name, code:val(ov,'#r-code')||null, output_quantity:isFinite(numVal(ov,'#r-outq'))?numVal(ov,'#r-outq'):1, output_unit:val(ov,'#r-unit')||'шт', labor_hours:isFinite(numVal(ov,'#r-lh'))?numVal(ov,'#r-lh'):0, labor_rate:isFinite(numVal(ov,'#r-lr'))?numVal(ov,'#r-lr'):0, description:val(ov,'#r-desc')||null };
+        var recId;
+        if(isEdit){ var up=await sb.from('recipes').update(recRec).eq('id',rec.id); if(up.error){ U.toast('Ошибка: '+up.error.message); return false; } recId=rec.id; }
+        else { recRec.group_id=groupId(); recRec.unit_id=null; var insR=await sb.from('recipes').insert(recRec).select().single(); if(insR.error){ U.toast('Ошибка: '+insR.error.message); return false; } recId=insR.data.id; }
+        // собрать ингредиенты
+        var ings=Array.prototype.map.call(ov.querySelectorAll('#r-ings .m2-ing'), function(row){
+          var type=row.querySelector('.ing-type').value, v=row.querySelector('.ing-val').value, q=parseFloat(row.querySelector('.ing-qty').value);
+          if(!v||!(q>0)) return null;
+          return type==='sub' ? { recipe_id:recId, sub_recipe_id:v, quantity:q } : { recipe_id:recId, material_id:v, quantity:q };
+        }).filter(Boolean);
+        // заменить состав
+        await sb.from('recipe_ingredients').delete().eq('recipe_id',recId);
+        if(ings.length){ var insI=await sb.from('recipe_ingredients').insert(ings); if(insI.error){ U.toast('Состав с ошибкой: '+(/cycle|цикл/i.test(insI.error.message)?'обнаружен цикл вложенности рецептов':insI.error.message)); /* рецепт сохранён */ } }
+        U.toast(isEdit?'Рецепт сохранён':'Рецепт создан'); await loadTab('recipes');
+      }});
+    return ov;
   }
-  container.appendChild(frag);
-}
+  async function delRecipe(id){ var r=await sb.from('recipes').delete().eq('id',id); if(r.error){ U.toast('Нельзя удалить: рецепт используется в партиях или как полуфабрикат'); return false; } U.toast('Рецепт удалён'); await loadTab('recipes'); }
 
-function renderRecipeRow(r) {
-  const tpl = document.getElementById('m2-recipe-row-tpl');
-  const node = tpl.content.firstElementChild.cloneNode(true);
-  node.dataset.recId = r.id;
-
-  const fld = (name) => node.querySelector(`[data-field="${name}"]`);
-
-  const ingCount = r.recipe_ingredients?.length || 0;
-  const hasSub = (r.recipe_ingredients || []).some(i => i.sub_recipe_id);
-  const hours = Number(r.labor_hours || 0);
-
-  fld('code').textContent = r.code || '—';
-
-  const name = fld('name');
-  name.textContent = r.name || '—';
-  name.title = r.name || '';
-
-  fld('output').textContent = `${formatNumber(r.output_quantity)} ${r.output_unit || ''}`;
-  fld('ingredients').textContent = `${ingCount} ингр.`;
-  fld('hours').textContent = hours > 0 ? `${formatNumber(hours)} ч` : '—';
-
-  const productName = r.name || '—';
-  const pr = fld('product');
-  pr.textContent = productName;
-  pr.title = productName;
-
-  if (hasSub) {
-    const chip = fld('chip');
-    chip.textContent = 'вложен.';
-    chip.title = 'Содержит вложенные рецепты';
-    chip.classList.add('m2-chip-sub');
-  }
-
-  return node;
-}
-
-// Строка рецепта в режиме «Можно произвести»
-function renderRecipeProdRow(r, maxProducible) {
-  const tpl = document.getElementById('m2-recipe-prod-row-tpl');
-  const node = tpl.content.firstElementChild.cloneNode(true);
-  node.dataset.recId = r.id;
-
-  const fld = (name) => node.querySelector(`[data-field="${name}"]`);
-
-  fld('code').textContent = r.code || '—';
-
-  const name = fld('name');
-  name.textContent = r.name || '—';
-  name.title = r.name || '';
-
-  const info = recState.producible[r.id] || { producible: 0, limiting: null, hasMaterials: false };
-  const qty = Number(info.producible || 0);
-  const unit = r.output_unit || '';
-
-  // ширина шкалы относительно максимума по списку
-  const pct = Math.max(0, Math.min(100, Math.round((qty / maxProducible) * 100)));
-  // цвет: 0 — красный, мало (<25% от макс) — янтарный, иначе зелёный
-  const color = qty <= 0 ? '#DC2626' : (pct < 25 ? '#D97706' : '#15803D');
-  const bar = fld('bar');
-  bar.style.width = pct + '%';
-  bar.style.background = color;
-
-  const limit = fld('limit');
-  if (!info.hasMaterials) {
-    limit.textContent = 'Нет материалов в составе';
-  } else if (qty <= 0) {
-    limit.textContent = info.limiting ? `Не хватает: ${info.limiting}` : 'Недостаточно материалов';
-  } else if (info.limiting) {
-    limit.textContent = `Ограничивает: ${info.limiting}`;
-  } else {
-    limit.textContent = '';
-  }
-  limit.title = limit.textContent;
-
-  const q = fld('qty');
-  q.textContent = `${formatNumber(qty)} ${unit}`.trim();
-  if (qty <= 0) q.classList.add('m2-prod-qty--zero');
-
-  return node;
-}
-
-// ---- Recipe editor ----
-async function openRecipeEditor(id) {
-  if (!canWrite) return;
-  await refreshCache();
-
-  recState.editing = id;
-  const recipe = id ? (recState.cached || []).find(x => x.id === id) : null;
-
-  $('m2-rec-modal-title').textContent = recipe ? 'Редактирование рецепта' : 'Новый рецепт';
-  $('m2-rec-modal-sub').textContent = recipe
-    ? `Создан ${formatDateTime(new Date(recipe.created_at))}`
-    : '';
-
-  $('m2-rec-f-code').value = recipe?.code || '';
-  $('m2-rec-f-name').value = recipe?.name || '';
-  $('m2-rec-f-output-qty').value = recipe?.output_quantity || 1;
-  $('m2-rec-f-output-unit').value = recipe?.output_unit || 'шт';
-  $('m2-rec-f-hours').value = recipe?.labor_hours || 0;
-  $('m2-rec-f-rate').value = recipe?.labor_rate || 0;
-  $('m2-rec-f-desc').value = recipe?.description || '';
-
-  recState.ingredients = (recipe?.recipe_ingredients || []).map(i => ({
-    kind: i.sub_recipe_id ? 'sub_recipe' : 'material',
-    material_id: i.material_id,
-    sub_recipe_id: i.sub_recipe_id,
-    quantity: i.quantity
-  }));
-  closeIngredientPicker();
-  renderIngredients();
-  updateCycleOut();
-
-  $('m2-rec-delete').classList.toggle('hidden', !id);
-  $('m2-rec-duplicate').classList.toggle('hidden', !id);
-
-  if (id) loadRecipeCost(id);
-  else $('m2-rec-cost').textContent = 'Сохраните рецепт, чтобы увидеть себестоимость';
-
-  validateRecipeForm();
-  $('m2-rec-modal').classList.remove('hidden');
-  setTimeout(() => $('m2-rec-f-name').focus(), 50);
-}
-
-document.querySelectorAll('.m2-rec-close').forEach(b => b.addEventListener('click', () => $('m2-rec-modal').classList.add('hidden')));
-$('m2-rec-new').addEventListener('click', () => openRecipeEditor(null));
-
-$('m2-rec-f-output-qty').addEventListener('input', () => { updateCycleOut(); validateRecipeForm(); });
-$('m2-rec-f-output-unit').addEventListener('input', () => { updateCycleOut(); validateRecipeForm(); });
-$('m2-rec-f-name').addEventListener('input', () => { updateCycleOut(); validateRecipeForm(); });
-
-function updateCycleOut() {
-  const qty = parseDecimalInput($('m2-rec-f-output-qty').value);
-  const unit = $('m2-rec-f-output-unit').value.trim() || 'шт';
-  const name = $('m2-rec-f-name').value.trim();
-  $('m2-rec-cycle-out').textContent = qty && name
-    ? `${formatNumber(qty)} ${unit} «${name}»`
-    : '—';
-}
-
-function validateRecipeForm() {
-  const ok = $('m2-rec-f-name').value.trim()
-    && (parseDecimalInput($('m2-rec-f-output-qty').value) || 0) > 0
-    && $('m2-rec-f-output-unit').value.trim();
-  $('m2-rec-save').disabled = !ok;
-}
-
-function renderIngredients() {
-  const el = $('m2-rec-ingredients');
-  if (recState.ingredients.length === 0) {
-    el.innerHTML = '<div class="px-4 py-3 text-xs text-fg-muted">Добавьте ингредиенты</div>';
-    return;
-  }
-  el.innerHTML = recState.ingredients.map((ing, i) => {
-    let label = '—', unit = '', chipClass = '', chipText = '';
-    if (ing.kind === 'material') {
-      const w = cache.warehouse.find(x => x.id === ing.material_id);
-      label = w ? w.name : '(удалено)';
-      unit = w?.unit || '';
-      const isProduct = w?.type === 'product';
-      chipClass = isProduct ? 'm2-chip-prod' : 'm2-chip-mat';
-      chipText = isProduct ? 'продукция' : 'материал';
-    } else {
-      const r = cache.recipes.find(x => x.id === ing.sub_recipe_id);
-      label = r ? r.name : '(удалено)';
-      unit = r?.output_unit || '';
-      chipClass = 'm2-chip-sub';
-      chipText = 'рецепт';
-    }
-    return `
-      <div class="px-4 py-3 flex items-center gap-3">
-        <span class="m2-badge ${chipClass}">${chipText}</span>
-        <div class="min-w-0 flex-1 text-sm truncate">${esc(label)}</div>
-        <div class="flex items-center gap-1">
-          <input type="text" inputmode="decimal" value="${ing.quantity}"
-            class="w-24 px-2 py-1.5 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm text-right"
-            data-ing-idx="${i}">
-          <span class="text-xs text-fg-muted w-10">${esc(unit)}</span>
-        </div>
-        <button class="p-1.5 rounded-lg hover:bg-surface-alt" data-remove-ing="${i}">
-          <svg class="w-4 h-4 text-state-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
-        </button>
-      </div>
-    `;
-  }).join('');
-
-  el.querySelectorAll('[data-ing-idx]').forEach(input => {
-    input.addEventListener('input', () => {
-      const i = Number(input.dataset.ingIdx);
-      recState.ingredients[i].quantity = parseDecimalInput(input.value) || 0;
+  /* ---------- ПАРТИИ ---------- */
+  function runStatus(st){ var m={planned:['st-planned','Запланирована'],in_progress:['st-progress','В работе'],done:['st-done','Завершена'],cancelled:['st-cancelled','Отменена']}; var x=m[st]||['','—']; return '<span class="m2-chip '+x[0]+'">'+x[1]+'</span>'; }
+  function renderRuns(){
+    var panel=document.getElementById('m2p-runs');
+    var rows=data.runs.filter(function(r){ return match(r.run_number)||match(r.recipes&&r.recipes.name); });
+    if(!data.runs.length){ panel.innerHTML=empty('Нет партий','Создайте партию по рецепту. При запуске материалы спишутся со склада, при завершении — оприходуется готовая продукция.'); return; }
+    var html='<div class="m2-tablewrap"><table class="m2-tbl"><thead><tr><th>Партия</th><th>Рецепт</th><th class="num">План</th><th class="num">Факт</th><th>Статус</th><th>Готовность</th><th></th></tr></thead><tbody>';
+    rows.forEach(function(r){
+      html+='<tr class="row"><td><div class="nm">'+U.esc(r.run_number||'—')+'</div><div class="sub">'+U.formatDate(r.created_at)+'</div></td>'
+        +'<td>'+U.esc((r.recipes&&r.recipes.name)||'—')+'</td>'
+        +'<td class="num">'+U.formatQuantity(r.planned_quantity)+'</td>'
+        +'<td class="num">'+(r.actual_quantity!=null?U.formatQuantity(r.actual_quantity):'—')+'</td>'
+        +'<td>'+runStatus(r.status)+'</td>'
+        +'<td class="sub">'+(r.planned_ready_at?U.formatDate(r.planned_ready_at):'—')+'</td>'
+        +'<td><div class="m2-acts">'+runActions(r)+'</div></td></tr>';
     });
-  });
-  el.querySelectorAll('[data-remove-ing]').forEach(btn => {
-    btn.addEventListener('click', () => {
-      recState.ingredients.splice(Number(btn.dataset.removeIng), 1);
-      renderIngredients();
+    html+='</tbody></table></div><div class="m2-foot"><span>Партий: <b>'+data.runs.length+'</b></span></div>';
+    panel.innerHTML=html;
+    panel.querySelectorAll('[data-ract]').forEach(function(b){ b.addEventListener('click', function(){
+      var id=b.getAttribute('data-id'), r=data.runs.find(function(x){return x.id===id;}), a=b.getAttribute('data-ract');
+      if(a==='start') doStart(id);
+      else if(a==='finish') openFinish(r);
+      else if(a==='cancel') confirmAct('Отменить партию '+(r.run_number||'')+'?', (r.status==='in_progress'?'Списанные материалы вернутся на склад.':'Партия будет отменена.'),'Отменить партию',true,function(){ return doCancel(id); });
+      else if(a==='edit') openRunDialog(r);
+      else if(a==='del') confirmAct('Удалить партию '+(r.run_number||'')+'?','Действие необратимо.','Удалить',true,function(){ return delRun(id); });
+    });});
+  }
+  function runActions(r){
+    var s='';
+    if(canWrite()){
+      if(r.status==='planned'){ s+=ic('start','Запустить',r.id,'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m6 4 14 8-14 8z"/></svg>',false,'ract','go'); s+=ic('edit','Изменить',r.id,svgEdit(),false,'ract'); s+=ic('del','Удалить',r.id,svgTrash(),true,'ract'); }
+      else if(r.status==='in_progress'){ s+=ic('finish','Завершить',r.id,'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6 9 17l-5-5"/></svg>',false,'ract','go'); s+=ic('cancel','Отменить',r.id,'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M18 6 6 18M6 6l12 12"/></svg>',true,'ract'); }
+    }
+    if(!s) s='<span class="sub">—</span>';
+    return s;
+  }
+  function openRunDialog(run){
+    var isEdit=!!run;
+    if(!data.recipes.length){ U.toast('Сначала создайте рецепт'); return; }
+    var recOpts=data.recipes.map(function(r){ return '<option value="'+r.id+'"'+(isEdit&&run.recipe_id===r.id?' selected':'')+'>'+U.esc(r.name)+'</option>'; }).join('');
+    var an=activeProdName();
+    var body=''
+      +'<div class="m2-field"><label>Рецепт *</label><select class="m2-select" id="rn-rec"'+(isEdit?' disabled':'')+'>'+recOpts+'</select></div>'
+      +'<div class="m2-row2"><div class="m2-field"><label>Плановое кол-во *</label><input class="m2-input" id="rn-qty" type="number" step="any" value="'+(isEdit?num(run.planned_quantity):'')+'"></div>'
+      +'<div class="m2-field"><label>Готовность к</label><input class="m2-input" id="rn-ready" type="datetime-local" value="'+(isEdit&&run.planned_ready_at?toLocalInput(run.planned_ready_at):'')+'"></div></div>'
+      +'<div class="m2-field"><label>Комментарий</label><textarea class="m2-textarea" id="rn-comment">'+U.esc(isEdit?(run.comment||''):'')+'</textarea></div>'
+      +'<div class="m2-hint">Производство: <b style="color:var(--text)">'+U.esc(an||'по умолчанию')+'</b>. Материалы спишутся при запуске партии.</div>';
+    dialog({ title:isEdit?'Партия '+(run.run_number||''):'Новая партия', ok:isEdit?'Сохранить':'Создать', body:body, onOk:async function(ov){
+      var qty=numVal(ov,'#rn-qty'); if(!(qty>0)){ U.toast('Укажите плановое количество'); return false; }
+      var ready=val(ov,'#rn-ready'); var readyIso=ready?new Date(ready).toISOString():null;
+      if(isEdit){ var up=await sb.from('production_runs').update({ planned_quantity:qty, planned_ready_at:readyIso, comment:val(ov,'#rn-comment')||null }).eq('id',run.id); if(up.error){ U.toast('Ошибка: '+up.error.message); return false; } U.toast('Партия обновлена'); }
+      else { var ins=await sb.from('production_runs').insert({ group_id:groupId(), recipe_id:val(ov,'#rn-rec'), planned_quantity:qty, unit_id:resolveRunUnit(), status:'planned', planned_ready_at:readyIso, comment:val(ov,'#rn-comment')||null }); if(ins.error){ U.toast('Ошибка: '+ins.error.message); return false; } U.toast('Партия создана'); }
+      await loadTab('runs');
+    }});
+  }
+  async function doStart(id){
+    var r=await RIVA.rpc('start_production_run',{p_run_id:id});
+    if(r&&r.ok){ U.toast('Партия запущена, материалы списаны'); await loadTab('runs'); return; }
+    if(r&&r.error==='INSUFFICIENT_STOCK'){ showDeficit(r.deficit||[]); return; }
+    U.toast('Ошибка: '+((r&&r.error)||''));
+  }
+  function showDeficit(def){
+    var body='<div class="m2-deficit"><div class="dh">Недостаточно материалов на складе</div>'
+      + def.map(function(d){ return '<div class="di"><span>'+U.esc(d.name)+'</span><span>не хватает '+U.formatQuantity(d.missing)+' '+U.esc(d.unit||'')+'</span></div>'; }).join('')
+      + '</div><div class="m2-hint">Пополните склад (оприходуйте заказ снабжения) или уменьшите плановое количество.</div>';
+    dialog({ title:'Нельзя запустить партию', ok:false, cancel:'Понятно', body:body, onOk:function(){} });
+  }
+  function openFinish(run){
+    var body='<div class="m2-field"><label>Фактически произведено *</label><input class="m2-input" id="fn-qty" type="number" step="any" value="'+num(run.planned_quantity)+'"></div>'
+      +'<div class="m2-hint">Готовая продукция «'+U.esc((run.recipes&&run.recipes.name)||'')+'» будет оприходована на склад.</div>';
+    dialog({ title:'Завершить партию '+(run.run_number||''), ok:'Завершить', body:body, onOk:async function(ov){
+      var q=numVal(ov,'#fn-qty'); if(!(q>0)){ U.toast('Укажите фактическое количество'); return false; }
+      var r=await RIVA.rpc('finish_production_run',{p_run_id:run.id,p_actual_quantity:q});
+      if(!(r&&r.ok)){ U.toast('Ошибка: '+((r&&r.error)||'')); return false; }
+      U.toast('Партия завершена, продукция на складе'); await loadTab('runs');
+    }});
+  }
+  async function doCancel(id){ var r=await RIVA.rpc('cancel_production_run',{p_run_id:id}); if(!(r&&r.ok)){ U.toast('Ошибка: '+((r&&r.error)||'')); return false; } U.toast('Партия отменена'); await loadTab('runs'); }
+  async function delRun(id){ var r=await sb.from('production_runs').delete().eq('id',id); if(r.error){ U.toast('Ошибка: '+r.error.message); return false; } U.toast('Партия удалена'); await loadTab('runs'); }
+
+  /* ---------- МОЖНО ПРОИЗВЕСТИ ---------- */
+  function renderProducible(){
+    var panel=document.getElementById('m2p-producible');
+    var list=data.producible.map(function(p){ var r=data.recById[p.recipe_id]; return { p:p, name:r?r.name:'—', unit:r?(r.output_unit||'шт'):'', code:r?r.code:'' }; })
+      .filter(function(x){ return match(x.name)||match(x.code); });
+    if(!data.producible.length){ panel.innerHTML=empty('Нет данных','Добавьте рецепты с составом — здесь появится расчёт, сколько можно произвести из текущих остатков.'); return; }
+    list.sort(function(a,b){ return num(b.p.producible)-num(a.p.producible); });
+    var html='<div class="m2-tablewrap"><table class="m2-tbl"><thead><tr><th>Рецепт</th><th class="num">Можно произвести</th><th>Ограничивает</th>'+(canWrite()?'<th></th>':'')+'</tr></thead><tbody>';
+    list.forEach(function(x){
+      var has=x.p.has_materials; var n=num(x.p.producible);
+      html+='<tr class="row"><td><div class="nm">'+U.esc(x.name)+'</div>'+(x.code?'<div class="sub">'+U.esc(x.code)+'</div>':'')+'</td>'
+        +'<td class="num '+(n>0?'m2-ok':'m2-no')+'">'+(has?(U.formatQuantity(n)+' '+U.esc(x.unit)):'<span class="m2-no">нет состава</span>')+'</td>'
+        +'<td class="sub">'+(x.p.limiting_material?U.esc(x.p.limiting_material):'—')+'</td>'
+        +(canWrite()?('<td><div class="m2-acts">'+(n>0?'<button class="m2-btn ghost sm" data-mk="'+x.p.recipe_id+'">Партия</button>':'')+'</div></td>'):'')
+        +'</tr>';
     });
-  });
-}
-
-// ================================================================
-// ИНЛАЙН-ПИКЕР ИНГРЕДИЕНТА (материал / вложенный рецепт)
-// ================================================================
-const picker = {
-  open: false,
-  kind: null,       // 'material' | 'sub_recipe'
-  activeIdx: -1
-};
-
-function closeIngredientPicker() {
-  picker.open = false;
-  picker.kind = null;
-  picker.activeIdx = -1;
-  $('m2-rec-picker').classList.add('hidden');
-  $('m2-rec-picker-search').value = '';
-  $('m2-rec-picker-list').innerHTML = '';
-}
-
-function openIngredientPicker(kind) {
-  if (picker.open && picker.kind === kind) { closeIngredientPicker(); return; }
-  picker.open = true;
-  picker.kind = kind;
-  picker.activeIdx = -1;
-  $('m2-rec-picker').classList.remove('hidden');
-  const input = $('m2-rec-picker-search');
-  input.placeholder = kind === 'material'
-    ? 'Поиск материала или ввод нового названия…'
-    : 'Поиск рецепта…';
-  input.value = '';
-  renderPickerList('');
-  setTimeout(() => input.focus(), 30);
-}
-
-// Источник данных пикера в зависимости от вида
-function pickerSource() {
-  if (picker.kind === 'material') {
-    // материалы и продукция со склада
-    return cache.warehouse.map(w => ({
-      id: w.id,
-      name: w.name,
-      meta: `${w.article ? w.article + ' · ' : ''}${w.unit || ''}${w.type === 'product' ? ' · продукция' : ''}`
-    }));
+    html+='</tbody></table></div><div class="m2-foot"><span>Рассчитано по текущим остаткам склада</span></div>';
+    panel.innerHTML=html;
+    panel.querySelectorAll('[data-mk]').forEach(function(b){ b.addEventListener('click', function(){ var rec=data.recById[b.getAttribute('data-mk')]; if(rec){ /* перейти в Партии с префиллом */ data.runs=[]; openRunDialogPrefill(rec); } }); });
   }
-  // вложенные рецепты — все, кроме текущего редактируемого
-  return cache.recipes
-    .filter(r => r.id !== recState.editing)
-    .map(r => ({
-      id: r.id,
-      name: r.name,
-      meta: `${r.code ? r.code + ' · ' : ''}${r.output_unit || ''}`
-    }));
-}
-
-function renderPickerList(query) {
-  const q = (query || '').trim().toLowerCase();
-  const all = pickerSource();
-  const list = q ? all.filter(o => o.name.toLowerCase().includes(q)) : all;
-  const listEl = $('m2-rec-picker-list');
-
-  let html = '';
-
-  // Для материала: если есть непустой ввод и точного совпадения по имени нет — пункт «Создать»
-  if (picker.kind === 'material' && q) {
-    const exact = all.some(o => o.name.toLowerCase() === q);
-    if (!exact) {
-      html += `<div class="m2-picker-opt m2-picker-opt--create" data-create="1">+ Создать «${esc(query.trim())}»</div>`;
-    }
+  function openRunDialogPrefill(rec){
+    // открыть диалог новой партии с выбранным рецептом (вкладку не переключаем — создастся в текущем производстве)
+    var fake={ recipe_id:rec.id };
+    // временно гарантируем, что список рецептов есть
+    if(!data.recipes.length) data.recipes=[rec];
+    openRunDialog(null);
+    setTimeout(function(){ var sel=document.querySelector('#rn-rec'); if(sel){ sel.value=rec.id; } }, 0);
   }
 
-  if (list.length === 0 && !html) {
-    html = `<div class="m2-picker-opt m2-picker-opt--empty">${picker.kind === 'material' ? 'Ничего не найдено' : 'Рецепты не найдены'}</div>`;
-  } else {
-    html += list.map(o =>
-      `<div class="m2-picker-opt" data-id="${esc(o.id)}">${esc(o.name)}${o.meta ? ` <small>${esc(o.meta)}</small>` : ''}</div>`
-    ).join('');
+  /* ---------- общие ---------- */
+  function empty(t,d){ return '<div class="m2-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><path d="M3 3v18h18"/><path d="m7 14 3-3 3 2 5-6"/></svg><div class="t">'+t+'</div><div class="d">'+d+'</div></div>'; }
+  function svgEdit(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>'; }
+  function svgTrash(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>'; }
+  function ic(act,title,id,svg,danger,attr,extra){ return '<button class="m2-ic'+(danger?' danger':'')+(extra?(' '+extra):'')+'" title="'+title+'" data-'+(attr||'act')+'="'+act+'" data-id="'+id+'">'+svg+'</button>'; }
+  function toLocalInput(iso){ var d=new Date(iso); if(isNaN(d)) return ''; var p=function(n){return String(n).padStart(2,'0');}; return d.getFullYear()+'-'+p(d.getMonth()+1)+'-'+p(d.getDate())+'T'+p(d.getHours())+':'+p(d.getMinutes()); }
+
+  function dialog(opts){
+    var ov=document.createElement('div'); ov.className='m2-overlay';
+    ov.innerHTML='<div class="m2-dialog'+(opts.wide?' wide':'')+'"><div class="m2-dhead"><h3>'+U.esc(opts.title)+'</h3><button class="m2-dclose">✕</button></div><div class="m2-dbody">'+opts.body+'</div><div class="m2-dfoot"><button class="m2-btn ghost" data-x="cancel">'+(opts.cancel||'Отмена')+'</button>'+(opts.ok===false?'':'<button class="m2-btn" data-x="ok">'+(opts.ok||'Сохранить')+'</button>')+'</div></div>';
+    document.body.appendChild(ov);
+    function close(){ ov.remove(); }
+    ov.querySelector('.m2-dclose').onclick=close; ov.querySelector('[data-x="cancel"]').onclick=close;
+    ov.addEventListener('mousedown', function(e){ if(e.target===ov) close(); });
+    var okb=ov.querySelector('[data-x="ok"]'); if(okb) okb.onclick=async function(){ okb.disabled=true; try{ var r=await opts.onOk(ov); if(r!==false) close(); } finally { if(okb) okb.disabled=false; } };
+    if(opts.onMount) opts.onMount(ov);
+    return ov;
   }
-
-  listEl.innerHTML = html;
-  picker.activeIdx = -1;
-}
-
-$('m2-rec-add-material').addEventListener('click', () => openIngredientPicker('material'));
-$('m2-rec-add-subrecipe').addEventListener('click', () => {
-  if (cache.recipes.filter(r => r.id !== recState.editing).length === 0) {
-    toast('Нет других рецептов для вложения', 'warning');
-    return;
-  }
-  openIngredientPicker('sub_recipe');
-});
-
-$('m2-rec-picker-search').addEventListener('input', (e) => renderPickerList(e.target.value));
-
-$('m2-rec-picker-search').addEventListener('keydown', (e) => {
-  const opts = Array.from($('m2-rec-picker-list').querySelectorAll('.m2-picker-opt[data-id], .m2-picker-opt[data-create]'));
-  if (e.key === 'Escape') { closeIngredientPicker(); return; }
-  if (e.key === 'ArrowDown') {
-    e.preventDefault();
-    picker.activeIdx = Math.min(picker.activeIdx + 1, opts.length - 1);
-  } else if (e.key === 'ArrowUp') {
-    e.preventDefault();
-    picker.activeIdx = Math.max(picker.activeIdx - 1, 0);
-  } else if (e.key === 'Enter') {
-    e.preventDefault();
-    if (picker.activeIdx >= 0 && opts[picker.activeIdx]) {
-      opts[picker.activeIdx].click();
-    } else if (opts.length === 1) {
-      opts[0].click();
-    }
-    return;
-  } else {
-    return;
-  }
-  opts.forEach((o, i) => o.classList.toggle('active', i === picker.activeIdx));
-  opts[picker.activeIdx]?.scrollIntoView({ block: 'nearest' });
-});
-
-$('m2-rec-picker-list').addEventListener('click', async (e) => {
-  const create = e.target.closest('[data-create]');
-  if (create) {
-    await createMaterialAndAdd($('m2-rec-picker-search').value.trim());
-    return;
-  }
-  const opt = e.target.closest('[data-id]');
-  if (!opt) return;
-  const id = opt.dataset.id;
-  if (picker.kind === 'material') {
-    recState.ingredients.push({ kind: 'material', material_id: id, sub_recipe_id: null, quantity: 1 });
-  } else {
-    recState.ingredients.push({ kind: 'sub_recipe', material_id: null, sub_recipe_id: id, quantity: 1 });
-  }
-  closeIngredientPicker();
-  renderIngredients();
-});
-
-// Создание новой позиции склада (материал) на лету: спрашиваем единицу
-async function createMaterialAndAdd(name) {
-  if (!name) return;
-  const unit = (prompt(`Единица измерения для «${name}»:`, 'шт') || '').trim() || 'шт';
-  try {
-    const { data, error } = await sb.from('warehouse_items').insert({
-      group_id: groupId,
-      name,
-      unit,
-      type: 'material',
-      quantity: 0,
-      price: null
-    }).select('id, article, name, unit, type, quantity, price').single();
-    if (error) throw error;
-    // обновляем кэш склада, чтобы новый материал сразу был доступен
-    cache.warehouse.push(data);
-    cache.warehouse.sort((a, b) => (a.name || '').localeCompare(b.name || '', 'ru'));
-    recState.ingredients.push({ kind: 'material', material_id: data.id, sub_recipe_id: null, quantity: 1 });
-    closeIngredientPicker();
-    renderIngredients();
-    toast(`Материал «${name}» создан на складе`, 'success');
-  } catch (err) {
-    toast('Ошибка: ' + err.message, 'error');
-  }
-}
-
-async function loadRecipeCost(recipeId) {
-  const { data, error } = await sb.rpc('get_recipe_cost', { p_recipe_id: recipeId });
-  if (error) { $('m2-rec-cost').textContent = 'Ошибка: ' + error.message; return; }
-  if (!data?.ok) { $('m2-rec-cost').textContent = '—'; return; }
-  const mat = Number(data.materials_cost || 0);
-  const lab = Number(data.labor_cost || 0);
-  const total = Number(data.total_cost || 0);
-  const unit = Number(data.unit_cost || 0);
-  const unitLabel = $('m2-rec-f-output-unit').value.trim() || '';
-  $('m2-rec-cost').innerHTML = `
-    <div class="grid grid-cols-2 md:grid-cols-4 gap-3 text-sm">
-      <div>
-        <div class="text-xs text-fg-muted">Материалы</div>
-        <div class="font-medium text-fg">${esc(formatMoney(mat))}</div>
-      </div>
-      <div>
-        <div class="text-xs text-fg-muted">Труд</div>
-        <div class="font-medium text-fg">${esc(formatMoney(lab))}</div>
-      </div>
-      <div>
-        <div class="text-xs text-fg-muted">Итого за цикл</div>
-        <div class="font-medium text-fg">${esc(formatMoney(total))}</div>
-      </div>
-      <div>
-        <div class="text-xs text-fg-muted">За ед. ${esc(unitLabel)}</div>
-        <div class="font-medium text-fg">${esc(formatMoney(unit))}</div>
-      </div>
-    </div>
-  `;
-}
-
-// Save recipe
-$('m2-rec-save').addEventListener('click', async () => {
-  const btn = $('m2-rec-save');
-  btn.disabled = true;
-  btn.textContent = 'Сохраняем…';
-  try {
-    const payload = {
-      code: $('m2-rec-f-code').value.trim() || null,
-      name: $('m2-rec-f-name').value.trim(),
-      output_quantity: parseDecimalInput($('m2-rec-f-output-qty').value) || 0,
-      output_unit: $('m2-rec-f-output-unit').value.trim() || 'шт',
-      labor_hours: parseDecimalInput($('m2-rec-f-hours').value) || 0,
-      labor_rate: parseDecimalInput($('m2-rec-f-rate').value) || 0,
-      description: $('m2-rec-f-desc').value.trim() || null
-    };
-
-    let recipeId = recState.editing;
-    if (recipeId) {
-      const { error } = await sb.from('recipes').update(payload).eq('id', recipeId);
-      if (error) throw error;
-    } else {
-      const { data, error } = await sb.from('recipes').insert({ ...payload, group_id: groupId }).select().single();
-      if (error) throw error;
-      recipeId = data.id;
-    }
-
-    await sb.from('recipe_ingredients').delete().eq('recipe_id', recipeId);
-    const ings = recState.ingredients
-      .filter(i => i.quantity > 0 && (i.material_id || i.sub_recipe_id))
-      .map(i => ({
-        recipe_id: recipeId,
-        material_id: i.material_id,
-        sub_recipe_id: i.sub_recipe_id,
-        quantity: Number(i.quantity)
-      }));
-    if (ings.length) {
-      const { error } = await sb.from('recipe_ingredients').insert(ings);
-      if (error) throw error;
-    }
-
-    toast('Рецепт сохранён', 'success');
-    recState.editing = recipeId;
-    // данные мощности устарели — сбрасываем кэш расчёта
-    recState.producible = {};
-    await loadRecipes();
-    loadRecipeCost(recipeId);
-    $('m2-rec-delete').classList.remove('hidden');
-    $('m2-rec-duplicate').classList.remove('hidden');
-  } catch (e) {
-    toast('Ошибка: ' + e.message, 'error');
-  } finally {
-    btn.textContent = 'Сохранить';
-    validateRecipeForm();
-  }
-});
-
-$('m2-rec-delete').addEventListener('click', async () => {
-  if (!recState.editing) return;
-  if (!confirm('Удалить рецепт? Если он используется в других рецептах или партиях — удаление может быть заблокировано.')) return;
-  try {
-    const { error } = await sb.from('recipes').delete().eq('id', recState.editing);
-    if (error) throw error;
-    toast('Рецепт удалён', 'success');
-    recState.producible = {};
-    $('m2-rec-modal').classList.add('hidden');
-    await loadRecipes();
-  } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
-});
-
-$('m2-rec-duplicate').addEventListener('click', async () => {
-  if (!recState.editing) return;
-  try {
-    const { data: orig, error: e1 } = await sb.from('recipes').select('*, recipe_ingredients!recipe_id(*)').eq('id', recState.editing).single();
-    if (e1) throw e1;
-
-    const { data: copy, error: e2 } = await sb.from('recipes').insert({
-      group_id: groupId,
-      code: orig.code ? orig.code + ' (копия)' : null,
-      name: orig.name + ' (копия)',
-      output_quantity: orig.output_quantity,
-      output_unit: orig.output_unit,
-      labor_hours: orig.labor_hours,
-      labor_rate: orig.labor_rate,
-      description: orig.description
-    }).select().single();
-    if (e2) throw e2;
-
-    if (orig.recipe_ingredients?.length) {
-      const dup = orig.recipe_ingredients.map(i => ({
-        recipe_id: copy.id,
-        material_id: i.material_id,
-        sub_recipe_id: i.sub_recipe_id,
-        quantity: i.quantity
-      }));
-      const { error: e3 } = await sb.from('recipe_ingredients').insert(dup);
-      if (e3) throw e3;
-    }
-
-    toast('Рецепт скопирован', 'success');
-    recState.producible = {};
-    $('m2-rec-modal').classList.add('hidden');
-    await loadRecipes();
-    openRecipeEditor(copy.id);
-  } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
-});
-
-// ================================================================
-// RUNS
-// ================================================================
-
-const runState = {
-  cached: [],
-  editing: null,
-  currentRun: null,
-  statusFilter: 'all',
-  recipeValue: ''
-};
-
-$('m2-run-search').addEventListener('input', renderRuns);
-
-initCustomSelect(
-  { dd: 'm2-run-status-dd', btn: 'm2-run-status-btn', menu: 'm2-run-status-menu', label: 'm2-run-status-label' },
-  (value) => { runState.statusFilter = value; renderRuns(); }
-);
-
-const runRecipeSelect = initCustomSelect(
-  { dd: 'm2-run-recipe-dd', btn: 'm2-run-recipe-btn', menu: 'm2-run-recipe-menu', label: 'm2-run-recipe-label' },
-  async (value) => { runState.recipeValue = value; updateRunUnits(); await refreshRequirements(); validateRunForm(); }
-);
-
-function fillRunRecipeOptions() {
-  const opts = ['<div class="m2-dd-opt" data-value="">— выберите рецепт —</div>']
-    .concat(cache.recipes.map(r => `<div class="m2-dd-opt" data-value="${esc(r.id)}">${esc(r.name)}${r.code ? ' (' + esc(r.code) + ')' : ''}</div>`));
-  runRecipeSelect.setOptions(opts.join(''));
-}
-
-async function loadRuns() {
-  await refreshCache();
-
-  const { data, error } = await sb
-    .from('production_runs')
-    .select('*, recipes(id, name, code, output_quantity, output_unit)')
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    $('m2-run-list').innerHTML = `<div class="text-sm text-state-error p-6">${esc(error.message)}</div>`;
-    return;
-  }
-  runState.cached = data || [];
-  renderRuns();
-}
-
-const RUN_STATUS = {
-  planned: { label: 'Запланировано' },
-  in_progress: { label: 'В работе' },
-  done: { label: 'Завершено' },
-  cancelled: { label: 'Отменено' }
-};
-
-function renderRuns() {
-  const q = ($('m2-run-search').value || '').trim().toLowerCase();
-  const st = runState.statusFilter;
-  let list = runState.cached;
-  if (st !== 'all') list = list.filter(r => r.status === st);
-  if (q) list = list.filter(r =>
-    (r.run_number || '').toLowerCase().includes(q) ||
-    (r.recipes?.name || '').toLowerCase().includes(q)
-  );
-
-  if (list.length === 0) {
-    $('m2-run-list').innerHTML = `<div class="text-center py-16 text-sm text-fg-muted">${q || st !== 'all' ? 'Ничего не найдено' : 'Пока нет партий. Создайте первую.'}</div>`;
-    return;
-  }
-
-  const container = $('m2-run-list');
-  container.innerHTML = '';
-  const frag = document.createDocumentFragment();
-  list.forEach(r => frag.appendChild(renderRunRow(r)));
-  container.appendChild(frag);
-}
-
-function renderRunRow(r) {
-  const tpl = document.getElementById('m2-run-row-tpl');
-  const node = tpl.content.firstElementChild.cloneNode(true);
-  node.dataset.runId = r.id;
-
-  const fld = (name) => node.querySelector(`[data-field="${name}"]`);
-  const unit = r.recipes?.output_unit || '';
-
-  fld('number').textContent = r.run_number || '—';
-
-  const status = fld('status');
-  status.textContent = RUN_STATUS[r.status]?.label || r.status;
-  status.classList.add('m2-badge-' + r.status);
-
-  const recipeName = r.recipes?.name || '(рецепт удалён)';
-  const recipe = fld('recipe');
-  recipe.textContent = recipeName;
-  recipe.title = recipeName;
-
-  const planFact = `${formatNumber(r.planned_quantity)}${r.actual_quantity ? ' / ' + formatNumber(r.actual_quantity) : ' / —'}`;
-  fld('planfact').textContent = `${planFact} ${unit}`.trim();
-
-  fld('date').textContent = r.status === 'done' && r.finished_at
-    ? `Завершено ${formatDate(new Date(r.finished_at))}`
-    : r.status === 'in_progress' && r.started_at
-      ? `В работе с ${formatDate(new Date(r.started_at))}`
-      : `Создано ${formatDate(new Date(r.created_at))}`;
-
-  return node;
-}
-
-// ---- Run editor ----
-async function openRunEditor(id) {
-  if (!canWrite) return;
-  await refreshCache();
-
-  runState.editing = id;
-  const run = id ? runState.cached.find(x => x.id === id) : null;
-  runState.currentRun = run;
-
-  $('m2-run-modal-title').textContent = run ? `Партия ${run.run_number}` : 'Новая партия';
-  $('m2-run-modal-sub').textContent = run
-    ? `Создана ${formatDateTime(new Date(run.created_at))}`
-    : '';
-
-  fillRunRecipeOptions();
-  runState.recipeValue = run?.recipe_id || '';
-  runRecipeSelect.set(runState.recipeValue);
-  $('m2-run-recipe-btn').disabled = !!run;
-  $('m2-run-recipe-dd').style.opacity = run ? '0.6' : '';
-  $('m2-run-recipe-dd').style.pointerEvents = run ? 'none' : '';
-
-  $('m2-run-f-planned').value = run?.planned_quantity ?? '';
-  $('m2-run-f-planned').disabled = run && run.status !== 'planned';
-
-  $('m2-run-f-actual').value = run?.actual_quantity ?? '';
-  $('m2-run-f-actual').disabled = !(run && run.status === 'in_progress');
-  $('m2-run-actual-wrap').style.display = (run && ['in_progress','done','cancelled'].includes(run.status)) ? '' : 'none';
-
-  if (run?.planned_ready_at) {
-    const d = new Date(run.planned_ready_at);
-    const pad = (n) => String(n).padStart(2, '0');
-    $('m2-run-f-ready-date').value = `${d.getFullYear()}-${pad(d.getMonth() + 1)}-${pad(d.getDate())}`;
-    $('m2-run-f-ready-time').value = `${pad(d.getHours())}:${pad(d.getMinutes())}`;
-  } else {
-    $('m2-run-f-ready-date').value = '';
-    $('m2-run-f-ready-time').value = '';
-  }
-  const readyDisabled = run && run.status !== 'planned';
-  $('m2-run-f-ready-date').disabled = readyDisabled;
-  $('m2-run-f-ready-time').disabled = readyDisabled;
-
-  $('m2-run-f-comment').value = run?.comment || '';
-
-  updateRunUnits();
-  await refreshRequirements();
-  renderRunStatus(run);
-  renderRunActions(run);
-
-  $('m2-run-delete').classList.toggle('hidden', !run || run.status !== 'planned');
-  validateRunForm();
-
-  $('m2-run-modal').classList.remove('hidden');
-}
-
-document.querySelectorAll('.m2-run-close').forEach(b => b.addEventListener('click', () => $('m2-run-modal').classList.add('hidden')));
-$('m2-run-new').addEventListener('click', () => openRunEditor(null));
-
-$('m2-run-f-planned').addEventListener('input', async () => { await refreshRequirements(); validateRunForm(); });
-
-function updateRunUnits() {
-  const r = cache.recipes.find(x => x.id === runState.recipeValue);
-  const unit = r?.output_unit || '—';
-  $('m2-run-f-planned-unit').textContent = unit;
-  $('m2-run-f-actual-unit').textContent = unit;
-}
-
-async function refreshRequirements() {
-  const recipeId = runState.recipeValue;
-  const plannedQ = parseDecimalInput($('m2-run-f-planned').value);
-  const reqEl = $('m2-run-requirements');
-  const listEl = $('m2-run-req-list');
-  $('m2-run-deficit').classList.add('hidden');
-
-  if (!recipeId || !plannedQ || plannedQ <= 0) {
-    reqEl.classList.add('hidden');
-    return;
-  }
-
-  const { data, error } = await sb.rpc('get_recipe_composition', { p_recipe_id: recipeId });
-  if (error) { reqEl.classList.add('hidden'); return; }
-
-  const recipe = cache.recipes.find(r => r.id === recipeId);
-  if (!recipe || !recipe.output_quantity) return;
-  const ratio = plannedQ / recipe.output_quantity;
-
-  const rows = (data || []).map(m => {
-    const need = Number(m.total_quantity) * ratio;
-    const have = Number(m.material_stock || 0);
-    const deficit = need - have;
-    const enough = deficit <= 0;
-    return { ...m, need, have, deficit, enough };
-  });
-
-  if (rows.length === 0) {
-    reqEl.classList.add('hidden');
-    return;
-  }
-
-  reqEl.classList.remove('hidden');
-  listEl.innerHTML = rows.map(r => `
-    <div class="px-4 py-2.5 flex items-center gap-3 text-sm">
-      <div class="min-w-0 flex-1">
-        <div class="truncate">${esc(r.material_name)}</div>
-        <div class="text-xs text-fg-muted">Нужно ${formatNumber(r.need)} ${esc(r.material_unit)} · на складе ${formatNumber(r.have)} ${esc(r.material_unit)}</div>
-      </div>
-      ${r.enough
-        ? '<span class="m2-badge m2-badge-done">хватит</span>'
-        : `<span class="m2-badge m2-badge-cancelled">не хватает ${formatNumber(-r.deficit)}</span>`}
-    </div>
-  `).join('');
-}
-
-function renderRunStatus(run) {
-  if (!run) { $('m2-run-status-row').classList.add('hidden'); return; }
-  $('m2-run-status-row').classList.remove('hidden');
-  $('m2-run-status-badge').innerHTML = `<span class="m2-badge m2-badge-${run.status}">${esc(RUN_STATUS[run.status]?.label || run.status)}</span>`;
-}
-
-function renderRunActions(run) {
-  const el = $('m2-run-actions');
-  if (!run || !canWrite) { el.innerHTML = ''; return; }
-  if (run.status === 'planned') {
-    el.innerHTML = `
-      <button id="m2-run-start" class="btn-primary px-4 py-2 rounded-lg text-sm">Запустить</button>
-      <button id="m2-run-cancel" class="btn-secondary px-4 py-2 rounded-lg text-sm">Отменить</button>
-    `;
-    $('m2-run-start')?.addEventListener('click', startRun);
-    $('m2-run-cancel')?.addEventListener('click', cancelRun);
-  } else if (run.status === 'in_progress') {
-    el.innerHTML = `
-      <button id="m2-run-finish" class="btn-primary px-4 py-2 rounded-lg text-sm">Завершить</button>
-      <button id="m2-run-cancel" class="btn-secondary px-4 py-2 rounded-lg text-sm">Отменить (вернуть материалы)</button>
-    `;
-    $('m2-run-finish')?.addEventListener('click', finishRun);
-    $('m2-run-cancel')?.addEventListener('click', cancelRun);
-  } else {
-    el.innerHTML = '';
-  }
-}
-
-function validateRunForm() {
-  const run = runState.currentRun;
-  if (run && run.status !== 'planned') {
-    $('m2-run-save').disabled = true;
-    return;
-  }
-  const ok = runState.recipeValue && (parseDecimalInput($('m2-run-f-planned').value) || 0) > 0;
-  $('m2-run-save').disabled = !ok;
-}
-
-function collectReadyAt() {
-  const d = $('m2-run-f-ready-date').value;
-  const t = $('m2-run-f-ready-time').value;
-  if (!d) return null;
-  const time = t || '00:00';
-  const dt = new Date(`${d}T${time}`);
-  return Number.isNaN(dt.getTime()) ? null : dt.toISOString();
-}
-
-$('m2-run-save').addEventListener('click', async () => {
-  const btn = $('m2-run-save');
-  btn.disabled = true;
-  btn.textContent = 'Сохраняем…';
-  try {
-    const payload = {
-      recipe_id: runState.recipeValue,
-      planned_quantity: parseDecimalInput($('m2-run-f-planned').value) || 0,
-      planned_ready_at: collectReadyAt(),
-      comment: $('m2-run-f-comment').value.trim() || null
-    };
-
-    if (runState.editing) {
-      const { error } = await sb.from('production_runs').update(payload).eq('id', runState.editing);
-      if (error) throw error;
-      toast('Партия сохранена', 'success');
-    } else {
-      const { data, error } = await sb.from('production_runs').insert({ ...payload, group_id: groupId, status: 'planned' }).select().single();
-      if (error) throw error;
-      toast('Партия создана', 'success');
-      runState.editing = data.id;
-    }
-    $('m2-run-modal').classList.add('hidden');
-    await loadRuns();
-  } catch (e) {
-    toast('Ошибка: ' + e.message, 'error');
-  } finally {
-    btn.textContent = 'Сохранить';
-    validateRunForm();
-  }
-});
-
-$('m2-run-delete').addEventListener('click', async () => {
-  if (!runState.editing) return;
-  if (!confirm('Удалить запланированную партию?')) return;
-  try {
-    const { error } = await sb.from('production_runs').delete().eq('id', runState.editing);
-    if (error) throw error;
-    toast('Партия удалена', 'success');
-    $('m2-run-modal').classList.add('hidden');
-    await loadRuns();
-  } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
-});
-
-async function startRun() {
-  if (!runState.editing) return;
-  try {
-    const { data, error } = await sb.rpc('start_production_run', { p_run_id: runState.editing });
-    if (error) throw error;
-    if (!data?.ok) {
-      if (data?.error === 'INSUFFICIENT_STOCK' && Array.isArray(data.deficit)) {
-        $('m2-run-deficit').classList.remove('hidden');
-        $('m2-run-deficit-list').innerHTML = data.deficit.map(d =>
-          `<div>• ${esc(d.name)}: не хватает ${formatNumber(d.missing)} ${esc(d.unit || '')} (нужно ${formatNumber(d.need)}, есть ${formatNumber(d.have)})</div>`
-        ).join('');
-        toast('Недостаточно материалов на складе', 'error');
-        return;
-      }
-      throw new Error(data?.error || 'UNKNOWN');
-    }
-    toast('Партия запущена, материалы списаны', 'success');
-    $('m2-run-modal').classList.add('hidden');
-    await loadRuns();
-  } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
-}
-
-async function finishRun() {
-  if (!runState.editing) return;
-  const actual = parseDecimalInput($('m2-run-f-actual').value);
-  if (!actual || actual <= 0) { toast('Укажите фактическое количество', 'warning'); return; }
-  try {
-    const { data, error } = await sb.rpc('finish_production_run', { p_run_id: runState.editing, p_actual_quantity: actual });
-    if (error) throw error;
-    if (!data?.ok) throw new Error(data?.error || 'UNKNOWN');
-    toast('Партия завершена, продукция оприходована', 'success');
-    $('m2-run-modal').classList.add('hidden');
-    await loadRuns();
-  } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
-}
-
-async function cancelRun() {
-  if (!runState.editing) return;
-  const status = runState.currentRun?.status;
-  const msg = status === 'in_progress'
-    ? 'Отменить партию? Ранее списанные материалы будут возвращены на склад.'
-    : 'Отменить запланированную партию?';
-  if (!confirm(msg)) return;
-  try {
-    const { data, error } = await sb.rpc('cancel_production_run', { p_run_id: runState.editing });
-    if (error) throw error;
-    if (!data?.ok) throw new Error(data?.error || 'UNKNOWN');
-    toast('Партия отменена', 'success');
-    $('m2-run-modal').classList.add('hidden');
-    await loadRuns();
-  } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
-}
-
-// ---- helpers ----
-function pluralize(n, forms) {
-  const mod100 = Math.abs(n) % 100;
-  const mod10 = mod100 % 10;
-  if (mod100 >= 11 && mod100 <= 19) return forms[2];
-  if (mod10 === 1) return forms[0];
-  if (mod10 >= 2 && mod10 <= 4) return forms[1];
-  return forms[2];
-}
-
-// ---- init ----
-switchTab('recipes');
+  function val(ov,s){ var e=ov.querySelector(s); return e?e.value.trim():''; }
+  function numVal(ov,s){ var e=ov.querySelector(s); return e?parseFloat(e.value):NaN; }
+  function confirmAct(title,text,okLabel,danger,fn){ var ov=dialog({ title:title, ok:okLabel, body:'<p style="color:var(--text-2);font-size:.92rem;line-height:1.5;">'+U.esc(text)+'</p>', onOk:async function(){ return await fn(); } }); if(danger){ var b=ov.querySelector('[data-x="ok"]'); if(b){ b.style.background='var(--st-cancelled)'; b.style.color='#fff'; b.style.boxShadow='none'; } } }
+
+  /* ---------- события + старт ---------- */
+  function onView(e){ if(!alive()){ document.removeEventListener('riva:view',onView); return; } var t=tabFromLabel(e.detail&&e.detail.tab); if(t!==curTab) showTab(t); }
+  function onUnits(){ if(!alive()){ document.removeEventListener('riva:units-changed',onUnits); return; } renderTools(); if(curTab==='runs'||curTab==='producible') loadTab(curTab); }
+  document.addEventListener('riva:view',onView);
+  document.addEventListener('riva:units-changed',onUnits);
+  showTab(tabFromLabel(RIVA.state.view && RIVA.state.view.tab));
+})();
 </script>
