@@ -300,10 +300,7 @@ body.is-authed .app{display:grid;}
       <h1>Производственный учёт, который понятен с первого экрана</h1>
       <p>RIVA ведёт ваш цех от закупки до денег: рецепты-матрёшка, автоматический расчёт «сколько можно произвести» из текущих остатков, склады, продажи и казначейство — в одном пространстве, без лишней бухгалтерской нагрузки.</p>
       <div class="cta">
-        <button class="btn-fill" data-action="google-signin">
-          <svg viewBox="0 0 24 24"><path fill="#fff" d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.9h5.9a5 5 0 0 1-2.2 3.3v2.7h3.5c2-1.9 3.3-4.7 3.3-7.9z" opacity=".0"/></svg>
-          Начать через Google
-        </button>
+        <button class="btn-fill" data-action="google-signin">Начать через Google</button>
         <button class="btn-google" data-action="google-signin">Создать аккаунт</button>
       </div>
     </div>
@@ -355,7 +352,7 @@ body.is-authed .app{display:grid;}
   </section>
 
   <footer class="lfoot">
-    <span>© <span id="year"></span> RIVA · elpa.systems</span>
+    <span>© <span id="year"></span> RIVA</span>
     <span><a href="#" data-action="preview-app">Предпросмотр интерфейса (демо)</a></span>
   </footer>
 </div>
@@ -441,7 +438,7 @@ body.is-authed .app{display:grid;}
         <button class="nav-link" data-page="modal5">Группа</button>
       </div>
     </nav>
-    <div class="side-foot"><span>elpa.systems</span><span>v2.0</span></div>
+    <div class="side-foot"><span>RIVA</span><span>v2.0</span></div>
   </aside>
 
   <!-- Контент: сюда грузятся modalN.html -->
@@ -545,7 +542,7 @@ body.is-authed .app{display:grid;}
     });
   });
 
-  /* наполнение флайаута подразделениями (берётся из window.RIVA.getUnits(section); пока заглушка) */
+  /* наполнение флайаута подразделениями (берётся из window.RIVA.unitsBySection[section]; пока заглушка) */
   function fillUnits(item, section){
     var list=item.querySelector('.fly-list'); if(!list) return;
     var units=(window.RIVA && window.RIVA.unitsBySection && window.RIVA.unitsBySection[section]) || null;
@@ -571,15 +568,12 @@ body.is-authed .app{display:grid;}
     var titles={supply:'Снабжение',production:'Производство',sales:'Продажи',management:'Управление',settings:'Настройки'};
     var st=document.getElementById('sectionTitle'); if(st) st.textContent=titles[section]||'';
     var cs=document.getElementById('crumbSection'); if(cs) cs.textContent=titles[section]||'';
-    /* активная подстраница раздела */
     var panel=document.querySelector('.nav-panel[data-section="'+section+'"]');
     var first=panel?panel.querySelector('.nav-link'):null;
     if(panel){ panel.querySelectorAll('.nav-link.active').forEach(function(x){x.classList.remove('active');}); if(first) first.classList.add('active'); }
     var cp=document.getElementById('crumbPage'); if(cp&&first) cp.textContent=first.textContent.trim();
-    /* подпись активного подразделения в хлебных крошках */
     var cu=document.getElementById('crumbUnit');
     if(cu){ cu.textContent = unitId ? '  ·  фильтр: подразделение' : ''; }
-    /* загрузка функциональной страницы */
     var page=first?first.getAttribute('data-page'):null;
     loadPage(page, section, unitId);
   }
