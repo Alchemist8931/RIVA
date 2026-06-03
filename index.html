@@ -1,945 +1,609 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="ru" data-theme="light-bw">
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <title>RIVA</title>
-  <meta name="description" content="Производственное веб-приложение для малого бизнеса">
-  <meta name="theme-color" content="#FFFFFF">
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RIVA — производственный учёт для небольших мастерских</title>
 
-  <link rel="manifest" href="./manifest.json">
-  <link rel="icon" href="./assets/favicon.svg" type="image/svg+xml">
-  <meta name="apple-mobile-web-app-capable" content="yes">
-  <meta name="apple-mobile-web-app-status-bar-style" content="default">
-  <meta name="apple-mobile-web-app-title" content="RIVA">
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<!-- SN Pro (основной). Если у тебя свой источник SN Pro — замени ссылку ниже. Inter — фолбэк. -->
+<link href="https://fonts.cdnfonts.com/css/sn-pro" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
 
-  <script src="https://cdn.tailwindcss.com"></script>
+<style>
+/* ============================================================
+   ТЕМЫ. По умолчанию — светлая ЧБ (:root). Переключение — data-theme на <html>.
+   Все скругления пляшут от --r (как поле поиска в примере).
+   ============================================================ */
+:root{
+  /* — Шкала, неизменная между темами — */
+  --r:12px; --r-sm:calc(var(--r) - 2px); --r-lg:calc(var(--r) + 2px); --r-dot:999px;
+  --sp-1:.25rem; --sp-2:.5rem; --sp-3:.75rem; --sp-4:1rem; --sp-5:1.25rem;
+  --sp-6:1.5rem; --sp-8:2rem; --sp-10:2.5rem; --sp-12:3rem;
+  --rail-w:80px; --sidebar-w:300px; --content-max:1240px;
+  --ease:cubic-bezier(.22,1,.36,1); --dur:.35s; --dur-fast:.16s;
+  --font-sans:'SN Pro','Inter',ui-sans-serif,system-ui,-apple-system,'Segoe UI',Roboto,sans-serif;
+  --font-mono:ui-monospace,'SF Mono',Menlo,Consolas,monospace;
+  --grid-size:64px;
+  --dots-count:90; --dots-speed:.20; --dots-max-size:.7;
 
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=SN+Pro:ital,wght@0,200..900;1,200..900&display=swap" rel="stylesheet">
+  /* === СВЕТЛАЯ ЧБ (по умолчанию) === */
+  --bg:#f7f7f8; --bg-2:#ffffff;
+  --grid-color:rgba(0,0,0,.035);
+  --glow-1:rgba(0,0,0,.05); --glow-2:rgba(0,0,0,.03);
+  --surface:#ffffff;
+  --card:rgba(0,0,0,.022); --card-hover:rgba(0,0,0,.045);
+  --glass-bg:rgba(255,255,255,.72); --glass-blur:18px;
+  --glass-border:rgba(0,0,0,.08); --glass-hi:rgba(255,255,255,.7);
+  --border:rgba(0,0,0,.10); --border-strong:rgba(0,0,0,.18);
+  --text:#0c0d10; --text-2:#41454d; --text-3:#80858f;
+  --accent:#15161a; --accent-fg:#ffffff; --accent-soft:rgba(0,0,0,.06); --accent-line:rgba(0,0,0,.22);
+  --st-upcoming:#3457c8; --st-upcoming-bg:rgba(52,87,200,.10);
+  --st-pending:#a86412;  --st-pending-bg:rgba(200,140,30,.12);
+  --st-completed:#1c8a55;--st-completed-bg:rgba(28,160,90,.12);
+  --st-cancelled:#c0354a;--st-cancelled-bg:rgba(200,60,80,.10);
+  --shadow-card:0 1px 0 rgba(255,255,255,.6) inset, 0 18px 40px -28px rgba(0,0,0,.35);
+  --shadow-pop:0 30px 70px -28px rgba(0,0,0,.4), 0 1px 0 rgba(255,255,255,.6) inset;
+  --dots-color:10,10,12; --btn-fg:#ffffff; --btn-bg:#15161a;
+  color-scheme:light;
+}
 
-  <script>
-    // Tailwind theme: themed-цвета через CSS-переменные, state-цвета — константы
-    tailwind.config = {
-      theme: {
-        extend: {
-          colors: {
-            fg: {
-              DEFAULT:   'var(--fg)',
-              secondary: 'var(--fg-secondary)',
-              muted:     'var(--fg-muted)'
-            },
-            surface: {
-              DEFAULT: 'var(--bg)',
-              alt:     'var(--bg-alt)',
-              card:    'var(--bg-card)'
-            },
-            line: {
-              DEFAULT: 'var(--line)',
-              light:   'var(--line-light)'
-            },
-            state: { success: '#16A34A', warning: '#D97706', error: '#DC2626', info: '#2563EB' }
-          },
-          fontFamily: { sans: ['"SN Pro"', 'system-ui', '-apple-system', 'sans-serif'] },
-          maxWidth: { app: '1400px' }
-        }
-      }
-    };
-  </script>
+/* === ТЁМНАЯ ЧБ === */
+[data-theme="dark-bw"]{
+  --bg:#08090b; --bg-2:#0b0c0f;
+  --grid-color:rgba(255,255,255,.022);
+  --glow-1:rgba(255,255,255,.05); --glow-2:rgba(255,255,255,.03);
+  --surface:#111216;
+  --card:rgba(255,255,255,.024); --card-hover:rgba(255,255,255,.05);
+  --glass-bg:rgba(20,21,26,.55); --glass-border:rgba(255,255,255,.08); --glass-hi:rgba(255,255,255,.06);
+  --border:rgba(255,255,255,.07); --border-strong:rgba(255,255,255,.14);
+  --text:#f3f4f7; --text-2:#a6aab4; --text-3:#6b6f79;
+  --accent:#f3f4f7; --accent-fg:#0a0b0d; --accent-soft:rgba(255,255,255,.10); --accent-line:rgba(255,255,255,.22);
+  --st-upcoming:#9db4ff; --st-upcoming-bg:rgba(99,128,255,.13);
+  --st-pending:#ffcf8b;  --st-pending-bg:rgba(255,176,70,.12);
+  --st-completed:#7fe0b0;--st-completed-bg:rgba(60,200,140,.12);
+  --st-cancelled:#ff9fae;--st-cancelled-bg:rgba(255,90,110,.12);
+  --shadow-card:0 1px 0 rgba(255,255,255,.04) inset, 0 24px 48px -28px rgba(0,0,0,.8);
+  --shadow-pop:0 30px 70px -24px rgba(0,0,0,.85), 0 1px 0 rgba(255,255,255,.05) inset;
+  --dots-color:255,255,255; --btn-fg:#0a0b0d; --btn-bg:#f3f4f7;
+  color-scheme:dark;
+}
 
-  <style>
-    :root {
-      /* === ОСНОВА ПРИЛОЖЕНИЯ — заполняется JS из активной палитры === */
-      --bg:            #FFFFFF;
-      --bg-alt:        #FAFAFA;
-      --bg-card:       #F5F5F5;
-      --fg:            #0A0A0A;
-      --fg-secondary:  #404040;
-      --fg-muted:      #737373;
-      --line:          #E5E5E5;
-      --line-light:    #F0F0F0;
+/* === INDIGO (цветная, тёмная база) === */
+[data-theme="indigo"]{
+  --bg:#0a0a12; --bg-2:#0d0d18;
+  --grid-color:rgba(150,140,255,.05);
+  --glow-1:rgba(124,116,255,.18); --glow-2:rgba(70,90,200,.12);
+  --surface:#13131f;
+  --card:rgba(255,255,255,.03); --card-hover:rgba(255,255,255,.055);
+  --glass-bg:rgba(24,22,40,.55); --glass-border:rgba(150,140,255,.14); --glass-hi:rgba(180,170,255,.10);
+  --border:rgba(150,140,255,.12); --border-strong:rgba(150,140,255,.24);
+  --text:#f1f0ff; --text-2:#aaa6d0; --text-3:#726f96;
+  --accent:#7c74ff; --accent-fg:#ffffff; --accent-soft:rgba(124,116,255,.16); --accent-line:rgba(124,116,255,.4);
+  --st-upcoming:#9db4ff; --st-upcoming-bg:rgba(99,128,255,.14);
+  --st-pending:#ffcf8b;  --st-pending-bg:rgba(255,176,70,.12);
+  --st-completed:#7fe0b0;--st-completed-bg:rgba(60,200,140,.12);
+  --st-cancelled:#ff9fae;--st-cancelled-bg:rgba(255,90,110,.12);
+  --shadow-card:0 1px 0 rgba(255,255,255,.05) inset, 0 24px 48px -28px rgba(0,0,0,.85);
+  --shadow-pop:0 30px 70px -24px rgba(0,0,0,.9), 0 1px 0 rgba(255,255,255,.06) inset;
+  --dots-color:150,140,255; --btn-fg:#ffffff; --btn-bg:#7c74ff;
+  color-scheme:dark;
+}
 
-      /* === ВЫСОТА И СКРУГЛЕНИЕ КОНТРОЛОВ ШАПКИ === */
-      --ctrl-h:        38px;
-      --ctrl-radius:   12px;
+/* === EMERALD (цветная, тёмная база) === */
+[data-theme="emerald"]{
+  --bg:#07100c; --bg-2:#0a1611;
+  --grid-color:rgba(80,220,160,.05);
+  --glow-1:rgba(40,200,140,.16); --glow-2:rgba(30,140,110,.12);
+  --surface:#0e1a14;
+  --card:rgba(255,255,255,.028); --card-hover:rgba(255,255,255,.05);
+  --glass-bg:rgba(14,30,22,.55); --glass-border:rgba(80,220,160,.14); --glass-hi:rgba(140,240,200,.10);
+  --border:rgba(80,220,160,.12); --border-strong:rgba(80,220,160,.24);
+  --text:#ecfdf4; --text-2:#9fccb6; --text-3:#6a9080;
+  --accent:#22c08a; --accent-fg:#03130c; --accent-soft:rgba(34,192,138,.16); --accent-line:rgba(34,192,138,.42);
+  --st-upcoming:#9db4ff; --st-upcoming-bg:rgba(99,128,255,.13);
+  --st-pending:#ffcf8b;  --st-pending-bg:rgba(255,176,70,.12);
+  --st-completed:#7fe0b0;--st-completed-bg:rgba(60,200,140,.14);
+  --st-cancelled:#ff9fae;--st-cancelled-bg:rgba(255,90,110,.12);
+  --shadow-card:0 1px 0 rgba(255,255,255,.05) inset, 0 24px 48px -28px rgba(0,0,0,.85);
+  --shadow-pop:0 30px 70px -24px rgba(0,0,0,.9), 0 1px 0 rgba(255,255,255,.06) inset;
+  --dots-color:120,230,180; --btn-fg:#03130c; --btn-bg:#22c08a;
+  color-scheme:dark;
+}
 
-      /* === AURORA (фон): палитра — заполняется JS === */
-      --aurora-bg:        #FFFFFF;
-      --aurora-primary:   #FFFFFF;
-      --aurora-secondary: #888888;
-      --aurora-grad1:     #666666;
-      --aurora-grad2:     #333333;
-      --aurora-grad3:     #000000;
-      --aurora-opacity:   0.22;
-      --aurora-blur:      14px;
-      --aurora-blend:     multiply;
+/* ============================================================ БАЗА ============================================================ */
+*{box-sizing:border-box;margin:0;padding:0;}
+html,body{height:100%;}
+body{font-family:var(--font-sans);background:var(--bg);color:var(--text);-webkit-font-smoothing:antialiased;text-rendering:optimizeLegibility;overflow-x:hidden;transition:background var(--dur) var(--ease),color var(--dur) var(--ease);}
+a{color:inherit;text-decoration:none;}
+button{font-family:inherit;color:inherit;background:none;border:none;cursor:pointer;}
+img{display:block;max-width:100%;}
+::selection{background:var(--accent-soft);}
 
-      /* === AURORA: геометрия и анимация (одинаково для всех тем) === */
-      --aurora-mask-x:     100%;
-      --aurora-mask-y:     0%;
-      --aurora-mask-black: 10%;
-      --aurora-mask-fade:  65%;
-      --grad-angle:        100deg;
-      --grad1-stop1: 0%;  --grad1-stop2: 5%;  --grad1-stop3: 12%; --grad1-stop4: 18%; --grad1-stop5: 25%;
-      --grad2-stop1: 8%;  --grad2-stop2: 14%; --grad2-stop3: 22%; --grad2-stop4: 32%; --grad2-stop5: 42%;
-      --bg-size-main-1: 300%;  --bg-size-main-2: 200%;
-      --bg-size-after-1: 200%; --bg-size-after-2: 100%;
-      --anim-duration: 90s;
-      --anim-pos-start: 50%;   --anim-pos-end: 350%;
-      --transition-duration: 0.6s;
-    }
+.bg{position:fixed;inset:0;z-index:-1;pointer-events:none;
+  background:radial-gradient(900px 600px at 12% -8%,var(--glow-1),transparent 60%),
+             radial-gradient(800px 600px at 100% 110%,var(--glow-2),transparent 55%),var(--bg);}
+.bg::after{content:"";position:absolute;inset:0;
+  background-image:linear-gradient(to right,var(--grid-color) 1px,transparent 1px),
+                   linear-gradient(to bottom,var(--grid-color) 1px,transparent 1px);
+  background-size:var(--grid-size) var(--grid-size);
+  -webkit-mask-image:radial-gradient(120% 100% at 50% 0%,#000 35%,transparent 85%);
+          mask-image:radial-gradient(120% 100% at 50% 0%,#000 35%,transparent 85%);}
 
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    html, body {
-      font-family: 'SN Pro', system-ui, -apple-system, sans-serif;
-      background: var(--bg);
-      color: var(--fg);
-      -webkit-font-smoothing: antialiased;
-      -moz-osx-font-smoothing: grayscale;
-      transition: background-color var(--transition-duration) ease, color var(--transition-duration) ease;
-    }
-    body { min-height: 100vh; overflow-x: hidden; position: relative; }
+*{scrollbar-width:thin;scrollbar-color:var(--border-strong) transparent;}
+*::-webkit-scrollbar{width:9px;height:9px;}
+*::-webkit-scrollbar-thumb{background:var(--border-strong);border-radius:var(--r-dot);border:2px solid transparent;background-clip:padding-box;}
 
-    ::-webkit-scrollbar { width: 6px; height: 6px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 3px; }
-    ::-webkit-scrollbar-thumb:hover { background: var(--fg-muted); }
+/* Утилита переключателя тем */
+.theme-switch{display:inline-flex;gap:4px;padding:4px;border:1px solid var(--border);border-radius:var(--r);background:var(--card);}
+.theme-switch button{width:24px;height:24px;border-radius:var(--r-sm);border:1px solid var(--border);position:relative;transition:transform var(--dur-fast) var(--ease);}
+.theme-switch button:hover{transform:translateY(-1px);}
+.theme-switch button[data-set="light-bw"]{background:#f2f2f2;}
+.theme-switch button[data-set="dark-bw"]{background:#15161a;}
+.theme-switch button[data-set="indigo"]{background:linear-gradient(135deg,#13131f 40%,#7c74ff);}
+.theme-switch button[data-set="emerald"]{background:linear-gradient(135deg,#0e1a14 40%,#22c08a);}
+.theme-switch button.on{outline:2px solid var(--accent);outline-offset:1px;}
 
-    /* ============================================================
-       AURORA BACKGROUND
-       ============================================================ */
-    .aurora-background {
-      pointer-events: none;
-      position: fixed;
-      inset: 0;
-      z-index: 0;
-      opacity: var(--aurora-opacity);
-      filter: blur(var(--aurora-blur));
-      transition: opacity var(--transition-duration) ease;
-      will-change: transform;
+/* ============================================================ ЛЕНДИНГ ============================================================ */
+.landing{max-width:1180px;margin:0 auto;padding:var(--sp-6) var(--sp-6) var(--sp-12);}
+.lnav{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-4);padding:var(--sp-3) 0;margin-bottom:var(--sp-12);}
+.brand{display:flex;align-items:center;gap:var(--sp-3);font-weight:700;font-size:1.05rem;letter-spacing:-.01em;}
+.brand .mark{width:38px;height:38px;border-radius:var(--r);display:grid;place-items:center;background:var(--surface);border:1px solid var(--border-strong);box-shadow:var(--shadow-card);}
+.brand .mark svg{width:18px;height:18px;color:var(--text);}
+.lnav .right{display:flex;align-items:center;gap:var(--sp-3);}
 
-      -webkit-mask-image: radial-gradient(ellipse at var(--aurora-mask-x) var(--aurora-mask-y),
-        black var(--aurora-mask-black), transparent var(--aurora-mask-fade));
-      mask-image: radial-gradient(ellipse at var(--aurora-mask-x) var(--aurora-mask-y),
-        black var(--aurora-mask-black), transparent var(--aurora-mask-fade));
+.btn-google{display:inline-flex;align-items:center;gap:var(--sp-2);height:42px;padding:0 var(--sp-4);border-radius:var(--r);border:1px solid var(--border-strong);background:var(--surface);color:var(--text);font-size:.9rem;font-weight:600;transition:transform var(--dur-fast) var(--ease),background var(--dur-fast) var(--ease),border-color var(--dur-fast) var(--ease);}
+.btn-google:hover{transform:translateY(-1px);background:var(--card-hover);}
+.btn-google svg{width:18px;height:18px;}
+.btn-fill{display:inline-flex;align-items:center;gap:var(--sp-2);height:42px;padding:0 var(--sp-5);border-radius:var(--r);background:var(--btn-bg);color:var(--btn-fg);font-size:.9rem;font-weight:600;box-shadow:var(--shadow-card);transition:transform var(--dur-fast) var(--ease),opacity var(--dur-fast) var(--ease);}
+.btn-fill:hover{transform:translateY(-1px);opacity:.92;}
+.btn-fill svg{width:18px;height:18px;}
 
-      background-image:
-        repeating-linear-gradient(var(--grad-angle),
-          var(--aurora-primary) var(--grad1-stop1),
-          var(--aurora-primary) var(--grad1-stop2),
-          transparent var(--grad1-stop3),
-          transparent var(--grad1-stop4),
-          var(--aurora-primary) var(--grad1-stop5)
-        ),
-        repeating-linear-gradient(var(--grad-angle),
-          var(--aurora-secondary) var(--grad2-stop1),
-          var(--aurora-grad1) var(--grad2-stop2),
-          var(--aurora-grad2) var(--grad2-stop3),
-          var(--aurora-grad3) var(--grad2-stop4),
-          var(--aurora-grad1) var(--grad2-stop5)
-        );
-      background-size: var(--bg-size-main-1) 100%, var(--bg-size-main-2) 100%;
-      background-position: var(--anim-pos-start) 50%, var(--anim-pos-start) 50%;
-      background-color: var(--aurora-bg);
-    }
-    .aurora-background::after {
-      content: '';
-      position: absolute; inset: 0;
-      background-image: inherit;
-      background-size: var(--bg-size-after-1) 100%, var(--bg-size-after-2) 100%;
-      background-attachment: fixed;
-      mix-blend-mode: var(--aurora-blend);
-      animation: aurora-shift var(--anim-duration) linear infinite;
-    }
-    @keyframes aurora-shift {
-      0%   { background-position: var(--anim-pos-start) 50%, var(--anim-pos-start) 50%; }
-      100% { background-position: var(--anim-pos-end)   50%, var(--anim-pos-end)   50%; }
-    }
+.hero{display:grid;grid-template-columns:1.1fr .9fr;gap:var(--sp-10);align-items:center;margin-bottom:var(--sp-12);}
+.hero .eyebrow{font-family:var(--font-mono);font-size:.74rem;letter-spacing:.18em;text-transform:uppercase;color:var(--text-3);margin-bottom:var(--sp-4);}
+.hero h1{font-size:clamp(2.1rem,4.4vw,3.3rem);font-weight:700;letter-spacing:-.03em;line-height:1.04;margin-bottom:var(--sp-5);}
+.hero p{color:var(--text-2);font-size:1.06rem;line-height:1.6;max-width:52ch;margin-bottom:var(--sp-6);}
+.hero .cta{display:flex;align-items:center;gap:var(--sp-3);flex-wrap:wrap;}
+.hero-visual{position:relative;height:360px;border-radius:var(--r-lg);background:var(--glass-bg);-webkit-backdrop-filter:blur(var(--glass-blur));backdrop-filter:blur(var(--glass-blur));border:1px solid var(--glass-border);box-shadow:var(--shadow-card);overflow:hidden;}
+.hero-visual::before{content:"";position:absolute;inset:0 0 auto 0;height:1px;background:linear-gradient(90deg,transparent,var(--glass-hi),transparent);}
+.hero-visual canvas{position:absolute;inset:0;width:100%;height:100%;}
+.hero-chip{position:absolute;z-index:2;left:var(--sp-5);bottom:var(--sp-5);display:inline-flex;align-items:center;gap:var(--sp-2);font-size:.82rem;color:var(--text-2);background:var(--card);border:1px solid var(--border);border-radius:var(--r);padding:.5rem var(--sp-3);}
+.hero-chip .pulse{width:7px;height:7px;border-radius:50%;background:var(--st-completed);box-shadow:0 0 0 4px var(--st-completed-bg);}
 
-    /* Перехватывающий оверлей для плавной смены темы */
-    .theme-transition-overlay {
-      position: fixed; inset: 0; z-index: 1000;
-      background: var(--bg);
-      opacity: 0; pointer-events: none;
-      transition: opacity var(--transition-duration) ease;
-    }
-    .theme-transition-overlay.active { opacity: 0.85; pointer-events: all; }
+.features{display:grid;grid-template-columns:repeat(3,1fr);gap:var(--sp-5);margin-bottom:var(--sp-12);}
+.feature{padding:var(--sp-6);border-radius:var(--r-lg);background:var(--card);border:1px solid var(--border);transition:border-color var(--dur-fast) var(--ease),background var(--dur-fast) var(--ease),transform var(--dur-fast) var(--ease);}
+.feature:hover{border-color:var(--border-strong);background:var(--card-hover);transform:translateY(-2px);}
+.feature .ic{width:42px;height:42px;border-radius:var(--r);display:grid;place-items:center;background:var(--accent-soft);color:var(--accent);border:1px solid var(--accent-line);margin-bottom:var(--sp-4);}
+.feature .ic svg{width:20px;height:20px;}
+.feature h3{font-size:1.05rem;font-weight:600;margin-bottom:var(--sp-2);letter-spacing:-.01em;}
+.feature p{color:var(--text-2);font-size:.92rem;line-height:1.55;}
 
-    /* ============================================================
-       BLUEPRINT GRID — оригинальный фон auth-экрана (стал не нужен,
-       заменён на aurora, но классы оставлены, если где-то ещё)
-       ============================================================ */
-    .blueprint-grid {
-      background-image:
-        linear-gradient(rgba(10,10,10,0.035) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(10,10,10,0.035) 1px, transparent 1px);
-      background-size: 48px 48px;
-    }
-    .corner-mark { position: absolute; width: 18px; height: 18px; border-color: rgba(10,10,10,0.18); border-style: solid; pointer-events: none; }
-    .corner-mark-tl { top: 0; left: 0; border-width: 1px 0 0 1px; }
-    .corner-mark-tr { top: 0; right: 0; border-width: 1px 1px 0 0; }
-    .corner-mark-bl { bottom: 0; left: 0; border-width: 0 0 1px 1px; }
-    .corner-mark-br { bottom: 0; right: 0; border-width: 0 1px 1px 0; }
+.cta-band{padding:var(--sp-10);border-radius:var(--r-lg);background:var(--glass-bg);-webkit-backdrop-filter:blur(var(--glass-blur));backdrop-filter:blur(var(--glass-blur));border:1px solid var(--glass-border);box-shadow:var(--shadow-card);text-align:center;margin-bottom:var(--sp-10);}
+.cta-band h2{font-size:clamp(1.5rem,3vw,2.1rem);font-weight:700;letter-spacing:-.02em;margin-bottom:var(--sp-3);}
+.cta-band p{color:var(--text-2);max-width:46ch;margin:0 auto var(--sp-6);line-height:1.55;}
+.cta-band .cta{display:flex;justify-content:center;gap:var(--sp-3);flex-wrap:wrap;}
 
-    /* ============================================================
-       КНОПКИ ПРИЛОЖЕНИЯ (используют CSS-переменные)
-       ============================================================ */
-    .btn-primary {
-      background: var(--fg); color: var(--bg); border: 1px solid var(--fg);
-      transition: all .2s ease;
-    }
-    .btn-primary:hover:not(:disabled) { opacity: 0.88; }
-    .btn-primary:disabled { opacity: .4; cursor: not-allowed; }
+.lfoot{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-4);padding-top:var(--sp-6);border-top:1px solid var(--border);font-size:.84rem;color:var(--text-3);}
+.lfoot a{color:var(--text-3);}
+.lfoot a:hover{color:var(--text-2);}
 
-    .btn-secondary {
-      background: var(--bg); color: var(--fg); border: 1px solid var(--line);
-      transition: all .2s ease;
-    }
-    .btn-secondary:hover:not(:disabled) { background: var(--bg-alt); border-color: var(--fg-muted); }
+/* ============================================================ ПРИЛОЖЕНИЕ (спайн) ============================================================ */
+.app{display:none;grid-template-columns:var(--rail-w) var(--sidebar-w) 1fr;gap:var(--sp-4);padding:var(--sp-4);min-height:100vh;align-items:start;}
+body.is-authed .landing{display:none;}
+body.is-authed .app{display:grid;}
+.rail,.sidebar{position:sticky;top:var(--sp-4);height:calc(100vh - var(--sp-4)*2);}
 
-    .btn-google {
-      background: var(--bg); color: var(--fg); border: 1px solid var(--line);
-      transition: all .2s ease;
-    }
-    .btn-google:hover:not(:disabled) { background: var(--bg-alt); border-color: var(--fg); }
+.rail{width:100%;display:flex;flex-direction:column;align-items:center;gap:var(--sp-3);padding:var(--sp-4) 0;background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-card);}
+.rail-logo{width:46px;height:46px;border-radius:var(--r);display:grid;place-items:center;margin-bottom:var(--sp-2);background:var(--bg-2);border:1px solid var(--border-strong);box-shadow:var(--shadow-card);}
+.rail-logo svg{width:20px;height:20px;color:var(--text);}
+.rail-item{position:relative;}
+.rail-btn{position:relative;width:52px;height:52px;display:grid;place-items:center;border-radius:var(--r-lg);color:var(--text-2);border:1px solid transparent;transition:background var(--dur-fast) var(--ease),color var(--dur-fast) var(--ease),border-color var(--dur-fast) var(--ease);}
+.rail-btn svg{width:22px;height:22px;}
+.rail-btn:hover{background:var(--card-hover);color:var(--text);}
+.rail-btn.active{background:var(--accent-soft);color:var(--accent);border-color:var(--accent-line);}
+.rail-foot{margin-top:auto;display:flex;flex-direction:column;align-items:center;gap:var(--sp-3);}
 
-    /* ============================================================
-       ШАПКА — все контролы одной высоты и одного скругления
-       ============================================================ */
-    .header-blur {
-      /* fallback */
-      background: var(--bg);
-      border-bottom: 1px solid var(--line);
-      backdrop-filter: blur(10px);
-      -webkit-backdrop-filter: blur(10px);
-    }
-    @supports (background: color-mix(in srgb, white, black)) {
-      .header-blur {
-        background: color-mix(in srgb, var(--bg) 82%, transparent);
-      }
-    }
+/* Флайаут подразделений (появляется по наведению на пункт рейла через 0.3с) */
+.flyout{position:absolute;left:calc(100% + 12px);top:0;min-width:240px;padding:var(--sp-2);border-radius:var(--r);
+  background:var(--glass-bg);-webkit-backdrop-filter:blur(var(--glass-blur));backdrop-filter:blur(var(--glass-blur));
+  border:1px solid var(--glass-border);box-shadow:var(--shadow-pop);z-index:60;
+  opacity:0;transform:translateX(-6px) scale(.98);transform-origin:left center;pointer-events:none;
+  transition:opacity var(--dur-fast) var(--ease),transform var(--dur-fast) var(--ease);}
+.rail-item.flyopen .flyout{opacity:1;transform:translateX(0) scale(1);pointer-events:auto;}
+.flyout .fly-head{display:flex;align-items:center;justify-content:space-between;padding:.4rem var(--sp-3) var(--sp-2);font-size:.72rem;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);}
+.flyout .fly-item{display:flex;align-items:center;gap:var(--sp-2);width:100%;padding:.55rem var(--sp-3);border-radius:var(--r-sm);color:var(--text-2);font-size:.875rem;text-align:left;transition:background var(--dur-fast) var(--ease),color var(--dur-fast) var(--ease);}
+.flyout .fly-item:hover{background:var(--accent-soft);color:var(--text);}
+.flyout .fly-item .badge-def{margin-left:auto;font-size:.68rem;color:var(--text-3);font-family:var(--font-mono);}
+.flyout .fly-all{border-top:1px solid var(--border);margin-top:var(--sp-2);padding-top:var(--sp-2);}
+.flyout .fly-empty{padding:.6rem var(--sp-3);color:var(--text-3);font-size:.83rem;}
 
-    .ctrl {
-      height: var(--ctrl-h);
-      border-radius: var(--ctrl-radius);
-      border: 1px solid var(--line);
-      background: var(--bg);
-      display: inline-flex; align-items: center; gap: 8px;
-      padding: 0 12px;
-      font-size: 13px; color: var(--fg);
-      transition: border-color .2s ease, background .2s ease;
-      cursor: pointer;
-    }
-    .ctrl:hover { border-color: var(--fg-muted); }
-    .ctrl-square {
-      width: var(--ctrl-h);
-      padding: 0;
-      justify-content: center;
-      gap: 0;
-    }
-    .ctrl-logo {
-      cursor: default;
-      pointer-events: none;
-    }
-    .ctrl-logo:hover { border-color: var(--line); }
+.sidebar{width:100%;display:flex;flex-direction:column;padding:var(--sp-5) var(--sp-4);background:var(--surface);border:1px solid var(--border);border-radius:var(--r-lg);box-shadow:var(--shadow-card);overflow:hidden;}
+.search{display:flex;align-items:center;gap:var(--sp-2);width:100%;height:46px;padding:0 var(--sp-3);margin-bottom:var(--sp-5);background:var(--card);border:1px solid var(--border);border-radius:var(--r);color:var(--text-3);transition:border-color var(--dur-fast) var(--ease),background var(--dur-fast) var(--ease);}
+.search:focus-within{border-color:var(--accent-line);}
+.search svg{width:16px;height:16px;flex:0 0 auto;}
+.search input{flex:1;background:none;border:none;outline:none;color:var(--text);font-size:.875rem;min-width:0;}
+.search input::placeholder{color:var(--text-3);}
+.search .kbd{font-family:var(--font-mono);font-size:.72rem;color:var(--text-3);padding:2px 6px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--card);}
+.panel-title{font-size:.72rem;font-weight:600;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3);padding:0 var(--sp-3);margin-bottom:var(--sp-3);}
+.nav{flex:1;overflow-y:auto;margin:0 calc(var(--sp-2)*-1);padding:0 var(--sp-2);}
+.nav-panel{display:none;}
+.nav-panel.is-active{display:block;animation:navIn .35s var(--ease);}
+@keyframes navIn{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+.nav-link{display:flex;align-items:center;gap:var(--sp-3);width:100%;padding:.6rem var(--sp-3);border-radius:var(--r-sm);color:var(--text-2);font-size:.9rem;font-weight:500;text-align:left;transition:background var(--dur-fast) var(--ease),color var(--dur-fast) var(--ease);}
+.nav-link svg{width:18px;height:18px;flex:0 0 auto;opacity:.85;}
+.nav-link:hover{background:var(--card-hover);color:var(--text);}
+.nav-link.active{background:var(--accent-soft);color:var(--text);box-shadow:0 0 0 1px var(--border) inset;}
+.nav-link .tag{margin-left:auto;font-size:.68rem;font-weight:500;padding:2px 8px;border-radius:var(--r-sm);background:var(--card);color:var(--text-2);border:1px solid var(--border);}
+.side-foot{margin-top:var(--sp-3);padding-top:var(--sp-3);border-top:1px solid var(--border);font-family:var(--font-mono);font-size:.72rem;color:var(--text-3);display:flex;justify-content:space-between;align-items:center;}
 
-    /* ----- Segmented nav (radio-input стиль) ----- */
-    .nav-segmented {
-      height: var(--ctrl-h);
-      background: var(--bg-card);
-      border: 1px solid var(--line);
-      border-radius: var(--ctrl-radius);
-      padding: 4px;
-      display: inline-flex; align-items: stretch; gap: 0;
-    }
-    .nav-segmented .nav-item {
-      padding: 0 14px;
-      border-radius: calc(var(--ctrl-radius) - 4px);
-      color: var(--fg-muted);
-      font-size: 13px;
-      transition: all .15s ease-in-out;
-      display: inline-flex; align-items: center;
-      text-decoration: none; white-space: nowrap;
-    }
-    .nav-segmented .nav-item:hover { color: var(--fg); }
-    .nav-segmented .nav-item.active {
-      background: var(--bg);
-      color: var(--fg);
-      font-weight: 600;
-      box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 0 0 1px rgba(0,0,0,.04);
-    }
+.main{min-width:0;padding:var(--sp-2) var(--sp-6) var(--sp-10) var(--sp-4);max-width:calc(var(--content-max) + var(--sp-10));}
+.topbar{display:flex;align-items:center;justify-content:space-between;gap:var(--sp-4);margin-bottom:var(--sp-8);}
+.crumbs{display:flex;align-items:center;gap:var(--sp-2);font-size:.85rem;color:var(--text-3);}
+.crumbs b{color:var(--text-2);font-weight:500;}
+.crumbs svg{width:14px;height:14px;opacity:.6;}
+.actions{display:flex;align-items:center;gap:var(--sp-3);}
+.icon-btn{position:relative;width:40px;height:40px;border-radius:var(--r);display:grid;place-items:center;background:var(--card);border:1px solid var(--border);color:var(--text-2);transition:border-color var(--dur-fast) var(--ease),color var(--dur-fast) var(--ease),background var(--dur-fast) var(--ease);}
+.icon-btn:hover{border-color:var(--border-strong);color:var(--text);background:var(--card-hover);}
+.icon-btn svg{width:18px;height:18px;}
+.profile{display:flex;align-items:center;gap:var(--sp-3);padding-left:var(--sp-2);}
+.avatar{width:40px;height:40px;border-radius:var(--r);display:grid;place-items:center;font-weight:600;font-size:.85rem;color:var(--btn-fg);background:var(--btn-bg);}
+.profile .who b{font-size:.875rem;font-weight:600;display:block;line-height:1.2;}
+.profile .who span{font-size:.78rem;color:var(--text-3);}
 
-    /* ----- Сайдбар-навигация (мобильная) ----- */
-    .sidebar-item {
-      border: 1px solid transparent; transition: all .2s ease; color: var(--fg-secondary);
-    }
-    .sidebar-item:hover { background: var(--bg-alt); border-color: var(--line-light); color: var(--fg); }
-    .sidebar-item.active { background: var(--bg-alt); border-color: var(--line); color: var(--fg); }
+#page-container{min-height:50vh;border-radius:var(--r-lg);}
+.page-skeleton{display:grid;place-items:center;min-height:50vh;color:var(--text-3);font-size:.9rem;gap:var(--sp-3);text-align:center;}
+.page-skeleton .spin{width:26px;height:26px;border-radius:50%;border:2px solid var(--border);border-top-color:var(--accent);animation:spin 1s linear infinite;}
+@keyframes spin{to{transform:rotate(360deg);}}
 
-    /* ============================================================
-       КАРТОЧКА ГРУППЫ (auth — экран выбора)
-       ============================================================ */
-    .group-card {
-      border: 1px solid var(--line); transition: all .2s ease; background: var(--bg);
-    }
-    .group-card:hover {
-      border-color: var(--fg); background: var(--bg-alt); transform: translateY(-1px);
-    }
+#toasts{position:fixed;right:var(--sp-5);bottom:var(--sp-5);display:flex;flex-direction:column;gap:var(--sp-2);z-index:200;}
+.toast{padding:.7rem var(--sp-4);border-radius:var(--r);background:var(--glass-bg);-webkit-backdrop-filter:blur(var(--glass-blur));backdrop-filter:blur(var(--glass-blur));border:1px solid var(--glass-border);box-shadow:var(--shadow-pop);font-size:.875rem;color:var(--text);animation:navIn .3s var(--ease);}
 
-    /* ============================================================
-       ЛОАДЕР И TOAST
-       ============================================================ */
-    .loader {
-      animation: spin 1s linear infinite;
-      border: 2px solid var(--line);
-      border-top-color: var(--fg);
-      border-radius: 50%;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+/* Появление */
+@keyframes fadeUp{from{opacity:0;transform:translateY(14px);}to{opacity:1;transform:none;}}
+.reveal{opacity:0;animation:fadeUp .7s var(--ease) forwards;}
+.reveal:nth-child(2){animation-delay:.06s;}.reveal:nth-child(3){animation-delay:.12s;}
+@media (prefers-reduced-motion:reduce){.reveal{animation:none;opacity:1;}*{transition:none!important;}}
 
-    .reveal { opacity: 0; transform: translateY(12px); transition: opacity .6s cubic-bezier(.16,1,.3,1), transform .6s cubic-bezier(.16,1,.3,1); }
-    .reveal.visible { opacity: 1; transform: translateY(0); }
-    .delay-1 { transition-delay: .1s; }
-    .delay-2 { transition-delay: .2s; }
-
-    .toast { animation: toastIn .3s cubic-bezier(.16,1,.3,1) forwards; }
-    @keyframes toastIn { from { opacity: 0; transform: translateX(12px); } to { opacity: 1; transform: translateX(0); } }
-
-    @media (max-width: 1023px) {
-      .sidebar { transform: translateX(-100%); transition: transform .3s cubic-bezier(.16,1,.3,1); }
-      .sidebar.open { transform: translateX(0); }
-    }
-
-    @media (prefers-reduced-motion: reduce) {
-      *, *::before, *::after {
-        animation-duration: .01ms !important;
-        transition-duration: .01ms !important;
-      }
-      .aurora-background::after { animation: none !important; }
-    }
-
-    /* ============================================================
-       ПЕРЕКЛЮЧАТЕЛЬ ТЕМ (ctrl + линия тем справа налево)
-       ============================================================ */
-    .theme-switcher { position: relative; }
-
-    .theme-line {
-      position: absolute;
-      right: calc(100% + 8px);
-      top: 50%;
-      transform: translateY(-50%);
-      display: flex; align-items: center; gap: 6px;
-      pointer-events: none;
-      opacity: 0;
-      transition: opacity .2s ease;
-    }
-    .theme-line.active { pointer-events: auto; opacity: 1; }
-
-    .theme-node {
-      width: calc(var(--ctrl-h) - 6px);
-      height: calc(var(--ctrl-h) - 6px);
-      border-radius: 10px;
-      border: 1px solid var(--line);
-      background: var(--bg);
-      display: inline-flex; align-items: center; justify-content: center;
-      cursor: pointer;
-      padding: 0;
-      opacity: 0;
-      transform: translateX(14px) scale(0.7);
-      transition: opacity .25s ease, transform .25s cubic-bezier(0.34, 1.56, 0.64, 1),
-                  border-color .15s ease, box-shadow .15s ease;
-      position: relative;
-    }
-    .theme-node:hover { border-color: var(--fg-muted); }
-    .theme-node.active {
-      border-color: var(--fg);
-      box-shadow: 0 0 0 2px var(--bg);
-    }
-    .theme-node .theme-preview {
-      width: 18px; height: 18px;
-      border-radius: 6px;
-      pointer-events: none;
-    }
-    .theme-node::after {
-      content: attr(title);
-      position: absolute;
-      bottom: -22px; left: 50%;
-      transform: translateX(-50%) translateY(4px);
-      font-size: 10px;
-      background: var(--fg); color: var(--bg);
-      padding: 3px 7px; border-radius: 6px;
-      white-space: nowrap;
-      opacity: 0; pointer-events: none;
-      transition: opacity .15s ease, transform .15s ease;
-    }
-    .theme-node:hover::after {
-      opacity: 1; transform: translateX(-50%) translateY(0);
-    }
-
-    /* Появление в стиле "справа налево" — ближайшая к кнопке темы выезжает первой */
-    .theme-line.active .theme-node { opacity: 1; transform: translateX(0) scale(1); }
-    .theme-line .theme-node:nth-last-child(1) { transition-delay: 0ms;   }
-    .theme-line .theme-node:nth-last-child(2) { transition-delay: 35ms;  }
-    .theme-line .theme-node:nth-last-child(3) { transition-delay: 70ms;  }
-    .theme-line .theme-node:nth-last-child(4) { transition-delay: 105ms; }
-    .theme-line .theme-node:nth-last-child(5) { transition-delay: 140ms; }
-    .theme-line .theme-node:nth-last-child(6) { transition-delay: 175ms; }
-    .theme-line .theme-node:nth-last-child(7) { transition-delay: 210ms; }
-    .theme-line:not(.active) .theme-node {
-      transition-delay: 0ms !important;
-      opacity: 0; transform: translateX(14px) scale(0.7);
-    }
-
-    .btn-theme.active .icon-palette { display: none; }
-    .btn-theme.active .icon-close   { display: block; }
-    .btn-theme .icon-close { display: none; }
-    .btn-theme.active { background: var(--bg-alt); border-color: var(--fg-muted); }
-
-    /* На мобильных скрываем линию (откроется направо вниз? — пока просто скрываем) */
-    @media (max-width: 480px) {
-      .theme-line { display: none; }
-      .theme-line.mobile-open {
-        display: flex;
-        position: fixed;
-        right: 12px; top: calc(var(--ctrl-h) + 70px);
-        flex-direction: column-reverse;
-      }
-    }
-  </style>
+@media (max-width:1080px){.hero{grid-template-columns:1fr;}.hero-visual{height:280px;}.features{grid-template-columns:1fr;}}
+@media (max-width:1200px){.app{grid-template-columns:var(--rail-w) 1fr;}.sidebar{display:none;}}
+@media (max-width:860px){.app{grid-template-columns:1fr;padding:var(--sp-3);}.rail{display:none;}.main{padding:var(--sp-2);}.crumbs{display:none;}}
+</style>
 </head>
 <body>
+<div class="bg"></div>
 
-  <!-- AURORA фон + плавный оверлей перехода тем -->
-  <div class="aurora-background" aria-hidden="true"></div>
-  <div class="theme-transition-overlay" aria-hidden="true"></div>
+<!-- ===================== ПУБЛИЧНЫЙ ЛЕНДИНГ ===================== -->
+<div class="landing">
+  <nav class="lnav">
+    <div class="brand">
+      <span class="mark"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 7l7 5 7-5M5 17l7-5 7 5"/></svg></span>
+      RIVA
+    </div>
+    <div class="right">
+      <div class="theme-switch" id="themeSwitch">
+        <button data-set="light-bw" title="Светлая Ч/Б"></button>
+        <button data-set="dark-bw" title="Тёмная Ч/Б"></button>
+        <button data-set="indigo" title="Indigo"></button>
+        <button data-set="emerald" title="Emerald"></button>
+      </div>
+      <button class="btn-google" data-action="google-signin">
+        <svg viewBox="0 0 24 24"><path fill="#4285F4" d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.9h5.9a5 5 0 0 1-2.2 3.3v2.7h3.5c2-1.9 3.3-4.7 3.3-7.9z"/><path fill="#34A853" d="M12 23c3 0 5.5-1 7.3-2.7l-3.5-2.7c-1 .7-2.3 1.1-3.8 1.1-2.9 0-5.4-2-6.3-4.6H2.1v2.8A11 11 0 0 0 12 23z"/><path fill="#FBBC05" d="M5.7 14.1a6.6 6.6 0 0 1 0-4.2V7.1H2.1a11 11 0 0 0 0 9.8z"/><path fill="#EA4335" d="M12 5.4c1.6 0 3 .6 4.2 1.7l3.1-3.1A11 11 0 0 0 2.1 7.1l3.6 2.8C6.6 7.3 9.1 5.4 12 5.4z"/></svg>
+        Войти
+      </button>
+    </div>
+  </nav>
 
-  <div id="app" class="relative z-10">
-
-    <!-- SCREEN: Loading -->
-    <div id="screen-loading" class="fixed inset-0 z-50 flex items-center justify-center" style="background: var(--bg);">
-      <div class="text-center">
-        <div class="w-12 h-12 loader mx-auto mb-4"></div>
-        <p class="text-fg-muted text-sm tracking-wider uppercase">Загрузка</p>
+  <section class="hero">
+    <div>
+      <div class="eyebrow">ERP для малого производства</div>
+      <h1>Производственный учёт, который понятен с первого экрана</h1>
+      <p>RIVA ведёт ваш цех от закупки до денег: рецепты-матрёшка, автоматический расчёт «сколько можно произвести» из текущих остатков, склады, продажи и казначейство — в одном пространстве, без лишней бухгалтерской нагрузки.</p>
+      <div class="cta">
+        <button class="btn-fill" data-action="google-signin">
+          <svg viewBox="0 0 24 24"><path fill="#fff" d="M22.5 12.2c0-.7-.1-1.4-.2-2H12v3.9h5.9a5 5 0 0 1-2.2 3.3v2.7h3.5c2-1.9 3.3-4.7 3.3-7.9z" opacity=".0"/></svg>
+          Начать через Google
+        </button>
+        <button class="btn-google" data-action="google-signin">Создать аккаунт</button>
       </div>
     </div>
+    <div class="hero-visual">
+      <canvas id="dots"></canvas>
+      <div class="hero-chip"><span class="pulse"></span> Снабжение → Производство → Продажи → Деньги</div>
+    </div>
+  </section>
 
-    <!-- SCREEN: Auth -->
-    <div id="screen-auth" class="hidden fixed inset-0 z-40 overflow-y-auto">
-      <div class="min-h-screen flex items-center justify-center px-4 py-8">
-        <div class="w-full max-w-md">
-          <div class="text-center mb-10 reveal">
-            <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-surface border border-line mb-5">
-              <svg class="w-7 h-7" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M7 20V4h6a4 4 0 0 1 0 8H7"/>
-                <path d="m13 12 4 8"/>
-              </svg>
-            </div>
-            <h1 class="text-2xl font-medium text-fg mb-1 tracking-tight">RIVA</h1>
-            <p class="text-fg-muted text-sm">Производственное приложение</p>
-          </div>
+  <section class="features">
+    <div class="feature reveal">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M21 16V8a2 2 0 0 0-1-1.7l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.7l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/><path d="m3.3 7 8.7 5 8.7-5M12 22V12"/></svg></div>
+      <h3>Рецепт как продукт</h3>
+      <p>Изделие, его состав и калькуляция — одна сущность. Вкладывайте рецепты в рецепты матрёшкой: полуфабрикат в составе изделия — это нормально.</p>
+    </div>
+    <div class="feature reveal">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="m7 14 3-3 3 2 5-6"/></svg></div>
+      <h3>Сколько можно произвести</h3>
+      <p>RIVA сама считает по всему дереву состава, сколько единиц вы соберёте из текущих остатков, и подсказывает лимитирующий материал.</p>
+    </div>
+    <div class="feature reveal">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="6" width="18" height="12" rx="2"/><path d="M3 10h18"/></svg></div>
+      <h3>Деньги под контролем</h3>
+      <p>Казначейство само подтягивает доходы из продаж и расходы из закупок, добавляет регулярные платежи — реальная картина денег без отдельной программы.</p>
+    </div>
+    <div class="feature reveal">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg></div>
+      <h3>Несколько складов и цехов</h3>
+      <p>Разделяйте направления на подразделения со своими складами, перемещайте материалы между ними под контролем управленца — с записью в журнал каждого.</p>
+    </div>
+    <div class="feature reveal">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="6" cy="6" r="2.5"/><circle cx="18" cy="6" r="2.5"/><circle cx="12" cy="18" r="2.5"/><path d="M6 8.5v3a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2v-3M12 13.5v2"/></svg></div>
+      <h3>Цепочки и аналитика</h3>
+      <p>Собирайте склад + производство + отдел продаж в цепочку-направление и смотрите результат целиком по группе, по подразделению и по каждой цепочке.</p>
+    </div>
+    <div class="feature reveal">
+      <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3l7 3v6c0 4-3 7-7 8-4-1-7-4-7-8V6z"/><path d="m9.5 12 1.8 1.8 3.5-3.8"/></svg></div>
+      <h3>Роли по подразделениям</h3>
+      <p>«Снабжение Айвазовского 53» или общий снабженец на все склады — гибкие роли с доступом ровно туда, куда нужно, и единый вход через Google.</p>
+    </div>
+  </section>
 
-          <div class="reveal delay-1">
+  <section class="cta-band">
+    <h2>Заведите своё производство в RIVA за вечер</h2>
+    <p>Без установки и интеграций. Войдите через Google — и сразу создавайте рецепты, склады и первые заказы.</p>
+    <div class="cta">
+      <button class="btn-fill" data-action="google-signin">Войти через Google</button>
+    </div>
+  </section>
 
-            <!-- View: Google login -->
-            <div id="view-google-login" class="bg-surface rounded-2xl p-8 border border-line relative">
-              <span class="corner-mark corner-mark-tl"></span>
-              <span class="corner-mark corner-mark-tr"></span>
-              <span class="corner-mark corner-mark-bl"></span>
-              <span class="corner-mark corner-mark-br"></span>
+  <footer class="lfoot">
+    <span>© <span id="year"></span> RIVA · elpa.systems</span>
+    <span><a href="#" data-action="preview-app">Предпросмотр интерфейса (демо)</a></span>
+  </footer>
+</div>
 
-              <div class="text-center mb-6">
-                <h2 class="text-lg font-medium mb-1">Вход в систему</h2>
-                <p class="text-fg-muted text-sm">Авторизуйтесь через Google аккаунт</p>
-              </div>
+<!-- ===================== ПРИЛОЖЕНИЕ (показывается после входа) ===================== -->
+<div class="app">
+  <!-- Рейл: главное меню с флайаутом подразделений -->
+  <aside class="rail">
+    <div class="rail-logo"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18M5 7l7 5 7-5M5 17l7-5 7 5"/></svg></div>
 
-              <button id="btn-google" class="btn-google w-full py-3.5 rounded-xl font-medium flex items-center justify-center gap-3">
-                <svg class="w-5 h-5" viewBox="0 0 24 24">
-                  <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/>
-                  <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/>
-                  <path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l3.66-2.84z"/>
-                  <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
-                </svg>
-                <span>Войти через Google</span>
-              </button>
+    <div class="rail-item" data-section="supply">
+      <button class="rail-btn active" data-section="supply" data-title="Снабжение" aria-label="Снабжение">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h13l5 5v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/><path d="M16 7v5h5M7 21v-6h6v6"/></svg>
+      </button>
+      <div class="flyout"><div class="fly-head"><span>Склады</span></div><div class="fly-list"></div>
+        <button class="fly-item fly-all" data-section="supply" data-unit="">Весь раздел (без фильтра)</button></div>
+    </div>
 
-              <p class="mt-5 pt-5 border-t border-line-light text-fg-muted text-xs text-center leading-relaxed">
-                При первом входе создаётся личная группа, где вы — администратор. Вас также могут пригласить в группы коллег.
-              </p>
-            </div>
+    <div class="rail-item" data-section="production">
+      <button class="rail-btn" data-section="production" data-title="Производство" aria-label="Производство">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V10l6 4V10l6 4V8l6 4v9z"/></svg>
+      </button>
+      <div class="flyout"><div class="fly-head"><span>Производства</span></div><div class="fly-list"></div>
+        <button class="fly-item fly-all" data-section="production" data-unit="">Весь раздел (без фильтра)</button></div>
+    </div>
 
-            <!-- View: Group picker -->
-            <div id="view-group-picker" class="hidden bg-surface rounded-2xl p-8 border border-line relative">
-              <span class="corner-mark corner-mark-tl"></span>
-              <span class="corner-mark corner-mark-tr"></span>
-              <span class="corner-mark corner-mark-bl"></span>
-              <span class="corner-mark corner-mark-br"></span>
+    <div class="rail-item" data-section="sales">
+      <button class="rail-btn" data-section="sales" data-title="Продажи" aria-label="Продажи">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3h2l2.4 12.3a2 2 0 0 0 2 1.7h7.7a2 2 0 0 0 2-1.6L22 8H6"/><circle cx="9" cy="20" r="1.5"/><circle cx="18" cy="20" r="1.5"/></svg>
+      </button>
+      <div class="flyout"><div class="fly-head"><span>Отделы продаж</span></div><div class="fly-list"></div>
+        <button class="fly-item fly-all" data-section="sales" data-unit="">Весь раздел (без фильтра)</button></div>
+    </div>
 
-              <div class="text-center mb-6">
-                <h2 class="text-lg font-medium mb-1">Выберите группу</h2>
-                <p class="text-fg-muted text-sm">Вы участник нескольких рабочих пространств</p>
-              </div>
+    <div class="rail-item" data-section="management">
+      <button class="rail-btn" data-section="management" data-title="Управление" aria-label="Управление">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M3 21V5a2 2 0 0 1 2-2h11l5 5v13z"/><path d="m8 13 2.5 2.5L16 10"/></svg>
+      </button>
+    </div>
 
-              <div id="group-list" class="space-y-2 mb-5"></div>
+    <div class="rail-foot">
+      <button class="rail-btn" data-section="settings" data-title="Настройки" aria-label="Настройки">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9 7 7M17 17l2.1 2.1M19.1 4.9 17 7M7 17l-2.1 2.1"/></svg>
+      </button>
+    </div>
+  </aside>
 
-              <button id="btn-create-group-open" class="w-full py-3 text-fg-muted text-sm hover:text-fg transition-colors border-t border-line-light pt-4">
-                + Создать новую группу
-              </button>
-              <button id="btn-signout-picker" class="mt-3 w-full py-2 text-fg-muted text-xs hover:text-fg transition-colors">
-                Выйти из аккаунта
-              </button>
-            </div>
-
-            <!-- View: Create group -->
-            <div id="view-create-group" class="hidden bg-surface rounded-2xl p-8 border border-line relative">
-              <span class="corner-mark corner-mark-tl"></span>
-              <span class="corner-mark corner-mark-tr"></span>
-              <span class="corner-mark corner-mark-bl"></span>
-              <span class="corner-mark corner-mark-br"></span>
-
-              <div class="text-center mb-6">
-                <h2 class="text-lg font-medium mb-1">Новая группа</h2>
-                <p class="text-fg-muted text-sm">Вы будете администратором и владельцем</p>
-              </div>
-
-              <label class="block mb-4">
-                <span class="text-xs text-fg-muted block mb-1.5">Название группы</span>
-                <input id="input-group-name" type="text" maxlength="100"
-                  class="w-full px-4 py-3 rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors"
-                  placeholder="Например: Пекарня на Мира"
-                  autocomplete="off" spellcheck="false">
-              </label>
-
-              <button id="btn-create-group-submit" class="btn-primary w-full py-3.5 rounded-xl font-medium mb-2" disabled>
-                Создать группу
-              </button>
-              <button id="btn-create-group-cancel" class="btn-secondary w-full py-2.5 rounded-xl text-sm">
-                Отмена
-              </button>
-            </div>
-
-            <!-- View: No groups -->
-            <div id="view-no-groups" class="hidden bg-surface rounded-2xl p-8 border border-line relative">
-              <span class="corner-mark corner-mark-tl"></span>
-              <span class="corner-mark corner-mark-tr"></span>
-              <span class="corner-mark corner-mark-bl"></span>
-              <span class="corner-mark corner-mark-br"></span>
-
-              <div class="text-center">
-                <div class="w-14 h-14 rounded-full bg-surface-alt border border-line mx-auto mb-4 flex items-center justify-center">
-                  <svg class="w-7 h-7 text-fg-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <rect x="3" y="3" width="18" height="18" rx="2"/>
-                    <line x1="9" y1="9" x2="15" y2="15"/>
-                    <line x1="15" y1="9" x2="9" y2="15"/>
-                  </svg>
-                </div>
-                <h2 class="text-lg font-medium mb-2">Нет доступных групп</h2>
-                <p class="text-fg-muted text-sm mb-6">Вас удалили из всех групп, или пока никто не пригласил.</p>
-                <button id="btn-create-group-from-empty" class="btn-primary w-full py-3 rounded-xl font-medium mb-2">
-                  Создать свою группу
-                </button>
-                <button id="btn-signout-empty" class="w-full py-2 text-fg-muted text-sm hover:text-fg transition-colors">
-                  Выйти
-                </button>
-              </div>
-            </div>
-
-            <!-- View: Session active -->
-            <div id="view-session-active" class="hidden bg-surface rounded-2xl p-8 border border-line relative">
-              <span class="corner-mark corner-mark-tl"></span>
-              <span class="corner-mark corner-mark-tr"></span>
-              <span class="corner-mark corner-mark-bl"></span>
-              <span class="corner-mark corner-mark-br"></span>
-
-              <div class="text-center">
-                <div class="w-14 h-14 rounded-full bg-state-warning/10 border border-state-warning/30 mx-auto mb-4 flex items-center justify-center">
-                  <svg class="w-7 h-7 text-state-warning" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                    <rect x="5" y="2" width="14" height="20" rx="2"/>
-                    <line x1="12" y1="18" x2="12.01" y2="18"/>
-                  </svg>
-                </div>
-                <h2 class="text-lg font-medium mb-2">Учётная запись активна</h2>
-                <p class="text-fg-muted text-sm mb-5">Ваш аккаунт уже используется на другом устройстве</p>
-
-                <div class="bg-surface-alt rounded-xl p-4 mb-5 text-left text-sm border border-line-light">
-                  <div class="flex justify-between gap-3 py-1">
-                    <span class="text-fg-muted flex-shrink-0">Устройство</span>
-                    <span id="session-device" class="text-fg text-right truncate">—</span>
-                  </div>
-                  <div class="flex justify-between gap-3 py-1">
-                    <span class="text-fg-muted flex-shrink-0">Начало сессии</span>
-                    <span id="session-started" class="text-fg text-right">—</span>
-                  </div>
-                </div>
-
-                <p class="text-fg-muted text-xs mb-5 leading-relaxed">
-                  Выйдите из системы на другом устройстве, чтобы войти здесь. Сессия освобождается автоматически через 2 минуты бездействия.
-                </p>
-
-                <button id="btn-retry-session" class="btn-secondary w-full py-3 rounded-xl font-medium text-sm mb-2">
-                  Повторить попытку
-                </button>
-                <button id="btn-signout-1" class="w-full py-2 text-fg-muted text-sm hover:text-fg transition-colors">
-                  Выйти
-                </button>
-              </div>
-            </div>
-
-            <!-- View: Blocked -->
-            <div id="view-blocked" class="hidden bg-surface rounded-2xl p-8 border border-line relative">
-              <span class="corner-mark corner-mark-tl"></span>
-              <span class="corner-mark corner-mark-tr"></span>
-              <span class="corner-mark corner-mark-bl"></span>
-              <span class="corner-mark corner-mark-br"></span>
-
-              <div class="text-center">
-                <div class="w-14 h-14 rounded-full bg-state-error/10 border border-state-error/30 mx-auto mb-4 flex items-center justify-center">
-                  <svg class="w-7 h-7 text-state-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <circle cx="12" cy="12" r="10"/>
-                    <line x1="4.93" y1="4.93" x2="19.07" y2="19.07"/>
-                  </svg>
-                </div>
-                <h2 class="text-lg font-medium mb-2">Доступ приостановлен</h2>
-                <p class="text-fg-muted text-sm mb-6">Ваш аккаунт заблокирован в системе</p>
-                <button id="btn-signout-2" class="btn-secondary w-full py-3 rounded-xl font-medium text-sm">Выйти</button>
-              </div>
-            </div>
-
-          </div>
-
-          <div class="mt-8 text-center reveal delay-2">
-            <div class="inline-flex items-center gap-2 text-fg-muted text-xs">
-              <svg class="w-3.5 h-3.5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <rect x="3" y="11" width="18" height="11" rx="2"/>
-                <path d="M7 11V7a5 5 0 0 1 10 0v4"/>
-              </svg>
-              Защищённое соединение
-            </div>
-          </div>
-        </div>
+  <!-- Сайдбар: подменю активного раздела -->
+  <aside class="sidebar">
+    <label class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>
+      <input type="text" placeholder="Поиск" /><span class="kbd">⌘K</span>
+    </label>
+    <div class="panel-title" id="sectionTitle">Снабжение</div>
+    <nav class="nav">
+      <div class="nav-panel is-active" data-section="supply">
+        <button class="nav-link active" data-page="modal1">Склад</button>
+        <button class="nav-link" data-page="modal1">Поставщики</button>
+        <button class="nav-link" data-page="modal1">Заказы поставщикам</button>
+        <button class="nav-link" data-page="modal1">Журнал движений</button>
       </div>
+      <div class="nav-panel" data-section="production">
+        <button class="nav-link active" data-page="modal2">Рецепты</button>
+        <button class="nav-link" data-page="modal2">Партии</button>
+        <button class="nav-link" data-page="modal2">Можно произвести</button>
+      </div>
+      <div class="nav-panel" data-section="sales">
+        <button class="nav-link active" data-page="modal3">Клиенты</button>
+        <button class="nav-link" data-page="modal3">Заказы</button>
+        <button class="nav-link" data-page="modal3">Отгрузки</button>
+      </div>
+      <div class="nav-panel" data-section="management">
+        <button class="nav-link active" data-page="modal4">Дашборд</button>
+        <button class="nav-link" data-page="modal4">Казначейство</button>
+        <button class="nav-link" data-page="modal4">Подразделения и цепочки</button>
+        <button class="nav-link" data-page="modal4">Пользователи</button>
+        <button class="nav-link" data-page="modal4">Отчёты</button>
+        <button class="nav-link" data-page="modal4">Журнал</button>
+      </div>
+      <div class="nav-panel" data-section="settings">
+        <button class="nav-link active" data-page="modal5">Профиль</button>
+        <button class="nav-link" data-page="modal5">Оформление</button>
+        <button class="nav-link" data-page="modal5">Группа</button>
+      </div>
+    </nav>
+    <div class="side-foot"><span>elpa.systems</span><span>v2.0</span></div>
+  </aside>
+
+  <!-- Контент: сюда грузятся modalN.html -->
+  <main class="main">
+    <header class="topbar">
+      <nav class="crumbs"><b id="crumbSection">Снабжение</b>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m9 6 6 6-6 6"/></svg>
+        <span id="crumbPage">Склад</span><span id="crumbUnit" style="color:var(--accent)"></span>
+      </nav>
+      <div class="actions">
+        <div class="theme-switch" id="themeSwitch2">
+          <button data-set="light-bw" title="Светлая Ч/Б"></button>
+          <button data-set="dark-bw" title="Тёмная Ч/Б"></button>
+          <button data-set="indigo" title="Indigo"></button>
+          <button data-set="emerald" title="Emerald"></button>
+        </div>
+        <button class="icon-btn" aria-label="Уведомления"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8a6 6 0 0 0-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg></button>
+        <div class="profile"><div class="avatar" id="userInitials">AL</div><div class="who"><b id="userName">Alchemist</b><span id="userGroup">Группа Alchemist</span></div></div>
+      </div>
+    </header>
+    <div id="page-container">
+      <div class="page-skeleton"><div class="spin"></div>Выберите раздел в меню — страница загрузится сюда</div>
     </div>
+  </main>
+</div>
 
-    <!-- SCREEN: Main -->
-    <div id="screen-main" class="hidden">
+<div id="toasts"></div>
 
-      <header class="header-blur sticky top-0 z-30">
-        <div class="max-w-app mx-auto flex items-center justify-between gap-3 h-16 px-4 lg:px-6">
+<script>
+/* ===== Тема: применение + сохранение ===== */
+(function(){
+  var KEY='riva-theme', DEF='light-bw';
+  function apply(t){ document.documentElement.setAttribute('data-theme',t);
+    document.querySelectorAll('.theme-switch button').forEach(function(b){ b.classList.toggle('on', b.getAttribute('data-set')===t); }); }
+  function set(t){ try{localStorage.setItem(KEY,t);}catch(e){} apply(t); }
+  apply((function(){ try{return localStorage.getItem(KEY)||DEF;}catch(e){return DEF;} })());
+  document.querySelectorAll('.theme-switch').forEach(function(sw){
+    sw.addEventListener('click', function(e){ var b=e.target.closest('button[data-set]'); if(b) set(b.getAttribute('data-set')); });
+  });
+  window.RIVA_THEME={set:set};
+})();
 
-          <!-- Левая зона -->
-          <div class="flex items-center gap-2">
-            <button id="btn-mobile-menu" class="ctrl ctrl-square lg:hidden" aria-label="Меню">
-              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                <line x1="4" y1="6" x2="20" y2="6"/>
-                <line x1="4" y1="12" x2="20" y2="12"/>
-                <line x1="4" y1="18" x2="20" y2="18"/>
-              </svg>
-            </button>
+/* ===== Точки на hero ===== */
+(function(){
+  var canvas=document.getElementById('dots'); if(!canvas) return; var ctx=canvas.getContext('2d');
+  function vars(){ var cs=getComputedStyle(document.documentElement);
+    return {c:(cs.getPropertyValue('--dots-color')||'10,10,12').trim(),
+            n:parseInt(cs.getPropertyValue('--dots-count'),10)||90,
+            s:parseFloat(cs.getPropertyValue('--dots-speed'))||.2,
+            m:parseFloat(cs.getPropertyValue('--dots-max-size'))||.7}; }
+  var p=vars(), reduce=matchMedia('(prefers-reduced-motion: reduce)').matches, w=0,h=0,dpr=1,dots=[];
+  function resize(){ dpr=Math.min(devicePixelRatio||1,2); var r=canvas.getBoundingClientRect(); w=r.width;h=r.height;
+    canvas.width=Math.max(1,w*dpr);canvas.height=Math.max(1,h*dpr);ctx.setTransform(dpr,0,0,dpr,0,0); }
+  function build(){ dots=[]; for(var i=0;i<p.n;i++) dots.push({x:Math.random()*w,y:Math.random()*h,r:Math.random()*p.m+.4,a:Math.random()*.5+.12,t:Math.random()*6.28,ts:Math.random()*.018+.004,vx:(Math.random()-.5)*p.s,vy:(Math.random()-.5)*p.s}); }
+  function frame(){ p=vars(); ctx.clearRect(0,0,w,h);
+    for(var i=0;i<dots.length;i++){ var d=dots[i];
+      if(!reduce){ d.x+=d.vx;d.y+=d.vy;d.t+=d.ts; if(d.x<-3)d.x=w+3;else if(d.x>w+3)d.x=-3; if(d.y<-3)d.y=h+3;else if(d.y>h+3)d.y=-3; }
+      var a=reduce?d.a:d.a*(.55+.45*Math.sin(d.t));
+      ctx.beginPath(); ctx.fillStyle='rgba('+p.c+','+a+')'; ctx.arc(d.x,d.y,d.r,0,6.2832); ctx.fill(); }
+    if(!reduce) requestAnimationFrame(frame); }
+  function start(){ resize(); build(); frame(); }
+  addEventListener('resize',function(){ resize(); build(); if(reduce) frame(); }); start();
+})();
 
-            <a href="#" class="ctrl ctrl-square ctrl-logo" aria-label="RIVA">
-              <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
-                <path d="M7 20V4h6a4 4 0 0 1 0 8H7"/>
-                <path d="m13 12 4 8"/>
-              </svg>
-            </a>
-            <span class="font-medium hidden sm:block tracking-tight" style="font-size:14px;">RIVA</span>
+/* ===== Кнопки Google + предпросмотр ===== */
+(function(){
+  var year=document.getElementById('year'); if(year) year.textContent=new Date().getFullYear();
+  function toast(msg){ var t=document.createElement('div'); t.className='toast'; t.textContent=msg;
+    document.getElementById('toasts').appendChild(t); setTimeout(function(){ t.remove(); },3500); }
+  window.RIVA_UI={toast:toast};
+  document.body.addEventListener('click', function(e){
+    var g=e.target.closest('[data-action="google-signin"]');
+    if(g){ e.preventDefault();
+      if(window.RIVA && typeof window.RIVA.signInWithGoogle==='function') window.RIVA.signInWithGoogle();
+      else toast('Авторизация Google подключается в assets/app.js (следующий файл)');
+      return; }
+    var pv=e.target.closest('[data-action="preview-app"]');
+    if(pv){ e.preventDefault(); document.body.classList.add('is-authed'); toast('Демо-предпросмотр интерфейса'); }
+  });
+})();
 
-            <!-- Group switcher -->
-            <div class="relative ml-1" id="group-switcher-wrap">
-              <button id="btn-group-switcher" class="ctrl">
-                <svg class="w-4 h-4 text-fg-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path d="M3 21h18"/>
-                  <path d="M5 21V7l8-4v18"/>
-                  <path d="M19 21V11l-6-4"/>
-                </svg>
-                <span id="current-group-name" class="max-w-[200px] truncate">—</span>
-                <svg id="group-switcher-arrow" class="w-4 h-4 text-fg-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="6 9 12 15 18 9"/></svg>
-              </button>
-              <div id="group-switcher-menu" class="hidden absolute left-0 top-full mt-2 w-72 bg-surface rounded-xl border border-line shadow-lg shadow-black/5 py-1.5 z-50 max-h-80 overflow-y-auto"></div>
-            </div>
-          </div>
+/* ===== Спайн приложения: рейл (флайаут 0.3с) + сайдбар + загрузка modalN ===== */
+(function(){
+  var rail=document.querySelector('.rail'); if(!rail) return;
+  var DELAY=300, openTimer=null, closeTimer=null;
 
-          <!-- Центральная навигация (segmented control) -->
-          <nav id="top-nav" class="nav-segmented hidden lg:inline-flex"></nav>
+  /* флайаут подразделений по наведению */
+  rail.querySelectorAll('.rail-item').forEach(function(item){
+    var sec=item.getAttribute('data-section');
+    if(!item.querySelector('.flyout')) return; // у management/settings флайаута нет
+    item.addEventListener('mouseenter', function(){
+      clearTimeout(closeTimer); clearTimeout(openTimer);
+      openTimer=setTimeout(function(){
+        rail.querySelectorAll('.rail-item.flyopen').forEach(function(x){ if(x!==item) x.classList.remove('flyopen'); });
+        item.classList.add('flyopen'); fillUnits(item, sec);
+      }, DELAY);
+    });
+    item.addEventListener('mouseleave', function(){
+      clearTimeout(openTimer);
+      closeTimer=setTimeout(function(){ item.classList.remove('flyopen'); }, 180);
+    });
+  });
 
-          <!-- Правая зона: профиль + тема -->
-          <div class="flex items-center gap-2">
+  /* наполнение флайаута подразделениями (берётся из window.RIVA.getUnits(section); пока заглушка) */
+  function fillUnits(item, section){
+    var list=item.querySelector('.fly-list'); if(!list) return;
+    var units=(window.RIVA && window.RIVA.unitsBySection && window.RIVA.unitsBySection[section]) || null;
+    if(!units){ list.innerHTML='<div class="fly-empty">Подразделения загрузятся из app.js</div>'; return; }
+    if(!units.length){ list.innerHTML='<div class="fly-empty">Нет подразделений</div>'; return; }
+    list.innerHTML=units.map(function(u){
+      return '<button class="fly-item" data-section="'+section+'" data-unit="'+u.id+'">'+u.name+
+             (u.is_default?'<span class="badge-def">по умолч.</span>':'')+'</button>'; }).join('');
+  }
 
-            <!-- Profile -->
-            <div class="relative" id="profile-wrap">
-              <button id="btn-profile" class="ctrl" style="padding: 0 8px 0 4px;">
-                <span class="inline-flex items-center justify-center rounded-md overflow-hidden" id="header-avatar"
-                      style="width:26px; height:26px; background: var(--bg-alt);">
-                  <svg class="w-4 h-4 text-fg-muted" viewBox="0 0 24 24" fill="currentColor">
-                    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-                  </svg>
-                </span>
-                <span class="hidden sm:block max-w-[140px] truncate" id="header-name"></span>
-                <svg class="w-4 h-4 text-fg-muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><polyline points="6 9 12 15 18 9"/></svg>
-              </button>
-              <div id="profile-menu" class="hidden absolute right-0 top-full mt-2 w-64 bg-surface rounded-xl border border-line shadow-lg shadow-black/5 py-1.5 z-50">
-                <div class="px-4 py-3 border-b border-line-light">
-                  <p class="text-sm font-medium" id="menu-name"></p>
-                  <p class="text-xs text-fg-muted truncate mt-0.5" id="menu-email"></p>
-                  <p class="text-xs text-fg-muted mt-1.5"><span id="menu-role"></span></p>
-                </div>
-                <button id="btn-signout-main" class="w-full flex items-center gap-3 px-4 py-2.5 text-sm text-state-error hover:bg-surface-alt transition-colors">
-                  <svg class="w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/>
-                    <polyline points="16 17 21 12 16 7"/>
-                    <line x1="21" y1="12" x2="9" y2="12"/>
-                  </svg>
-                  Выйти
-                </button>
-              </div>
-            </div>
+  /* клики: пункт рейла = раздел без фильтра; пункт флайаута = с фильтром */
+  rail.addEventListener('click', function(e){
+    var fly=e.target.closest('.fly-item');
+    if(fly){ openSection(fly.getAttribute('data-section'), fly.getAttribute('data-unit')||null);
+      var it=fly.closest('.rail-item'); if(it) it.classList.remove('flyopen'); return; }
+    var btn=e.target.closest('.rail-btn');
+    if(btn){ openSection(btn.getAttribute('data-section'), null); }
+  });
 
-            <!-- Theme switcher -->
-            <div class="theme-switcher">
-              <!-- Линия тем (появляется СПРАВА НАЛЕВО относительно кнопки) -->
-              <div class="theme-line" id="theme-line">
-                <button class="theme-node" data-theme="bw-light"  title="Светлая Ч/Б"><span class="theme-preview" style="background:linear-gradient(135deg,#FFFFFF 50%,#0A0A0A 50%)"></span></button>
-                <button class="theme-node" data-theme="bw-dark"   title="Тёмная Ч/Б"><span class="theme-preview" style="background:linear-gradient(135deg,#0A0B0E 50%,#FAFAFA 50%)"></span></button>
-                <button class="theme-node" data-theme="gradient-1" title="Тёплый песок"><span class="theme-preview" style="background:linear-gradient(135deg,#E5D2BB,#8A7560,#3F3A30)"></span></button>
-                <button class="theme-node" data-theme="gradient-2" title="Кофе с молоком"><span class="theme-preview" style="background:linear-gradient(135deg,#C68554,#7A4A2C,#2A1E18)"></span></button>
-                <button class="theme-node" data-theme="gradient-3" title="Морской бриз"><span class="theme-preview" style="background:linear-gradient(135deg,#A4C5D8,#3C7A95,#1E353F)"></span></button>
-                <button class="theme-node" data-theme="gradient-4" title="Туманный лес"><span class="theme-preview" style="background:linear-gradient(135deg,#A5BABA,#556450,#252820)"></span></button>
-                <button class="theme-node" data-theme="gradient-5" title="Стальной минимал"><span class="theme-preview" style="background:linear-gradient(135deg,#D8D9DD,#5A5E68,#1E1F23)"></span></button>
-              </div>
+  function openSection(section, unitId){
+    rail.querySelectorAll('.rail-btn').forEach(function(b){ b.classList.toggle('active', b.getAttribute('data-section')===section); });
+    document.querySelectorAll('.nav-panel').forEach(function(p){ p.classList.toggle('is-active', p.getAttribute('data-section')===section); });
+    var titles={supply:'Снабжение',production:'Производство',sales:'Продажи',management:'Управление',settings:'Настройки'};
+    var st=document.getElementById('sectionTitle'); if(st) st.textContent=titles[section]||'';
+    var cs=document.getElementById('crumbSection'); if(cs) cs.textContent=titles[section]||'';
+    /* активная подстраница раздела */
+    var panel=document.querySelector('.nav-panel[data-section="'+section+'"]');
+    var first=panel?panel.querySelector('.nav-link'):null;
+    if(panel){ panel.querySelectorAll('.nav-link.active').forEach(function(x){x.classList.remove('active');}); if(first) first.classList.add('active'); }
+    var cp=document.getElementById('crumbPage'); if(cp&&first) cp.textContent=first.textContent.trim();
+    /* подпись активного подразделения в хлебных крошках */
+    var cu=document.getElementById('crumbUnit');
+    if(cu){ cu.textContent = unitId ? '  ·  фильтр: подразделение' : ''; }
+    /* загрузка функциональной страницы */
+    var page=first?first.getAttribute('data-page'):null;
+    loadPage(page, section, unitId);
+  }
 
-              <button id="btn-theme" class="ctrl ctrl-square btn-theme" aria-label="Сменить тему">
-                <svg class="icon-palette w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <circle cx="12" cy="12" r="10"/>
-                  <circle cx="12" cy="8" r="2" fill="currentColor"/>
-                  <path d="M8 14c1.5-2 6.5-2 8 0" stroke-linecap="round"/>
-                </svg>
-                <svg class="icon-close w-4 h-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-                  <path d="M18 6 6 18M6 6l12 12"/>
-                </svg>
-              </button>
-            </div>
+  /* подменю */
+  var bar=document.querySelector('.sidebar');
+  if(bar) bar.addEventListener('click', function(e){
+    var link=e.target.closest('.nav-link'); if(!link) return;
+    var scope=link.closest('.nav-panel')||bar;
+    scope.querySelectorAll('.nav-link.active').forEach(function(x){x.classList.remove('active');});
+    link.classList.add('active');
+    var cp=document.getElementById('crumbPage'); if(cp) cp.textContent=link.textContent.trim();
+    loadPage(link.getAttribute('data-page'), null, null);
+  });
 
-          </div>
-        </div>
-      </header>
+  /* загрузка modalN.html в #page-container (реальную реализацию даст app.js) */
+  function loadPage(page, section, unitId){
+    if(window.RIVA && typeof window.RIVA.loadPage==='function'){ window.RIVA.loadPage(page, section, unitId); return; }
+    var c=document.getElementById('page-container'); if(!c||!page) return;
+    c.innerHTML='<div class="page-skeleton"><div class="spin"></div>Загрузка '+page+'.html подключается в app.js</div>';
+  }
 
-      <div id="sidebar-backdrop" class="hidden fixed inset-0 bg-black/30 z-20 lg:hidden"></div>
-      <aside id="sidebar" class="sidebar fixed left-0 top-0 bottom-0 w-72 bg-surface border-r border-line z-30 lg:hidden overflow-y-auto">
-        <div class="h-16 px-5 flex items-center border-b border-line">
-          <span class="font-medium tracking-tight">RIVA</span>
-        </div>
-        <nav id="side-nav" class="p-3 space-y-1"></nav>
-      </aside>
-
-      <main class="max-w-app mx-auto px-4 lg:px-6 py-6">
-        <div id="page-container">
-          <div class="flex items-center justify-center py-20">
-            <div class="w-8 h-8 loader"></div>
-          </div>
-        </div>
-      </main>
-    </div>
-
-  </div>
-
-  <div id="toasts" class="fixed bottom-4 right-4 z-[60] space-y-2 max-w-sm pointer-events-none"></div>
-
-  <!-- ============================================================
-       ПАЛИТРЫ И ПЕРЕКЛЮЧАТЕЛЬ ТЕМ
-       ============================================================ -->
-  <script>
-    (function () {
-      const PALETTES = {
-        // Текущая светлая (сохранена в неизменном виде)
-        'bw-light': {
-          bg: '#FFFFFF', bgAlt: '#FAFAFA', bgCard: '#F5F5F5',
-          fg: '#0A0A0A', fgSecondary: '#404040', fgMuted: '#737373',
-          line: '#E5E5E5', lineLight: '#F0F0F0',
-          aurora: {
-            bg: '#FFFFFF',
-            primary: '#FFFFFF',
-            secondary: '#A8A8A8',
-            grad1: '#888888', grad2: '#555555', grad3: '#222222',
-            opacity: 0.22, blur: 14, blend: 'multiply'
-          }
-        },
-        // Тёмная
-        'bw-dark': {
-          bg: '#15171C', bgAlt: '#1C1F25', bgCard: '#23262E',
-          fg: '#F5F5F5', fgSecondary: '#A3A3A3', fgMuted: '#737373',
-          line: '#2B2F38', lineLight: '#24272F',
-          aurora: {
-            bg: '#0A0B0E',
-            primary: '#23262E',
-            secondary: '#454A55',
-            grad1: '#5B6170', grad2: '#7A8090', grad3: '#9CA3B3',
-            opacity: 0.32, blur: 10, blend: 'screen'
-          }
-        },
-        // Тёплый песок
-        'gradient-1': {
-          bg: '#FCFBF6', bgAlt: '#F4F0E5', bgCard: '#EEE7D6',
-          fg: '#2A2823', fgSecondary: '#5C5547', fgMuted: '#8A8270',
-          line: '#DCD3BD', lineLight: '#EAE3CE',
-          aurora: {
-            bg: '#FCFBF6',
-            primary: '#E5D2BB',
-            secondary: '#A89077',
-            grad1: '#8A7560', grad2: '#6A5B4A', grad3: '#3F3A30',
-            opacity: 0.32, blur: 12, blend: 'soft-light'
-          }
-        },
-        // Кофе с молоком
-        'gradient-2': {
-          bg: '#F7F1E8', bgAlt: '#EFE6D5', bgCard: '#E6D8C1',
-          fg: '#2A1E18', fgSecondary: '#5A4438', fgMuted: '#8A7A6A',
-          line: '#D2C0A6', lineLight: '#E2D4BC',
-          aurora: {
-            bg: '#F7F1E8',
-            primary: '#C68554',
-            secondary: '#8A5A36',
-            grad1: '#7A4A2C', grad2: '#5A3320', grad3: '#2A1E18',
-            opacity: 0.30, blur: 13, blend: 'soft-light'
-          }
-        },
-        // Морской бриз
-        'gradient-3': {
-          bg: '#F4F8FA', bgAlt: '#E8EFF4', bgCard: '#D9E5ED',
-          fg: '#15252D', fgSecondary: '#3B5562', fgMuted: '#6E8595',
-          line: '#C3D4DE', lineLight: '#DEE8EE',
-          aurora: {
-            bg: '#F4F8FA',
-            primary: '#A4C5D8',
-            secondary: '#5E92AB',
-            grad1: '#3C7A95', grad2: '#28586D', grad3: '#1E353F',
-            opacity: 0.32, blur: 12, blend: 'soft-light'
-          }
-        },
-        // Туманный лес
-        'gradient-4': {
-          bg: '#F2F5F0', bgAlt: '#E7ECE3', bgCard: '#D9E0D2',
-          fg: '#1F2A20', fgSecondary: '#465045', fgMuted: '#7B8A78',
-          line: '#C0CBB9', lineLight: '#DCE3D4',
-          aurora: {
-            bg: '#F2F5F0',
-            primary: '#A5BABA',
-            secondary: '#6B7E6A',
-            grad1: '#556450', grad2: '#3E4A38', grad3: '#252820',
-            opacity: 0.30, blur: 13, blend: 'soft-light'
-          }
-        },
-        // Стальной минимал
-        'gradient-5': {
-          bg: '#F8F8FA', bgAlt: '#EEEFF2', bgCard: '#E0E2E7',
-          fg: '#1A1B1F', fgSecondary: '#3F4148', fgMuted: '#71747C',
-          line: '#C7C9D0', lineLight: '#DEE0E5',
-          aurora: {
-            bg: '#F8F8FA',
-            primary: '#D8D9DD',
-            secondary: '#9395A0',
-            grad1: '#5A5E68', grad2: '#3A3D45', grad3: '#1E1F23',
-            opacity: 0.28, blur: 13, blend: 'soft-light'
-          }
-        }
-      };
-
-      const STORAGE_KEY = 'riva-theme';
-
-      function applyPalette(key) {
-        const p = PALETTES[key];
-        if (!p) return;
-        const r = document.documentElement;
-
-        // Приложение
-        r.style.setProperty('--bg',           p.bg);
-        r.style.setProperty('--bg-alt',       p.bgAlt);
-        r.style.setProperty('--bg-card',      p.bgCard);
-        r.style.setProperty('--fg',           p.fg);
-        r.style.setProperty('--fg-secondary', p.fgSecondary);
-        r.style.setProperty('--fg-muted',     p.fgMuted);
-        r.style.setProperty('--line',         p.line);
-        r.style.setProperty('--line-light',   p.lineLight);
-
-        // Aurora
-        r.style.setProperty('--aurora-bg',        p.aurora.bg);
-        r.style.setProperty('--aurora-primary',   p.aurora.primary);
-        r.style.setProperty('--aurora-secondary', p.aurora.secondary);
-        r.style.setProperty('--aurora-grad1',     p.aurora.grad1);
-        r.style.setProperty('--aurora-grad2',     p.aurora.grad2);
-        r.style.setProperty('--aurora-grad3',     p.aurora.grad3);
-        r.style.setProperty('--aurora-opacity',   String(p.aurora.opacity));
-        r.style.setProperty('--aurora-blur',      p.aurora.blur + 'px');
-        r.style.setProperty('--aurora-blend',     p.aurora.blend);
-
-        // theme-color meta для статус-бара браузера/PWA
-        document.querySelector('meta[name="theme-color"]')?.setAttribute('content', p.bg);
-
-        // активный кружок в линии
-        document.querySelectorAll('.theme-node').forEach(n =>
-          n.classList.toggle('active', n.dataset.theme === key));
-      }
-
-      function switchTheme(key) {
-        const aurora = document.querySelector('.aurora-background');
-        const overlay = document.querySelector('.theme-transition-overlay');
-        const cur = PALETTES[key];
-        if (!cur) return;
-
-        // Плавный переход через оверлей
-        if (aurora) aurora.style.opacity = '0.05';
-        overlay?.classList.add('active');
-
-        setTimeout(() => {
-          applyPalette(key);
-          localStorage.setItem(STORAGE_KEY, key);
-
-          requestAnimationFrame(() => {
-            if (aurora) aurora.style.opacity = cur.aurora.opacity;
-            overlay?.classList.remove('active');
-          });
-        }, 350);
-      }
-
-      // Применяем сохранённую тему ДО рендеринга app.js (no flash)
-      const saved = localStorage.getItem(STORAGE_KEY) || 'bw-light';
-      applyPalette(PALETTES[saved] ? saved : 'bw-light');
-
-      // Биндинги — после DOMContentLoaded (т.к. кнопки лежат в DOM)
-      document.addEventListener('DOMContentLoaded', () => {
-        const btnTheme = document.getElementById('btn-theme');
-        const line = document.getElementById('theme-line');
-        if (!btnTheme || !line) return;
-
-        btnTheme.addEventListener('click', (e) => {
-          e.stopPropagation();
-          const isOpen = btnTheme.classList.toggle('active');
-          line.classList.toggle('active', isOpen);
-        });
-
-        document.querySelectorAll('.theme-node').forEach(b => {
-          b.addEventListener('click', (e) => {
-            e.stopPropagation();
-            const key = b.dataset.theme;
-            if (!PALETTES[key]) return;
-            btnTheme.classList.remove('active');
-            line.classList.remove('active');
-            switchTheme(key);
-          });
-        });
-
-        document.addEventListener('click', (e) => {
-          if (!e.target.closest('.theme-switcher')) {
-            btnTheme.classList.remove('active');
-            line.classList.remove('active');
-          }
-        });
-      });
-
-      // expose для отладки
-      window.RIVA_THEME = { applyPalette, switchTheme, PALETTES };
-    })();
-  </script>
-
-  <script type="module" src="./assets/app.js"></script>
+  window.RIVA_SHELL={openSection:openSection, loadPage:loadPage};
+})();
+</script>
 </body>
 </html>
