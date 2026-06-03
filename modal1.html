@@ -1,2329 +1,520 @@
-<!-- modal1.html — Страница "Снабжение". Подстраницы: Склад, Заказы снабжения, Журнал. -->
-<!-- Доступ: admin, supply, management. -->
-
-<section id="m1">
-
-  <div class="flex items-center justify-between gap-4 flex-wrap mb-6">
-    <div class="leading-tight">
-      <h1 class="text-[17px] font-medium tracking-tight">Снабжение</h1>
-      <p class="text-xs text-fg-muted mt-0.5" id="m1-subtitle">—</p>
-    </div>
-    <nav class="m1-subnav" id="m1-subnav">
-      <button class="m1-tab active" data-tab="warehouse">Склад</button>
-      <button class="m1-tab" data-tab="orders">Заказы снабжения</button>
-      <button class="m1-tab" data-tab="journal">Журнал</button>
-    </nav>
-  </div>
-
-  <!-- =========================
-       WAREHOUSE
-  ========================== -->
-  <div class="m1-panel" data-panel="warehouse">
-
-    <!-- Toolbar -->
-    <div class="bg-surface rounded-2xl border border-line mb-5 flex flex-wrap items-center" style="padding:10px; gap:10px;">
-      <div class="flex-1 min-w-[180px]">
-        <input id="m1-wh-search" type="search" placeholder="Поиск по артикулу или названию…"
-          class="m1-bar-ctrl w-full rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors text-sm">
-      </div>
-      <div class="m1-filter-group">
-        <button class="m1-wh-filter" data-type="all">Все</button>
-        <button class="m1-wh-filter" data-type="material">Материалы</button>
-        <button class="m1-wh-filter" data-type="product">Продукция</button>
-        <button class="m1-wh-filter" data-type="reorder">Остатки</button>
-      </div>
-      <label class="flex items-center gap-2 text-xs text-fg-secondary cursor-pointer select-none">
-        <div class="uiverse-wrapper">
-          <span class="cb-container">
-            <input type="checkbox" id="m1-wh-only-in-stock" />
-            <span class="checkmark">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="4" stroke-linecap="round" stroke-linejoin="round">
-                <polyline points="20 6 9 17 4 12"></polyline>
-              </svg>
-            </span>
-          </span>
-        </div>
-        <span>Только с остатком</span>
-      </label>
-      <button id="m1-wh-add" class="btn-primary m1-bar-ctrl rounded-xl text-sm font-medium ml-auto" style="padding-left:16px; padding-right:16px;">
-        + Добавить позицию
-      </button>
-    </div>
-
-    <div id="m1-wh-grid" class="space-y-3">
-      <div class="flex items-center justify-center py-16">
-        <div class="w-6 h-6 loader"></div>
-      </div>
-    </div>
-
-    <!-- Режим «Мин. остатки» -->
-    <div id="m1-reorder-wrap" class="hidden">
-      <div class="mb-4">
-        <button id="m1-reorder-add" class="btn-secondary px-4 py-2 rounded-lg text-sm">+ Добавить позицию</button>
-      </div>
-      <!-- инлайн-пикер добавления -->
-      <div id="m1-reorder-picker" class="hidden mb-4">
-        <div class="m1-picker">
-          <input id="m1-reorder-search" type="text" autocomplete="off" spellcheck="false"
-            class="m1-picker-search" placeholder="Поиск товара или рецепта…">
-          <div id="m1-reorder-list" class="m1-picker-list"></div>
-        </div>
-      </div>
-      <div id="m1-reorder-grid" class="space-y-3"></div>
-    </div>
-
-  </div>
-
-  <!-- =========================
-       ORDERS
-  ========================== -->
-  <div class="m1-panel hidden" data-panel="orders">
-
-    <div class="bg-surface rounded-2xl border border-line mb-5 flex flex-wrap items-center" style="padding:10px; gap:10px;">
-      <div class="flex-1 min-w-[180px]">
-        <input id="m1-ord-search" type="search" placeholder="Поиск по номеру или поставщику…"
-          class="m1-bar-ctrl w-full rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors text-sm">
-      </div>
-      <div class="m1-dd m1-bar-ctrl" id="m1-ord-status-dd">
-        <button type="button" class="m1-dd-btn" id="m1-ord-status-btn">
-          <span id="m1-ord-status-label">Все статусы</span>
-          <svg class="m1-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-        <div class="m1-dd-menu hidden" id="m1-ord-status-menu">
-          <div class="m1-dd-opt" data-value="all">Все статусы</div>
-          <div class="m1-dd-opt" data-value="draft">В работе</div>
-          <div class="m1-dd-opt" data-value="placed">Заказ размещён</div>
-          <div class="m1-dd-opt" data-value="in_transit">Товар в пути</div>
-          <div class="m1-dd-opt" data-value="received">На складе</div>
-        </div>
-      </div>
-      <button id="m1-ord-new" class="btn-primary m1-bar-ctrl rounded-xl text-sm font-medium ml-auto" style="padding-left:16px; padding-right:16px;">
-        + Новый заказ
-      </button>
-    </div>
-
-    <div id="m1-ord-list" class="space-y-3">
-      <div class="flex items-center justify-center py-16">
-        <div class="w-6 h-6 loader"></div>
-      </div>
-    </div>
-  </div>
-
-  <!-- =========================
-       JOURNAL (движения склада)
-  ========================== -->
-  <div class="m1-panel hidden" data-panel="journal">
-
-    <div class="bg-surface rounded-2xl border border-line mb-5 flex flex-wrap items-center" style="padding:10px; gap:10px;">
-      <div class="flex-1 min-w-[180px]">
-        <input id="m1-jr-search" type="search" placeholder="Поиск по позиции или описанию…"
-          class="m1-bar-ctrl w-full rounded-xl bg-surface border border-line focus:border-fg focus:outline-none transition-colors text-sm">
-      </div>
-      <div class="m1-dd m1-bar-ctrl" id="m1-jr-type-dd">
-        <button type="button" class="m1-dd-btn" id="m1-jr-type-btn">
-          <span id="m1-jr-type-label">Все движения</span>
-          <svg class="m1-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-        </button>
-        <div class="m1-dd-menu hidden" id="m1-jr-type-menu">
-          <div class="m1-dd-opt" data-value="all">Все движения</div>
-          <div class="m1-dd-opt" data-value="supply_in">Поступление (снабжение)</div>
-          <div class="m1-dd-opt" data-value="production_in">Выпуск продукции</div>
-          <div class="m1-dd-opt" data-value="sale_out">Списание (продажа)</div>
-          <div class="m1-dd-opt" data-value="return_in">Возврат на склад</div>
-          <div class="m1-dd-opt" data-value="adjustment">Корректировка</div>
-        </div>
-      </div>
-      <button id="m1-jr-refresh" class="btn-secondary m1-bar-ctrl rounded-xl text-sm font-medium ml-auto" style="padding-left:16px; padding-right:16px;">
-        Обновить
-      </button>
-    </div>
-
-    <div id="m1-jr-list" class="space-y-2">
-      <div class="flex items-center justify-center py-16">
-        <div class="w-6 h-6 loader"></div>
-      </div>
-    </div>
-  </div>
-
-</section>
-
-<!-- ============================================================
-     ШАБЛОН СТРОКИ СКЛАДА — используется на подстранице "Склад".
-============================================================ -->
-<template id="m1-wh-row-tpl">
-  <article class="m1-row m1-row--warehouse" data-wh-id="">
-    <span class="m1-badge"          data-field="type"></span>
-    <span class="m1-row__name"      data-field="name"></span>
-    <span class="m1-row__stat m1-row__stat--num"   data-field="quantity"></span>
-    <span class="m1-row__stat m1-row__stat--num"   data-field="price"></span>
-    <span class="m1-row__stat m1-row__stat--num m1-row__total" data-field="sum"></span>
-    <span class="m1-row__comment"   data-field="comment"></span>
-    <span class="m1-row__date"      data-field="date"></span>
-  </article>
-</template>
-
-<!-- ============================================================
-     ШАБЛОН СТРОКИ ЗАКАЗА СНАБЖЕНИЯ — используется на подстранице "Заказы".
-============================================================ -->
-<template id="m1-ord-row-tpl">
-  <article class="m1-row m1-row--order" data-ord-id="">
-    <span class="m1-row__code"     data-field="number"></span>
-    <span class="m1-badge"          data-field="status"></span>
-    <span class="m1-badge"          data-field="payment"></span>
-    <span class="m1-row__title"    data-field="supplier"></span>
-    <span class="m1-row__items"    data-field="items"></span>
-    <span class="m1-row__total"    data-field="total"></span>
-    <span class="m1-row__date"     data-field="date"></span>
-  </article>
-</template>
-
-<!-- ============================================================
-     ШАБЛОН СТРОКИ ЖУРНАЛА — движение склада.
-============================================================ -->
-<template id="m1-jr-row-tpl">
-  <article class="m1-row m1-row--journal">
-    <span class="m1-badge"          data-field="mtype"></span>
-    <span class="m1-row__name"      data-field="item"></span>
-    <span class="m1-jr-delta"       data-field="delta"></span>
-    <span class="m1-row__stat m1-row__stat--num" data-field="balance"></span>
-    <span class="m1-row__title"     data-field="desc"></span>
-    <span class="m1-row__items"     data-field="user"></span>
-    <span class="m1-row__date"      data-field="date"></span>
-  </article>
-</template>
-
-<!-- =========================
-     MODAL: редактор позиции склада
-========================== -->
-<div id="m1-wh-modal" class="hidden fixed inset-0 z-40 bg-black/30 flex items-center justify-center px-4 py-8 overflow-y-auto">
-  <div class="bg-surface rounded-2xl border border-line w-full max-w-3xl my-auto">
-    <div class="px-5 py-4 border-b border-line flex items-center justify-between">
-      <h3 class="font-medium" id="m1-wh-modal-title">Новая позиция</h3>
-      <button class="m1-wh-close p-1 rounded-lg hover:bg-surface-alt">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
-      </button>
-    </div>
-      
-     <div class="p-5 space-y-4">
-
-      <!-- Позиция -->
-      <div class="border border-line rounded-xl overflow-hidden">
-        <div class="px-4 py-3 bg-surface-alt border-b border-line flex items-center justify-between">
-          <span class="text-sm font-medium">Позиция</span>
-          <span class="text-xs text-fg-muted">артикул · название · кол-во · ед. · цена · сумма</span>
-        </div>
-        <div class="p-4">
-          <div class="m1-oi-row m1-oi-row--wh">
-            <input id="m1-wh-f-article" type="text" maxlength="100" placeholder="Артикул"
-              class="m1-oi-input" autocomplete="off">
-            <input id="m1-wh-f-name" type="text" maxlength="300" placeholder="Наименование *"
-              class="m1-oi-input">
-            <input id="m1-wh-f-qty" type="text" inputmode="decimal" placeholder="Кол-во"
-              class="m1-oi-input m1-oi-input--center">
-            <input id="m1-wh-f-unit" type="text" maxlength="20" placeholder="ед."
-              class="m1-oi-input m1-oi-input--center">
-            <input id="m1-wh-f-price" type="text" inputmode="decimal" placeholder="Цена"
-              class="m1-oi-input m1-oi-input--right">
-            <input id="m1-wh-f-sum" type="text" tabindex="-1" readonly placeholder="Сумма"
-              class="m1-oi-input m1-oi-input--right m1-oi-input--readonly">
-          </div>
-        </div>
-      </div>
-
-      <!-- Тип + категория -->
-      <div class="m1-wh-cm-row">
-        <label class="block">
-          <span class="text-xs text-fg-muted block mb-1.5">Тип позиции *</span>
-          <div class="m1-dd m1-dd--block" id="m1-wh-type-dd">
-            <button type="button" class="m1-dd-btn m1-dd-btn--block" id="m1-wh-type-btn">
-              <span id="m1-wh-type-label">Материал</span>
-              <svg class="m1-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="m1-dd-menu hidden" id="m1-wh-type-menu">
-              <div class="m1-dd-opt" data-value="material">Материал</div>
-            </div>
-          </div>
-        </label>
-        <label class="block">
-          <span class="text-xs text-fg-muted block mb-1.5">Категория</span>
-          <input id="m1-wh-f-category" list="m1-wh-category-dl" type="text" maxlength="100" autocomplete="off"
-            placeholder="Выберите или создайте…"
-            class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-          <datalist id="m1-wh-category-dl"></datalist>
-        </label>
-      </div>
-
-      <!-- Комментарий -->
-      <label class="block">
-        <span class="text-xs text-fg-muted block mb-1.5">Комментарий</span>
-        <textarea id="m1-wh-f-comment" rows="2" maxlength="1000"
-          class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm resize-none"></textarea>
-      </label>
-
-    </div>
-    
-    <div class="px-5 py-4 border-t border-line flex items-center justify-between gap-2">
-      <button id="m1-wh-delete" class="hidden px-4 py-2 rounded-lg text-sm text-state-error hover:bg-surface-alt transition-colors">Удалить</button>
-      <div class="flex items-center gap-2 ml-auto">
-        <button class="m1-wh-close btn-secondary px-4 py-2 rounded-lg text-sm">Отмена</button>
-        <button id="m1-wh-save" class="btn-primary px-4 py-2 rounded-lg text-sm" disabled>Сохранить</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- =========================
-     MODAL: редактор заказа снабжения
-========================== -->
-<div id="m1-ord-modal" class="hidden fixed inset-0 z-40 bg-black/30 flex items-start justify-center px-4 py-8 overflow-y-auto">
-  <div class="bg-surface rounded-2xl border border-line w-full max-w-3xl">
-    <div class="px-5 py-4 border-b border-line flex items-center justify-between">
-      <div>
-        <h3 class="font-medium" id="m1-ord-modal-title">Новый заказ</h3>
-        <p class="text-xs text-fg-muted mt-0.5" id="m1-ord-modal-sub"></p>
-      </div>
-      <button class="m1-ord-close p-1 rounded-lg hover:bg-surface-alt">
-        <svg class="w-5 h-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
-      </button>
-    </div>
-
-    <div class="p-5 space-y-4">
-
-      <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
-        <label class="block md:col-span-2">
-          <span class="text-xs text-fg-muted block mb-1.5">Поставщик</span>
-          <div class="m1-combo" id="m1-supplier-combo">
-            <input id="m1-ord-f-supplier" type="text" maxlength="200" autocomplete="off" spellcheck="false"
-              placeholder="Начните вводить или выберите…"
-              class="w-full px-3 py-2 rounded-lg bg-surface border border-line focus:border-fg focus:outline-none text-sm">
-            <div class="m1-combo-menu hidden" id="m1-supplier-menu"></div>
-          </div>
-        </label>
-        <label class="block">
-          <span class="text-xs text-fg-muted block mb-1.5">Статус оплаты</span>
-          <div class="m1-dd m1-dd--block" id="m1-ord-payment-dd">
-            <button type="button" class="m1-dd-btn m1-dd-btn--block" id="m1-ord-payment-btn">
-              <span id="m1-ord-payment-label">Не оплачено</span>
-              <svg class="m1-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="m1-dd-menu hidden" id="m1-ord-payment-menu">
-              <div class="m1-dd-opt" data-value="unpaid">Не оплачено</div>
-              <div class="m1-dd-opt" data-value="paid">Оплачено</div>
-            </div>
-          </div>
-        </label>
-      </div>
-
-      <!-- Статус заказа (если редактирование) -->
-      <div id="m1-ord-status-row" class="hidden">
-        <span class="text-xs text-fg-muted block mb-2">Статус заказа</span>
-        <div class="flex items-center gap-2 flex-wrap">
-          <div id="m1-ord-status-badges" class="flex items-center gap-1"></div>
-          <div class="text-fg-muted">→</div>
-          <div class="m1-dd" id="m1-ord-fstatus-dd">
-            <button type="button" class="m1-dd-btn" id="m1-ord-fstatus-btn">
-              <span id="m1-ord-fstatus-label">В работе</span>
-              <svg class="m1-dd-chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
-            </button>
-            <div class="m1-dd-menu hidden" id="m1-ord-fstatus-menu">
-              <div class="m1-dd-opt" data-value="draft">В работе</div>
-              <div class="m1-dd-opt" data-value="placed">Заказ размещён</div>
-              <div class="m1-dd-opt" data-value="in_transit">Товар в пути</div>
-              <div class="m1-dd-opt" data-value="received">На складе</div>
-            </div>
-          </div>
-        </div>
-        <p class="text-xs text-fg-muted mt-2">
-          При переходе в «На складе» содержимое заказа автоматически придёт на склад.
-        </p>
-      </div>
-
-      <!-- Позиции -->
-      <div class="border border-line rounded-xl overflow-hidden">
-        <div class="px-4 py-3 bg-surface-alt border-b border-line flex items-center justify-between">
-          <span class="text-sm font-medium">Позиции заказа</span>
-          <span id="m1-ord-total" class="text-sm text-fg-muted">Итого: 0,00 ₽</span>
-        </div>
-        <div id="m1-ord-items" class="divide-y divide-line-light">
-          <!-- позиции подставляются динамически -->
-        </div>
-        <datalist id="m1-item-article-dl"></datalist>
-        <datalist id="m1-item-name-dl"></datalist>
-        <div class="px-4 py-3 border-t border-line">
-          <button id="m1-ord-add-item" class="text-sm text-fg-muted hover:text-fg transition-colors">
-            + Добавить позицию
-          </button>
-        </div>
-      </div>
-
-      <!-- Вложения -->
-      <div class="border border-line rounded-xl overflow-hidden">
-        <div class="px-4 py-3 bg-surface-alt border-b border-line flex items-center justify-between">
-          <span class="text-sm font-medium">Документы</span>
-          <label class="text-sm text-fg-muted hover:text-fg transition-colors cursor-pointer">
-            + Загрузить
-            <input id="m1-ord-file-input" type="file" class="hidden" multiple>
-          </label>
-        </div>
-        <div id="m1-ord-attachments" class="divide-y divide-line-light">
-          <div class="px-4 py-3 text-xs text-fg-muted">Нет вложений</div>
-        </div>
-      </div>
-
-    </div>
-
-    <div class="px-5 py-4 border-t border-line flex items-center justify-between gap-2">
-      <button id="m1-ord-delete" class="hidden px-4 py-2 rounded-lg text-sm text-state-error hover:bg-surface-alt transition-colors">Удалить заказ</button>
-      <div class="flex items-center gap-2 ml-auto">
-        <button class="m1-ord-close btn-secondary px-4 py-2 rounded-lg text-sm">Отмена</button>
-        <button id="m1-ord-save" class="btn-primary px-4 py-2 rounded-lg text-sm">Сохранить</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <style>
-  /* Подстраничная навигация — segmented control как в шапке приложения */
-  .m1-subnav {
-    height: var(--ctrl-h, 38px);
-    background: var(--bg-card);
-    border: 1px solid var(--line);
-    border-radius: var(--ctrl-radius, 12px);
-    padding: 4px;
-    display: inline-flex;
-    align-items: stretch;
-    gap: 0;
-  }
-  .m1-subnav .m1-tab {
-    padding: 0 14px;
-    border: none;
-    background: none;
-    cursor: pointer;
-    border-radius: calc(var(--ctrl-radius, 12px) - 4px);
-    color: var(--fg-muted);
-    font-size: 13px;
-    white-space: nowrap;
-    display: inline-flex;
-    align-items: center;
-    transition: all .15s ease-in-out;
-  }
-  .m1-subnav .m1-tab:hover { color: var(--fg); }
-  .m1-subnav .m1-tab.active {
-    background: var(--bg);
-    color: var(--fg);
-    font-weight: 600;
-    box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 0 0 1px rgba(0,0,0,.04);
-  }
+/* ============================================================ RIVA · modal1 — Снабжение ============================================================ */
+.m1{ color:var(--text); }
+.m1-head{ display:flex; align-items:center; justify-content:space-between; gap:var(--sp-4); margin-bottom:var(--sp-5); flex-wrap:wrap; }
+.m1-title{ font-size:1.35rem; font-weight:700; letter-spacing:-.02em; display:flex; align-items:center; gap:var(--sp-3); }
+.m1-tools{ display:flex; align-items:center; gap:var(--sp-3); flex-wrap:wrap; }
+.m1-search{ display:flex; align-items:center; gap:var(--sp-2); height:38px; padding:0 var(--sp-3); background:var(--card); border:1px solid var(--border); border-radius:var(--r); color:var(--text-3); min-width:190px; }
+.m1-search:focus-within{ border-color:var(--accent-line); }
+.m1-search svg{ width:15px; height:15px; flex:0 0 auto; }
+.m1-search input{ flex:1; background:none; border:none; outline:none; color:var(--text); font-size:.875rem; min-width:0; }
+.m1-pill{ display:inline-flex; align-items:center; gap:6px; height:34px; padding:0 var(--sp-3); border-radius:var(--r); background:var(--accent-soft); color:var(--accent); border:1px solid var(--accent-line); font-size:.8rem; font-weight:600; }
+.m1-pill.muted{ background:var(--card); color:var(--text-3); border-color:var(--border); font-weight:500; }
+.m1-pill svg{ width:14px; height:14px; }
 
-  /* Группа фильтра — segmented control как .m1-subnav */
-  .m1-filter-group {
-    height: var(--m1-bar-h, 36px);
-    background: var(--bg-card);
-    border: 1px solid var(--line);
-    border-radius: var(--ctrl-radius, 12px);
-    padding: 4px;
-    display: inline-flex;
-    align-items: stretch;
-    gap: 0;
-  }
-  .m1-filter-group .m1-wh-filter {
-    padding: 0 14px;
-    border: none;
-    background: none;
-    cursor: pointer;
-    border-radius: calc(var(--ctrl-radius, 12px) - 4px);
-    color: var(--fg-muted);
-    font-size: 13px;
-    white-space: nowrap;
-    display: inline-flex;
-    align-items: center;
-    transition: all .15s ease-in-out;
-  }
-  .m1-filter-group .m1-wh-filter:hover { color: var(--fg); }
-  .m1-filter-group .m1-wh-filter.active {
-    background: var(--bg);
-    color: var(--fg);
-    font-weight: 600;
-    box-shadow: 0 1px 3px rgba(0,0,0,.06), 0 0 0 1px rgba(0,0,0,.04);
-  }
+.m1-btn{ display:inline-flex; align-items:center; gap:var(--sp-2); height:38px; padding:0 var(--sp-4); border-radius:var(--r); background:var(--btn-bg); color:var(--btn-fg); font-size:.875rem; font-weight:600; box-shadow:var(--shadow-card); transition:transform var(--dur-fast) var(--ease),opacity var(--dur-fast) var(--ease); white-space:nowrap; }
+.m1-btn:hover{ transform:translateY(-1px); opacity:.92; }
+.m1-btn:disabled{ opacity:.5; cursor:not-allowed; transform:none; }
+.m1-btn svg{ width:16px; height:16px; }
+.m1-btn.ghost{ background:var(--card); color:var(--text); border:1px solid var(--border-strong); box-shadow:none; }
+.m1-btn.ghost:hover{ background:var(--card-hover); }
+.m1-btn.sm{ height:32px; padding:0 var(--sp-3); font-size:.82rem; }
 
-  /* Скрытие контролов тулбара БЕЗ перестроения флекса (режим «Остатки») */
-  .m1-toolbar-hidden { visibility: hidden; pointer-events: none; }
+.m1-card{ border:1px solid var(--border); border-radius:var(--r-lg); background:var(--card); box-shadow:var(--shadow-card); overflow:hidden; }
+.m1-panel{ display:none; }
+.m1-panel.on{ display:block; animation:m1in .3s var(--ease); }
+@keyframes m1in{ from{ opacity:0; transform:translateY(6px);} to{ opacity:1; transform:none; } }
 
-  /* ============================================================
-     ШАБЛОН СТРОКИ (modal1 — Склад и Заказы снабжения)
-  ============================================================ */
-  .m1-row {
-    --m1-accent: var(--fg);
-    --m1-bg-pct: 3%;
-    --m1-bg-hover: 6%;
-    --m1-border-pct: 8%;
-    --m1-blur: 3px;
+.m1-tablewrap{ overflow-x:auto; }
+table.m1-tbl{ width:100%; border-collapse:collapse; font-size:.875rem; }
+.m1-tbl th{ text-align:left; font-size:.72rem; letter-spacing:.06em; text-transform:uppercase; color:var(--text-3); font-weight:600; padding:var(--sp-3) var(--sp-4); border-bottom:1px solid var(--border); white-space:nowrap; position:sticky; top:0; background:var(--surface); }
+.m1-tbl td{ padding:var(--sp-3) var(--sp-4); border-bottom:1px solid var(--border); color:var(--text-2); vertical-align:middle; }
+.m1-tbl tr:last-child td{ border-bottom:none; }
+.m1-tbl tbody tr{ transition:background var(--dur-fast) var(--ease); }
+.m1-tbl tbody tr:hover{ background:var(--card-hover); }
+.m1-tbl td.num, .m1-tbl th.num{ text-align:right; font-variant-numeric:tabular-nums; white-space:nowrap; }
+.m1-tbl .nm{ color:var(--text); font-weight:600; }
+.m1-tbl .sub{ color:var(--text-3); font-size:.78rem; font-family:var(--font-mono); }
 
-    background: color-mix(in srgb, var(--m1-accent) var(--m1-bg-pct), transparent);
-    backdrop-filter: blur(var(--m1-blur));
-    -webkit-backdrop-filter: blur(var(--m1-blur));
-    border: 1px solid color-mix(in srgb, var(--m1-accent) var(--m1-border-pct), transparent);
-    border-radius: 12px;
+.m1-chip{ display:inline-flex; align-items:center; gap:5px; font-size:.74rem; font-weight:500; padding:3px 9px; border-radius:var(--r-sm); white-space:nowrap; border:1px solid var(--border); background:var(--card); color:var(--text-2); }
+.m1-chip::before{ content:""; width:6px; height:6px; border-radius:50%; background:currentColor; }
+.c-prod{ color:var(--st-upcoming); background:var(--st-upcoming-bg); border-color:transparent; }
+.s-draft{ color:var(--st-pending); background:var(--st-pending-bg); border-color:transparent; }
+.s-placed,.s-transit{ color:var(--st-upcoming); background:var(--st-upcoming-bg); border-color:transparent; }
+.s-received{ color:var(--st-completed); background:var(--st-completed-bg); border-color:transparent; }
+.pay-paid{ color:var(--st-completed); } .pay-unpaid{ color:var(--text-3); }
+.delta-pos{ color:var(--st-completed); font-weight:600; } .delta-neg{ color:var(--st-cancelled); font-weight:600; }
+.low-stock{ color:var(--st-cancelled); font-weight:600; }
 
-    display: grid;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 16px;
-    min-height: 44px;
+.m1-acts{ display:flex; gap:6px; justify-content:flex-end; }
+.m1-ic{ width:30px; height:30px; display:grid; place-items:center; border-radius:var(--r-sm); border:1px solid var(--border); background:var(--card); color:var(--text-2); transition:all var(--dur-fast) var(--ease); }
+.m1-ic:hover{ border-color:var(--border-strong); color:var(--text); background:var(--card-hover); }
+.m1-ic.danger:hover{ color:var(--st-cancelled); border-color:var(--st-cancelled); }
+.m1-ic svg{ width:15px; height:15px; }
 
-    transition: background .15s ease, border-color .15s ease, opacity .15s ease;
-    cursor: pointer;
-  }
-  .m1-row:hover {
-    background: color-mix(in srgb, var(--m1-accent) var(--m1-bg-hover), transparent);
-    border-color: color-mix(in srgb, var(--m1-accent) calc(var(--m1-border-pct) + 10%), transparent);
-  }
-  .m1-row.is-empty { opacity: 0.45; }
+.m1-empty{ display:grid; place-items:center; gap:var(--sp-2); padding:var(--sp-12) var(--sp-4); text-align:center; color:var(--text-3); }
+.m1-empty svg{ width:36px; height:36px; opacity:.45; }
+.m1-empty .t{ font-size:1rem; font-weight:600; color:var(--text-2); }
+.m1-empty .d{ font-size:.875rem; max-width:42ch; }
+.m1-loading{ display:grid; place-items:center; gap:var(--sp-3); padding:var(--sp-12); color:var(--text-3); }
+.m1-loading .spin{ width:24px; height:24px; border-radius:50%; border:2px solid var(--border); border-top-color:var(--accent); animation:m1spin 1s linear infinite; }
+@keyframes m1spin{ to{ transform:rotate(360deg);} }
+.m1-foot{ display:flex; align-items:center; justify-content:space-between; padding:var(--sp-3) var(--sp-4); border-top:1px solid var(--border); font-size:.8rem; color:var(--text-3); }
+.m1-foot b{ color:var(--text); font-weight:600; }
 
-  .m1-row--warehouse {
-    grid-template-columns:
-      120px
-      minmax(0, 1fr)
-      110px
-      100px
-      120px
-      minmax(0, 1fr)
-      130px;
-    column-gap: 12px;
-  }
-  .m1-row--warehouse .m1-row__stat--num { margin-left: -6px; }
-  .m1-row--warehouse .m1-row__stat--num:first-of-type { margin-left: 0; }
+/* Диалоги */
+.m1-overlay{ position:fixed; inset:0; z-index:400; display:grid; place-items:center; padding:var(--sp-4); background:rgba(0,0,0,.45); -webkit-backdrop-filter:blur(6px); backdrop-filter:blur(6px); animation:m1fade .2s var(--ease); }
+@keyframes m1fade{ from{ opacity:0;} to{ opacity:1; } }
+.m1-dialog{ width:100%; max-width:560px; max-height:90vh; display:flex; flex-direction:column; background:var(--surface); border:1px solid var(--border-strong); border-radius:var(--r-lg); box-shadow:var(--shadow-pop); animation:m1pop .25s var(--ease); }
+@keyframes m1pop{ from{ opacity:0; transform:translateY(10px) scale(.98);} to{ opacity:1; transform:none; } }
+.m1-dialog.wide{ max-width:720px; }
+.m1-dhead{ display:flex; align-items:center; justify-content:space-between; padding:var(--sp-4) var(--sp-5); border-bottom:1px solid var(--border); }
+.m1-dhead h3{ font-size:1.05rem; font-weight:700; letter-spacing:-.01em; }
+.m1-dclose{ width:32px; height:32px; display:grid; place-items:center; border-radius:var(--r-sm); color:var(--text-3); }
+.m1-dclose:hover{ background:var(--card-hover); color:var(--text); }
+.m1-dbody{ padding:var(--sp-5); overflow-y:auto; }
+.m1-dfoot{ display:flex; justify-content:flex-end; gap:var(--sp-3); padding:var(--sp-4) var(--sp-5); border-top:1px solid var(--border); }
 
-  .m1-badge-material { --badge-c: #2563EB; }
-  .m1-badge-product  { --badge-c: #15803D; }
+.m1-field{ margin-bottom:var(--sp-4); }
+.m1-field:last-child{ margin-bottom:0; }
+.m1-field label{ display:block; font-size:.78rem; font-weight:600; color:var(--text-2); margin-bottom:6px; }
+.m1-input, .m1-select, .m1-textarea{ width:100%; height:40px; padding:0 var(--sp-3); background:var(--card); border:1px solid var(--border); border-radius:var(--r); color:var(--text); font-size:.9rem; font-family:inherit; transition:border-color var(--dur-fast) var(--ease); }
+.m1-textarea{ height:auto; min-height:72px; padding:var(--sp-2) var(--sp-3); resize:vertical; }
+.m1-input:focus, .m1-select:focus, .m1-textarea:focus{ outline:none; border-color:var(--accent-line); }
+.m1-row2{ display:grid; grid-template-columns:1fr 1fr; gap:var(--sp-3); }
+.m1-hint{ font-size:.78rem; color:var(--text-3); margin-top:6px; }
+.m1-seg{ display:inline-flex; padding:3px; gap:2px; background:var(--card); border:1px solid var(--border); border-radius:var(--r); }
+.m1-seg button{ font-size:.8rem; color:var(--text-3); padding:5px 12px; border-radius:var(--r-sm); }
+.m1-seg button.on{ background:var(--accent-soft); color:var(--accent); }
 
-  .m1-row--order {
-    grid-template-columns:
-      150px
-      130px
-      130px
-      minmax(0, 1fr)
-      70px
-      130px
-      170px;
-  }
-
-  /* Грид журнала: тип · позиция · дельта · остаток · описание · автор · дата */
-  .m1-row--journal {
-    grid-template-columns:
-      150px
-      minmax(0, 1.2fr)
-      110px
-      110px
-      minmax(0, 1.4fr)
-      130px
-      150px;
-    cursor: default;
-  }
-
-  .m1-row__head {
-    display: flex;
-    flex-direction: column;
-    min-width: 0;
-    gap: 1px;
-  }
-  .m1-row__type {
-    font-size: 10px;
-    text-transform: uppercase;
-    letter-spacing: 0.05em;
-    color: var(--fg-muted);
-    white-space: nowrap;
-  }
-  .m1-row__name {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--fg);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-
-  .m1-row__code {
-    font-size: 13px;
-    font-weight: 500;
-    color: var(--fg);
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .m1-row__title {
-    font-size: 13px;
-    color: var(--fg-secondary);
-    min-width: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-  .m1-row__stat {
-    font-size: 13px;
-    color: var(--fg);
-    white-space: nowrap;
-  }
-  .m1-row__total {
-    font-size: 13px;
-    font-weight: 600;
-    color: var(--fg);
-    text-align: right;
-  }
-  .m1-row__items {
-    font-size: 12px;
-    color: var(--fg-muted);
-    white-space: nowrap;
-  }
-  .m1-row__comment {
-    font-size: 12px;
-    color: var(--fg-muted);
-    font-style: italic;
-    min-width: 0;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    text-align: right;
-  }
-  .m1-row__date {
-    font-size: 12px;
-    color: var(--fg-muted);
-    text-align: right;
-    white-space: nowrap;
-  }
-
-  /* Дельта в журнале */
-  .m1-jr-delta {
-    font-size: 13px;
-    font-weight: 600;
-    white-space: nowrap;
-    text-align: right;
-  }
-  .m1-jr-delta--in  { color: #15803D; }
-  .m1-jr-delta--out { color: #DC2626; }
-
-  /* ============================================================
-     БЕЙДЖИ СТАТУСОВ
-  ============================================================ */
-  .m1-badge {
-    --m1-badge-pct: 13%;
-    --m1-badge-blur: 6px;
-
-    display: inline-flex;
-    align-items: center;
-    justify-self: start;
-    padding: 3px 9px;
-    border-radius: 7px;
-    font-size: 11px;
-    font-weight: 500;
-    line-height: 1.4;
-    white-space: nowrap;
-    background: color-mix(in srgb, var(--badge-c, var(--fg-muted)) var(--m1-badge-pct), transparent);
-    color: var(--badge-c, var(--fg-muted));
-    backdrop-filter: blur(var(--m1-badge-blur));
-    -webkit-backdrop-filter: blur(var(--m1-badge-blur));
-  }
-  .m1-badge-draft      { --badge-c: #6B7280; }
-  .m1-badge-placed     { --badge-c: #2563EB; }
-  .m1-badge-in_transit { --badge-c: #D97706; }
-  .m1-badge-received   { --badge-c: #15803D; }
-  .m1-badge-paid       { --badge-c: #15803D; }
-  .m1-badge-partial    { --badge-c: #D97706; }
-  .m1-badge-unpaid     { --badge-c: #DC2626; }
-
-  /* Бейджи типов движения журнала */
-  .m1-badge-supply_in     { --badge-c: #2563EB; }
-  .m1-badge-production_in { --badge-c: #15803D; }
-  .m1-badge-sale_out      { --badge-c: #DC2626; }
-  .m1-badge-return_in     { --badge-c: #0891B2; }
-  .m1-badge-adjustment    { --badge-c: #D97706; }
-  .m1-badge-other         { --badge-c: #6B7280; }
-
-  /* ============================================================
-     КАСТОМНЫЙ КОМБОБОКС ПОСТАВЩИКА
-  ============================================================ */
-  .m1-combo { position: relative; }
-  .m1-combo-menu {
-    position: absolute;
-    left: 0; right: 0; top: calc(100% + 4px);
-    z-index: 30;
-    max-height: 220px;
-    overflow-y: auto;
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    box-shadow: 0 8px 24px rgba(0,0,0,.08);
-    padding: 4px;
-  }
-  .m1-combo-menu::-webkit-scrollbar { width: 4px; }
-  .m1-combo-menu::-webkit-scrollbar-track { background: transparent; }
-  .m1-combo-menu::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
-  .m1-combo-menu:hover::-webkit-scrollbar-thumb { background: var(--fg-muted); }
-  .m1-combo-menu { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
-
-  .m1-combo-opt {
-    padding: 8px 10px;
-    border-radius: 7px;
-    font-size: 13px;
-    color: var(--fg);
-    cursor: pointer;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    transition: background .12s ease;
-  }
-  .m1-combo-opt:hover,
-  .m1-combo-opt.active { background: var(--bg-alt); }
-  .m1-combo-opt--empty { color: var(--fg-muted); cursor: default; font-style: italic; }
-
-  /* ============================================================
-     ИНЛАЙН-ПИКЕР (Мин. остатки) — товар или рецепт, как в modal2
-  ============================================================ */
-  .m1-picker {
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    background: var(--bg);
-    overflow: hidden;
-    max-width: 520px;
-  }
-  .m1-picker-search {
-    width: 100%;
-    padding: 8px 10px;
-    border: none;
-    border-bottom: 1px solid var(--line);
-    background: var(--bg);
-    color: var(--fg);
-    font-size: 13px;
-    outline: none;
-  }
-  .m1-picker-search::placeholder { color: var(--fg-muted); }
-  .m1-picker-list { max-height: 240px; overflow-y: auto; padding: 4px; }
-  .m1-picker-list::-webkit-scrollbar { width: 4px; }
-  .m1-picker-list::-webkit-scrollbar-track { background: transparent; }
-  .m1-picker-list::-webkit-scrollbar-thumb { background: var(--line); border-radius: 2px; }
-  .m1-picker-list:hover::-webkit-scrollbar-thumb { background: var(--fg-muted); }
-  .m1-picker-list { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
-
-  .m1-picker-group {
-    padding: 6px 10px 2px;
-    font-size: 11px; font-weight: 600;
-    color: var(--fg-muted);
-    text-transform: uppercase; letter-spacing: .03em;
-  }
-  .m1-picker-opt {
-    padding: 8px 10px;
-    border-radius: 7px;
-    font-size: 13px;
-    color: var(--fg);
-    cursor: pointer;
-    display: flex; align-items: center; gap: 8px;
-    white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    transition: background .12s ease;
-  }
-  .m1-picker-opt:hover,
-  .m1-picker-opt.active { background: var(--bg-alt); }
-  .m1-picker-opt .m1-picker-opt-name { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
-  .m1-picker-opt small { color: var(--fg-muted); font-weight: 400; }
-  .m1-picker-opt--empty { color: var(--fg-muted); cursor: default; font-style: italic; }
-
-  .m1-chip-prod { --badge-c: #D97706; }
-  .m1-chip-wh   { --badge-c: #2563EB; }
-
-  /* ============================================================
-     СТРОКА «МИН. ОСТАТКА» со шкалой заполнения
-  ============================================================ */
-  .m1-ro-row {
-    --m1-accent: var(--fg);
-    background: color-mix(in srgb, var(--m1-accent) 3%, transparent);
-    backdrop-filter: blur(3px);
-    -webkit-backdrop-filter: blur(3px);
-    border: 1px solid color-mix(in srgb, var(--m1-accent) 8%, transparent);
-    border-radius: 12px;
-    display: grid;
-    grid-template-columns:
-      90px
-      minmax(0, 1fr)
-      180px
-      minmax(160px, 1.2fr)
-      130px
-      36px;
-    align-items: center;
-    gap: 12px;
-    padding: 10px 16px;
-    min-height: 48px;
-    transition: background .15s ease, border-color .15s ease;
-  }
-  .m1-ro-row:hover {
-    background: color-mix(in srgb, var(--m1-accent) 6%, transparent);
-    border-color: color-mix(in srgb, var(--m1-accent) 18%, transparent);
-  }
-  .m1-ro-name {
-    font-size: 13px; font-weight: 500; color: var(--fg);
-    min-width: 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  }
-  .m1-ro-min-wrap { display: flex; align-items: center; gap: 6px; }
-  .m1-ro-min-input {
-    width: 90px; height: 32px; padding: 0 8px;
-    border-radius: 8px; background: var(--bg); border: 1px solid var(--line);
-    color: var(--fg); font-size: 13px; text-align: right; outline: none;
-    transition: border-color .15s ease;
-  }
-  .m1-ro-min-input:focus { border-color: var(--fg); }
-  .m1-ro-min-unit { font-size: 12px; color: var(--fg-muted); white-space: nowrap; }
-
-  .m1-ro-bar {
-    position: relative;
-    height: 8px; border-radius: 6px;
-    background: color-mix(in srgb, var(--fg) 10%, transparent);
-    overflow: hidden;
-  }
-  .m1-ro-bar-fill {
-    position: absolute; left: 0; top: 0; bottom: 0;
-    border-radius: 6px;
-    transition: width .25s ease, background .25s ease;
-  }
-  .m1-ro-status {
-    font-size: 12px; white-space: nowrap; text-align: right;
-  }
-  .m1-ro-del {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 30px; height: 30px; border-radius: 8px; cursor: pointer;
-    transition: background .12s ease;
-  }
-  .m1-ro-del:hover { background: var(--bg-alt); }
-
-  @media (max-width: 1024px) {
-    .m1-ro-row {
-      grid-template-columns: 70px minmax(0,1fr) auto minmax(120px,1fr) 36px;
-      gap: 10px;
-    }
-    .m1-ro-status { display: none; }
-  }
-  @media (max-width: 700px) {
-    .m1-ro-row { grid-template-columns: 1fr; gap: 8px; }
-  }
-
-  /* ============================================================
-     СТРОКА ПОЗИЦИИ ЗАКАЗА (в одну линию)
-  ============================================================ */
-  .m1-oi-row {
-    display: grid;
-    grid-template-columns:
-      90px
-      minmax(0, 1fr)
-      72px
-      64px
-      96px
-      96px
-      32px;
-    gap: 8px;
-    align-items: center;
-    padding: 8px 16px;
-  }
-  .m1-oi-input {
-    width: 100%;
-    padding: 6px 8px;
-    border-radius: 8px;
-    background: var(--bg);
-    border: 1px solid var(--line);
-    font-size: 13px;
-    color: var(--fg);
-    outline: none;
-    transition: border-color .15s ease;
-  }
-  .m1-oi-input:focus { border-color: var(--fg); }
-  .m1-oi-input::placeholder { color: var(--fg-muted); }
-  .m1-oi-input--center { text-align: center; }
-  .m1-oi-input--right { text-align: right; }
-  .m1-oi-input--readonly {
-    background: var(--bg-alt);
-    color: var(--fg-secondary);
-    cursor: default;
-  }
-  .m1-oi-input::-webkit-outer-spin-button,
-  .m1-oi-input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
-  .m1-oi-input[type=number] { -moz-appearance: textfield; }
-
-  .m1-oi-remove {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 28px; height: 28px;
-    border-radius: 8px;
-    transition: background .15s ease;
-  }
-  .m1-oi-remove:hover { background: var(--bg-alt); }
-
-  /* Адаптив */
-  @media (max-width: 1024px) {
-    .m1-row--warehouse,
-    .m1-row--order,
-    .m1-row--journal {
-      grid-template-columns: minmax(0, 1fr) auto auto auto;
-      gap: 10px;
-    }
-    .m1-row__comment, .m1-row__items { display: none; }
-  }
-  @media (max-width: 700px) {
-    .m1-row--warehouse,
-    .m1-row--order,
-    .m1-row--journal {
-      grid-template-columns: 1fr;
-      gap: 4px;
-      padding: 12px 14px;
-    }
-    .m1-row__total, .m1-row__date, .m1-row__comment { text-align: left; }
-    .m1-jr-delta { text-align: left; }
-    .m1-oi-row { grid-template-columns: 1fr 1fr; gap: 6px; }
-  }
-
-  /* ============================================================
-     ТУЛБАР ПОДСТРАНИЦ
-  ============================================================ */
-  :root { --m1-bar-h: 36px; }
-
-  .m1-bar-ctrl {
-    height: var(--m1-bar-h);
-    padding-top: 0;
-    padding-bottom: 0;
-  }
-  .m1-bar-ctrl:not(select):not(button) { /* инпуты */ }
-  input.m1-bar-ctrl { padding-left: 14px; padding-right: 14px; }
-
-  .m1-select {
-    appearance: none;
-    -webkit-appearance: none;
-    -moz-appearance: none;
-    padding-left: 14px;
-    padding-right: 34px;
-    cursor: pointer;
-    color: var(--fg);
-    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23737373' stroke-width='1.5' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'/%3E%3C/svg%3E");
-    background-repeat: no-repeat;
-    background-position: right 10px center;
-  }
-  .m1-select:focus { border-color: var(--fg); }
-
-  /* ============================================================
-     ЧЕКБОКС (uiverse)
-  ============================================================ */
-  .uiverse-wrapper {
-    --size: 22px;
-    --color-default: var(--line);
-    --color-active: var(--fg);
-    --transition: 0.4s cubic-bezier(0.68, -0.6, 0.32, 1.6);
-    display: inline-flex;
-  }
-  .cb-container {
-    display: block;
-    position: relative;
-    cursor: pointer;
-    width: var(--size);
-    height: var(--size);
-    user-select: none;
-  }
-  .cb-container input {
-    position: absolute;
-    opacity: 0;
-    cursor: pointer;
-    height: 0;
-    width: 0;
-  }
-  .checkmark {
-    position: absolute;
-    top: 0; left: 0;
-    height: 100%; width: 100%;
-    background-color: var(--bg);
-    border: 3px solid var(--color-default);
-    border-radius: 7px;
-    transition: var(--transition);
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    box-shadow: 2px 2px 0px var(--color-default);
-  }
-  .checkmark svg {
-    width: 15px;
-    height: 15px;
-    color: var(--bg);
-    transform: scale(0) rotate(-45deg);
-    transition: var(--transition);
-    filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.2));
-  }
-  .cb-container:hover .checkmark {
-    transform: translate(-2px, -2px);
-    box-shadow: 4px 4px 0px var(--color-default);
-  }
-  .cb-container input:checked ~ .checkmark {
-    background-color: var(--color-active);
-    border-color: var(--color-active);
-    box-shadow: 4px 4px 0px rgba(0, 0, 0, 0.15);
-    transform: scale(1.1) rotate(5deg);
-  }
-  .cb-container input:checked ~ .checkmark svg {
-    transform: scale(1) rotate(0deg);
-  }
-  .cb-container:active .checkmark {
-    transform: translate(2px, 2px);
-    box-shadow: 2px 2px 0px var(--color-default);
-  }
-
-  /* ============================================================
-     КАСТОМНЫЙ ДРОПДАУН
-  ============================================================ */
-  .m1-dd { position: relative; display: inline-flex; }
-  .m1-dd-btn {
-    height: var(--m1-bar-h, 36px);
-    display: inline-flex;
-    align-items: center;
-    gap: 8px;
-    padding: 0 12px 0 14px;
-    border-radius: 12px;
-    background: var(--bg);
-    border: 1px solid var(--line);
-    color: var(--fg);
-    font-size: 13px;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: border-color .15s ease;
-  }
-  .m1-dd-btn:hover { border-color: var(--fg-muted); }
-  .m1-dd.is-open .m1-dd-btn { border-color: var(--fg); }
-  .m1-dd-chev {
-    width: 16px; height: 16px;
-    color: var(--fg-muted);
-    transition: transform .18s ease;
-    flex-shrink: 0;
-  }
-  .m1-dd.is-open .m1-dd-chev { transform: rotate(180deg); }
-
-  .m1-dd-menu {
-    position: absolute;
-    top: calc(100% + 4px);
-    left: 0;
-    min-width: 100%;
-    z-index: 30;
-    background: var(--bg);
-    border: 1px solid var(--line);
-    border-radius: 10px;
-    box-shadow: 0 8px 24px rgba(0,0,0,.08);
-    padding: 4px;
-  }
-  .m1-dd-opt {
-    padding: 8px 10px;
-    border-radius: 7px;
-    font-size: 13px;
-    color: var(--fg);
-    cursor: pointer;
-    white-space: nowrap;
-    transition: background .12s ease;
-  }
-  .m1-dd-opt:hover { background: var(--bg-alt); }
-  .m1-dd-opt.is-selected {
-    background: var(--bg-alt);
-    font-weight: 600;
-  }
-
-  .m1-oi-row--wh {
-    grid-template-columns:
-      90px
-      minmax(0, 1fr)
-      72px
-      64px
-      96px
-      96px;
-  }
-
-  .m1-dd--block { display: block; }
-  .m1-dd-btn--block { width: 100%; justify-content: space-between; }
-  
+/* строки позиций в заказе */
+.m1-li{ display:grid; grid-template-columns:1fr 80px 90px 30px; gap:var(--sp-2); align-items:center; margin-bottom:var(--sp-2); }
+.m1-li .m1-input{ height:36px; }
+.m1-li-del{ width:30px; height:30px; display:grid; place-items:center; border-radius:var(--r-sm); border:1px solid var(--border); color:var(--text-3); }
+.m1-li-del:hover{ color:var(--st-cancelled); border-color:var(--st-cancelled); }
+.m1-li-head{ display:grid; grid-template-columns:1fr 80px 90px 30px; gap:var(--sp-2); font-size:.7rem; text-transform:uppercase; letter-spacing:.05em; color:var(--text-3); margin-bottom:6px; padding:0 2px; }
 </style>
 
-<script type="module">
-// ================================================================
-// modal1.html — Снабжение
-// ================================================================
+<div class="m1" id="m1-root">
+  <div class="m1-head">
+    <div class="m1-title" id="m1-title">Склад</div>
+    <div class="m1-tools" id="m1-tools"></div>
+  </div>
 
-const { sb, state } = window.RIVA;
-const { toast, esc, formatDate, formatDateTime, formatMoney, formatNumber, formatQuantity } = window.RIVA_UTILS;
-const $ = (id) => document.getElementById(id);
+  <div class="m1-card">
+    <div class="m1-panel" data-tab="warehouse" id="m1p-warehouse"></div>
+    <div class="m1-panel" data-tab="suppliers" id="m1p-suppliers"></div>
+    <div class="m1-panel" data-tab="orders" id="m1p-orders"></div>
+    <div class="m1-panel" data-tab="journal" id="m1p-journal"></div>
+  </div>
+</div>
 
-const myRole = state.currentGroup?.role;
-const canWrite = ['admin','supply','management'].includes(myRole);
-const groupId = state.currentGroup.group_id;
+<script>
+(function(){
+  var RIVA = window.RIVA, U = window.RIVA_UTILS;
+  if(!RIVA || !U){ var r=document.getElementById('m1-root'); if(r) r.innerHTML='<div class="m1-empty"><div class="t">Модуль не инициализирован</div><div class="d">app.js не загружен.</div></div>'; return; }
+  var sb = RIVA.sb;
 
-$('m1-subtitle').textContent = `Группа «${state.currentGroup.group_name}»`;
+  /* токен экземпляра — для самоочистки слушателей при смене страницы */
+  var INSTANCE = Date.now()+'-'+Math.random(); RIVA._m1Instance = INSTANCE;
+  function alive(){ return RIVA._m1Instance === INSTANCE && document.getElementById('m1-root'); }
 
-// ---------- tabs ----------
-function switchTab(name) {
-  document.querySelectorAll('.m1-tab').forEach(t => t.classList.toggle('active', t.dataset.tab === name));
-  document.querySelectorAll('.m1-panel').forEach(p => p.classList.toggle('hidden', p.dataset.panel !== name));
-  if (name === 'warehouse') loadWarehouse();
-  if (name === 'orders') loadOrders();
-  if (name === 'journal') loadJournal();
-}
-document.querySelectorAll('.m1-tab').forEach(t => t.addEventListener('click', () => switchTab(t.dataset.tab)));
+  /* ----- состояние ----- */
+  var data = { warehouse:[], suppliers:[], orders:[], journal:[] };
+  var search = '';
+  var curTab = 'warehouse';
 
-$('m1-wh-grid').addEventListener('click', (e) => {
-  const card = e.target.closest('[data-wh-id]');
-  if (card && card.dataset.whId) openWarehouseEditor(card.dataset.whId);
-});
-$('m1-ord-list').addEventListener('click', (e) => {
-  const card = e.target.closest('[data-ord-id]');
-  if (card && card.dataset.ordId) openOrderEditor(card.dataset.ordId);
-});
+  /* ----- доступ ----- */
+  function role(){ return (RIVA.state.currentGroup && RIVA.state.currentGroup.role) || null; }
+  function canWrite(){ return ['admin','supply','management'].indexOf(role())>=0; }
+  function canCross(){ return ['admin','management'].indexOf(role())>=0; }
+  function supplyUnits(){ return (RIVA.unitsBySection && RIVA.unitsBySection.supply) || []; }
+  function activeUnit(){ return RIVA.state.activeUnitId || null; }
+  function activeUnitName(){ var id=activeUnit(); if(!id) return null; var u=supplyUnits().find(function(x){return x.id===id;}); return u?u.name:null; }
+  function defaultUnitId(){ var us=supplyUnits(); var d=us.find(function(u){return u.is_default;})||us[0]; return d?d.id:null; }
+  function resolveCreateUnit(){ return activeUnit() || defaultUnitId(); }
+  function groupId(){ return RIVA.state.currentGroup && RIVA.state.currentGroup.group_id; }
 
-if (!canWrite) {
-  $('m1-wh-add')?.setAttribute('disabled', 'disabled');
-  $('m1-ord-new')?.setAttribute('disabled', 'disabled');
-}
+  /* ----- вкладка из ярлыка сайдбара ----- */
+  function tabFromLabel(label){
+    var l = (label||'').toLowerCase();
+    if(l.indexOf('поставщик')>=0) return 'suppliers';
+    if(l.indexOf('заказ')>=0) return 'orders';
+    if(l.indexOf('журнал')>=0) return 'journal';
+    return 'warehouse';
+  }
 
-// ================================================================
-// WAREHOUSE
-// ================================================================
+  /* ----- переключение панели ----- */
+  function showTab(tab){
+    curTab = tab; search='';
+    var titles={warehouse:'Склад',suppliers:'Поставщики',orders:'Заказы поставщикам',journal:'Журнал движений'};
+    document.getElementById('m1-title').textContent = titles[tab]||'';
+    document.querySelectorAll('#m1-root .m1-panel').forEach(function(p){ p.classList.toggle('on', p.getAttribute('data-tab')===tab); });
+    renderTools();
+    loadTab(tab);
+  }
 
-const wh = {
-  cached: [],
-  search: '',
-  typeFilter: 'all',
-  onlyInStock: false,
-  editing: null,
-  editingQtyBefore: null,   // кол-во до правки (для записи корректировки в журнал)
-  recipes: [],
-  thresholds: [],
-  pickerOpen: false,
-  pickerActive: -1,
-  typeValue: 'material'
-};
-
-$('m1-wh-search').addEventListener('input', (e) => { wh.search = e.target.value.trim().toLowerCase(); renderWarehouse(); });
-$('m1-wh-only-in-stock').addEventListener('change', (e) => { wh.onlyInStock = e.target.checked; renderWarehouse(); });
-document.querySelectorAll('.m1-wh-filter').forEach(btn => {
-  btn.addEventListener('click', () => {
-    document.querySelectorAll('.m1-wh-filter').forEach(b => b.classList.toggle('active', b === btn));
-    wh.typeFilter = btn.dataset.type;
-    if (wh.typeFilter === 'reorder') {
-      enterReorderMode();
-    } else {
-      exitReorderMode();
-      renderWarehouse();
+  /* ----- инструменты (поиск + кнопки) ----- */
+  function renderTools(){
+    var tools = document.getElementById('m1-tools'); tools.innerHTML='';
+    // индикатор склада
+    var pill = document.createElement('span');
+    var an = activeUnitName();
+    pill.className = 'm1-pill' + (an?'':' muted');
+    pill.innerHTML = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h13l5 5v6a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg>'+(an?U.esc(an):'Все склады');
+    tools.appendChild(pill);
+    // поиск
+    var s = document.createElement('label'); s.className='m1-search';
+    s.innerHTML='<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.2-3.2"/></svg>';
+    var inp=document.createElement('input'); inp.type='text'; inp.placeholder='Поиск'; inp.value=search;
+    inp.addEventListener('input', function(){ search=inp.value.toLowerCase(); renderCurrent(); });
+    s.appendChild(inp); tools.appendChild(s);
+    // действия
+    if(curTab==='warehouse'){
+      if(canCross() && supplyUnits().length>1) tools.appendChild(btn('Переместить', 'ghost', iconTransfer(), openTransfer));
+      if(canWrite()) tools.appendChild(btn('Добавить позицию','', iconPlus(), function(){ openItemDialog(null); }));
+    } else if(curTab==='suppliers'){
+      if(canWrite()) tools.appendChild(btn('Добавить поставщика','', iconPlus(), function(){ openSupplierDialog(null); }));
+    } else if(curTab==='orders'){
+      if(canWrite()) tools.appendChild(btn('Создать заказ','', iconPlus(), function(){ openOrderDialog(); }));
     }
-  });
-});
-document.querySelector('.m1-wh-filter[data-type="all"]').classList.add('active');
-
-async function loadWarehouse() {
-  const { data, error } = await sb.from('warehouse_items').select('*').order('name');
-  if (error) {
-    $('m1-wh-grid').innerHTML = `<div class="col-span-full text-sm text-state-error p-6">${esc(error.message)}</div>`;
-    return;
   }
-  wh.cached = data || [];
-  renderWarehouse();
-}
+  function btn(label, cls, icon, on){ var b=document.createElement('button'); b.className='m1-btn'+(cls?(' '+cls):''); b.innerHTML=icon+'<span>'+label+'</span>'; b.addEventListener('click',on); return b; }
+  function iconPlus(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>'; }
+  function iconTransfer(){ return '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M7 7h12l-3-3M17 17H5l3 3"/></svg>'; }
 
-function renderWarehouse() {
-  let list = wh.cached;
-  if (wh.typeFilter !== 'all' && wh.typeFilter !== 'reorder') list = list.filter(x => x.type === wh.typeFilter);
-  if (wh.onlyInStock) list = list.filter(x => Number(x.quantity) > 0);
-  if (wh.search) list = list.filter(x =>
-    (x.name || '').toLowerCase().includes(wh.search) ||
-    (x.article || '').toLowerCase().includes(wh.search)
-  );
-
-  if (list.length === 0) {
-    $('m1-wh-grid').innerHTML = `
-      <div class="text-center py-16 text-sm text-fg-muted">
-        ${wh.search || wh.typeFilter !== 'all' || wh.onlyInStock ? 'Ничего не найдено' : 'Склад пуст. Добавьте первую позицию.'}
-      </div>
-    `;
-    return;
-  }
-
-  const container = $('m1-wh-grid');
-  container.innerHTML = '';
-  const frag = document.createDocumentFragment();
-  list.forEach(x => frag.appendChild(renderWarehouseRow(x)));
-  container.appendChild(frag);
-}
-
-// ================================================================
-// РЕЖИМ «МИН. ОСТАТКИ» (reorder thresholds)
-// ================================================================
-
-function enterReorderMode() {
-  $('m1-wh-grid').classList.add('hidden');
-  $('m1-reorder-wrap').classList.remove('hidden');
-  $('m1-wh-only-in-stock').closest('label').classList.add('m1-toolbar-hidden');
-  $('m1-wh-add').classList.add('m1-toolbar-hidden');
-  loadReorder();
-}
-function exitReorderMode() {
-  $('m1-reorder-wrap').classList.add('hidden');
-  $('m1-wh-grid').classList.remove('hidden');
-  $('m1-wh-only-in-stock').closest('label').classList.remove('m1-toolbar-hidden');
-  $('m1-wh-add').classList.remove('m1-toolbar-hidden');
-  closeReorderPicker();
-}
-
-async function loadReorder() {
-  $('m1-reorder-grid').innerHTML = '<div class="flex items-center justify-center py-16"><div class="w-6 h-6 loader"></div></div>';
-
-  const [whRes, rcRes, thRes] = await Promise.all([
-    wh.cached.length ? Promise.resolve({ data: wh.cached }) : sb.from('warehouse_items').select('*').order('name'),
-    sb.from('recipes').select('id, code, name, output_unit').order('name'),
-    sb.from('reorder_thresholds').select('*')
-  ]);
-  if (whRes.data) wh.cached = whRes.data;
-  wh.recipes = rcRes.data || [];
-  wh.thresholds = thRes.data || [];
-
-  renderReorder();
-}
-
-function recipeStock(recipeName) {
-  return wh.cached
-    .filter(w => w.type === 'product' && w.name === recipeName)
-    .reduce((s, w) => s + Number(w.quantity || 0), 0);
-}
-
-function thresholdMeta(t) {
-  if (t.recipe_id) {
-    const r = wh.recipes.find(x => x.id === t.recipe_id);
-    return {
-      isRecipe: true,
-      name: r?.name || '(рецепт удалён)',
-      unit: r?.output_unit || '',
-      stock: r ? recipeStock(r.name) : 0
-    };
-  }
-  const w = wh.cached.find(x => x.id === t.warehouse_item_id);
-  return {
-    isRecipe: false,
-    name: w?.name || '(позиция удалена)',
-    unit: w?.unit || '',
-    stock: w ? Number(w.quantity || 0) : 0
-  };
-}
-
-function fillRatio(stock, min) {
-  if (!min || min <= 0) return 1;
-  return Math.max(0, stock / min);
-}
-
-function renderReorder() {
-  const grid = $('m1-reorder-grid');
-
-  if (wh.thresholds.length === 0) {
-    grid.innerHTML = '<div class="text-center py-16 text-sm text-fg-muted">Список пуст. Добавьте позиции и задайте для них минимальный остаток.</div>';
-    return;
-  }
-
-  const rows = wh.thresholds.map(t => {
-    const m = thresholdMeta(t);
-    const ratio = fillRatio(m.stock, Number(t.min_quantity || 0));
-    return { t, m, ratio };
-  }).sort((a, b) => a.ratio - b.ratio);
-
-  grid.innerHTML = rows.map(({ t, m, ratio }) => {
-    const min = Number(t.min_quantity || 0);
-    const pct = Math.min(100, Math.round(ratio * 100));
-    const color = ratio >= 1 ? '#15803D' : (ratio >= 0.5 ? '#D97706' : '#DC2626');
-    const deficit = Math.max(0, min - m.stock);
-    const statusText = ratio >= 1
-      ? 'в норме'
-      : `не хватает ${formatNumber(deficit)} ${esc(m.unit)}`;
-    const statusColor = ratio >= 1 ? 'var(--fg-muted)' : color;
-
-    return `
-      <div class="m1-ro-row" data-th-id="${esc(t.id)}">
-        <span class="m1-badge ${m.isRecipe ? 'm1-chip-prod' : 'm1-chip-wh'}">${m.isRecipe ? 'рецепт' : 'склад'}</span>
-        <div class="m1-ro-name" title="${esc(m.name)}">${esc(m.name)}</div>
-        <div class="m1-ro-min-wrap">
-          <span class="text-xs text-fg-muted">мин.</span>
-          <input type="text" inputmode="decimal" class="m1-ro-min-input" data-th-min value="${min ? formatDecimal2(min) : ''}">
-          <span class="m1-ro-min-unit">${esc(m.unit)}</span>
-        </div>
-        <div>
-          <div class="m1-ro-bar"><div class="m1-ro-bar-fill" style="width:${pct}%;background:${color};"></div></div>
-          <div class="text-xs text-fg-muted mt-1">Остаток ${formatNumber(m.stock)} ${esc(m.unit)} · ${pct}%</div>
-        </div>
-        <div class="m1-ro-status" style="color:${statusColor};">${statusText}</div>
-        <div class="m1-ro-del" data-th-del title="Убрать из списка">
-          <svg class="w-4 h-4 text-state-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
-        </div>
-      </div>`;
-  }).join('');
-
-  grid.querySelectorAll('.m1-ro-row').forEach(row => {
-    const id = row.dataset.thId;
-
-    const input = row.querySelector('[data-th-min]');
-    const commit = async () => {
-      const n = parseDecimalInput(input.value) || 0;
-      input.value = n ? formatDecimal2(n) : '';
-      const th = wh.thresholds.find(x => x.id === id);
-      if (th) th.min_quantity = n;
-      try {
-        const { error } = await sb.from('reorder_thresholds').update({ min_quantity: n, updated_at: new Date().toISOString() }).eq('id', id);
-        if (error) throw error;
-        renderReorder();
-      } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
-    };
-    input.addEventListener('input', (e) => {
-      if (e.target.value.includes('.')) {
-        const pos = e.target.selectionStart;
-        e.target.value = e.target.value.replace(/\./g, ',');
-        try { e.target.setSelectionRange(pos, pos); } catch (_) {}
+  /* ----- загрузка данных вкладки ----- */
+  async function loadTab(tab){
+    var panel = document.getElementById('m1p-'+tab);
+    panel.innerHTML = '<div class="m1-loading"><div class="spin"></div>Загрузка…</div>';
+    try{
+      if(tab==='warehouse'){
+        var w = await sb.from('warehouse_items').select('*').order('name');
+        if(w.error) throw w.error; data.warehouse = w.data||[];
+      } else if(tab==='suppliers'){
+        var s = await sb.from('suppliers').select('*').order('name');
+        if(s.error) throw s.error; data.suppliers = s.data||[];
+      } else if(tab==='orders'){
+        var o = await sb.from('supply_orders').select('*, suppliers(name), supply_order_items(*)').order('created_at',{ascending:false});
+        if(o.error) throw o.error; data.orders = o.data||[];
+      } else if(tab==='journal'){
+        var j = await sb.from('stock_movements').select('*').order('created_at',{ascending:false}).limit(300);
+        if(j.error) throw j.error; data.journal = j.data||[];
       }
-    });
-    input.addEventListener('blur', commit);
-    input.addEventListener('keydown', (e) => { if (e.key === 'Enter') input.blur(); });
-
-    row.querySelector('[data-th-del]').addEventListener('click', async () => {
-      if (!confirm('Убрать позицию из списка минимальных остатков?')) return;
-      try {
-        const { error } = await sb.from('reorder_thresholds').delete().eq('id', id);
-        if (error) throw error;
-        wh.thresholds = wh.thresholds.filter(x => x.id !== id);
-        renderReorder();
-        toast('Удалено из списка', 'success');
-      } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
-    });
-  });
-}
-
-$('m1-reorder-add').addEventListener('click', () => {
-  if (wh.pickerOpen) { closeReorderPicker(); return; }
-  wh.pickerOpen = true;
-  wh.pickerActive = -1;
-  $('m1-reorder-picker').classList.remove('hidden');
-  $('m1-reorder-search').value = '';
-  fillReorderPicker('');
-  setTimeout(() => $('m1-reorder-search').focus(), 30);
-});
-
-function closeReorderPicker() {
-  wh.pickerOpen = false;
-  wh.pickerActive = -1;
-  $('m1-reorder-picker').classList.add('hidden');
-  $('m1-reorder-search').value = '';
-  $('m1-reorder-list').innerHTML = '';
-}
-
-function reorderTakenIds() {
-  return {
-    wh: new Set(wh.thresholds.filter(t => t.warehouse_item_id).map(t => t.warehouse_item_id)),
-    rc: new Set(wh.thresholds.filter(t => t.recipe_id).map(t => t.recipe_id))
-  };
-}
-
-function fillReorderPicker(query) {
-  const q = (query || '').trim().toLowerCase();
-  const taken = reorderTakenIds();
-  const listEl = $('m1-reorder-list');
-
-  const whItems = wh.cached
-    .filter(w => !taken.wh.has(w.id))
-    .filter(w => !q || (w.name || '').toLowerCase().includes(q) || (w.article || '').toLowerCase().includes(q))
-    .map(w => ({
-      source: 'warehouse', id: w.id, name: w.name,
-      meta: `${w.article ? w.article + ' · ' : ''}${w.unit || ''}${w.type === 'product' ? ' · продукция' : ' · материал'}`
-    }));
-
-  const rcItems = wh.recipes
-    .filter(r => !taken.rc.has(r.id))
-    .filter(r => !q || (r.name || '').toLowerCase().includes(q) || (r.code || '').toLowerCase().includes(q))
-    .map(r => ({
-      source: 'recipe', id: r.id, name: r.name,
-      meta: `${r.code ? r.code + ' · ' : ''}${r.output_unit || ''}`
-    }));
-
-  let html = '';
-  if (whItems.length) {
-    html += `<div class="m1-picker-group">Склад</div>`;
-    html += whItems.map(o => reorderOptHtml(o, 'm1-chip-wh', 'склад')).join('');
-  }
-  if (rcItems.length) {
-    html += `<div class="m1-picker-group">Рецепты</div>`;
-    html += rcItems.map(o => reorderOptHtml(o, 'm1-chip-prod', 'рецепт')).join('');
-  }
-  if (!html) html = `<div class="m1-picker-opt m1-picker-opt--empty">Ничего не найдено</div>`;
-
-  listEl.innerHTML = html;
-  wh.pickerActive = -1;
-}
-
-function reorderOptHtml(o, chipClass, chipText) {
-  return `<div class="m1-picker-opt" data-opt-source="${esc(o.source)}" data-opt-id="${esc(o.id)}">
-    <span class="m1-badge ${chipClass}">${chipText}</span>
-    <span class="m1-picker-opt-name">${esc(o.name)}</span>
-    ${o.meta ? `<small>${esc(o.meta)}</small>` : ''}
-  </div>`;
-}
-
-$('m1-reorder-search').addEventListener('input', (e) => fillReorderPicker(e.target.value));
-$('m1-reorder-search').addEventListener('keydown', (e) => {
-  const opts = Array.from($('m1-reorder-list').querySelectorAll('[data-opt-source]'));
-  if (e.key === 'Escape') { closeReorderPicker(); return; }
-  if (e.key === 'ArrowDown') {
-    e.preventDefault();
-    wh.pickerActive = Math.min(wh.pickerActive + 1, opts.length - 1);
-  } else if (e.key === 'ArrowUp') {
-    e.preventDefault();
-    wh.pickerActive = Math.max(wh.pickerActive - 1, 0);
-  } else if (e.key === 'Enter') {
-    e.preventDefault();
-    const target = wh.pickerActive >= 0 ? opts[wh.pickerActive] : (opts.length === 1 ? opts[0] : null);
-    if (target) addReorderThreshold(target.dataset.optSource, target.dataset.optId);
-    return;
-  } else { return; }
-  opts.forEach((o, i) => o.classList.toggle('active', i === wh.pickerActive));
-  opts[wh.pickerActive]?.scrollIntoView({ block: 'nearest' });
-});
-
-$('m1-reorder-list').addEventListener('click', (e) => {
-  const opt = e.target.closest('[data-opt-source]');
-  if (!opt) return;
-  addReorderThreshold(opt.dataset.optSource, opt.dataset.optId);
-});
-
-async function addReorderThreshold(source, id) {
-  const payload = {
-    group_id: groupId,
-    warehouse_item_id: source === 'warehouse' ? id : null,
-    recipe_id: source === 'recipe' ? id : null,
-    min_quantity: 0
-  };
-  try {
-    const { data, error } = await sb.from('reorder_thresholds').insert(payload).select().single();
-    if (error) throw error;
-    wh.thresholds.push(data);
-    closeReorderPicker();
-    renderReorder();
-    toast('Позиция добавлена в список', 'success');
-  } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
-}
-
-function renderWarehouseRow(x) {
-  const tpl = document.getElementById('m1-wh-row-tpl');
-  const node = tpl.content.firstElementChild.cloneNode(true);
-  node.dataset.whId = x.id;
-
-  const fld = (name) => node.querySelector(`[data-field="${name}"]`);
-
-  const qty = Number(x.quantity || 0);
-  const price = Number(x.price || 0);
-  const sum = qty * price;
-  const commentText = x.comment || '';
-
-  if (qty === 0) node.classList.add('is-empty');
-
-  const tp = fld('type');
-  tp.textContent = x.type === 'material' ? 'Материал' : 'Продукция';
-  tp.classList.add('m1-badge-' + (x.type === 'material' ? 'material' : 'product'));
-
-  const name = fld('name');
-  name.textContent = x.article ? `${x.article} · ${x.name}` : (x.name || '—');
-  name.title = x.name || '';
-
-  fld('quantity').textContent = formatQuantity(qty, x.unit);
-  fld('price').textContent = formatMoney(price);
-  fld('sum').textContent = formatMoney(sum);
-
-  const cm = fld('comment');
-  const parts = [];
-  if (x.category) parts.push(x.category);
-  if (commentText) parts.push(commentText);
-  if (parts.length) {
-    cm.textContent = parts.join(' · ');
-    cm.title = parts.join(' · ');
-  } else {
-    cm.innerHTML = '&nbsp;';
-  }
-
-  fld('date').textContent = formatDate(new Date(x.updated_at || x.created_at));
-
-  return node;
-}
-
-function refreshCategoryDatalist() {
-  const cats = Array.from(new Set(
-    wh.cached.map(x => (x.category || '').trim()).filter(Boolean)
-  )).sort((a, b) => a.localeCompare(b, 'ru'));
-  $('m1-wh-category-dl').innerHTML = cats.map(c => `<option value="${esc(c)}"></option>`).join('');
-}
-
-// ---- Warehouse editor modal ----
-function openWarehouseEditor(id) {
-  if (!canWrite) return;
-  wh.editing = id;
-  const item = id ? wh.cached.find(x => x.id === id) : null;
-  // запоминаем кол-во до правки — чтобы записать корректировку в журнал
-  wh.editingQtyBefore = item ? Number(item.quantity || 0) : 0;
-  $('m1-wh-modal-title').textContent = item ? 'Редактирование позиции' : 'Новая позиция';
-  $('m1-wh-f-article').value = item?.article || '';
-  $('m1-wh-f-name').value = item?.name || '';
-  $('m1-wh-f-unit').value = item?.unit || 'шт';
-  $('m1-wh-f-qty').value = item?.quantity != null ? formatDecimal2(item.quantity) : '';
-  $('m1-wh-f-price').value = item?.price != null ? formatDecimal2(item.price) : '';
-  $('m1-wh-f-comment').value = item?.comment || '';
-  $('m1-wh-f-category').value = item?.category || '';
-  refreshCategoryDatalist();
-  $('m1-wh-delete').classList.toggle('hidden', !id);
-  validateWhForm();
-  $('m1-wh-modal').classList.remove('hidden');
-  setTimeout(() => $('m1-wh-f-name').focus(), 50);
-  wh.typeValue = item?.type || 'material';
-  whTypeSelect.set(wh.typeValue);
-  recalcWhSum();
-}
-
-function recalcWhSum() {
-  const qty = parseDecimalInput($('m1-wh-f-qty').value) || 0;
-  const price = parseDecimalInput($('m1-wh-f-price').value) || 0;
-  $('m1-wh-f-sum').value = formatDecimal2(qty * price);
-}
-
-['m1-wh-f-qty', 'm1-wh-f-price'].forEach(id => {
-  const input = $(id);
-  input.addEventListener('input', (e) => {
-    if (e.target.value.includes('.')) {
-      const pos = e.target.selectionStart;
-      e.target.value = e.target.value.replace(/\./g, ',');
-      try { e.target.setSelectionRange(pos, pos); } catch (_) {}
+      if(!alive()) return;
+      renderCurrent();
+    }catch(err){
+      if(!alive()) return;
+      panel.innerHTML = '<div class="m1-empty"><div class="t">Не удалось загрузить</div><div class="d">'+U.esc(err.message||String(err))+'</div></div>';
     }
-    recalcWhSum();
-  });
-  input.addEventListener('blur', (e) => {
-    const n = parseDecimalInput(e.target.value);
-    e.target.value = n == null ? '' : formatDecimal2(n);
-    recalcWhSum();
-  });
-});
+  }
 
-$('m1-wh-add').addEventListener('click', () => openWarehouseEditor(null));
-document.querySelectorAll('.m1-wh-close').forEach(b => b.addEventListener('click', () => $('m1-wh-modal').classList.add('hidden')));
+  function renderCurrent(){
+    if(curTab==='warehouse') renderWarehouse();
+    else if(curTab==='suppliers') renderSuppliers();
+    else if(curTab==='orders') renderOrders();
+    else if(curTab==='journal') renderJournal();
+  }
+  function match(s){ return !search || (s||'').toLowerCase().indexOf(search)>=0; }
 
-function validateWhForm() {
-  const ok = $('m1-wh-f-name').value.trim() && $('m1-wh-f-unit').value.trim();
-  $('m1-wh-save').disabled = !ok;
-}
-['m1-wh-f-name','m1-wh-f-unit'].forEach(id => $(id).addEventListener('input', validateWhForm));
+  /* ----- СКЛАД ----- */
+  function renderWarehouse(){
+    var panel = document.getElementById('m1p-warehouse');
+    var rows = data.warehouse.filter(function(i){ return match(i.name) || match(i.article); });
+    if(!data.warehouse.length){ panel.innerHTML = empty('Склад пуст','Добавьте позиции вручную или оприходуйте заказ поставщика.'); return; }
+    var totMat=0, totProd=0;
+    data.warehouse.forEach(function(i){ var v=num(i.quantity)*num(i.price); if(i.type==='product') totProd+=v; else totMat+=v; });
+    var html = '<div class="m1-tablewrap"><table class="m1-tbl"><thead><tr>'
+      + '<th>Наименование</th><th>Тип</th><th class="num">Остаток</th><th class="num">Цена</th><th class="num">Стоимость</th>'
+      + (canWrite()?'<th></th>':'') + '</tr></thead><tbody>';
+    rows.forEach(function(i){
+      var val = num(i.quantity)*num(i.price);
+      html += '<tr>'
+        + '<td><div class="nm">'+U.esc(i.name)+'</div>'+(i.article?'<div class="sub">'+U.esc(i.article)+'</div>':'')+'</td>'
+        + '<td>'+(i.type==='product'?'<span class="m1-chip c-prod">продукт</span>':'<span class="m1-chip">материал</span>')+'</td>'
+        + '<td class="num">'+U.formatQuantity(i.quantity)+' '+U.esc(i.unit||'')+'</td>'
+        + '<td class="num">'+(i.price!=null?U.formatMoney(i.price):'—')+'</td>'
+        + '<td class="num">'+U.formatMoney(val)+'</td>'
+        + (canWrite()?('<td><div class="m1-acts">'+icBtn('edit','Изм.',i.id)+icBtn('del','Удал.',i.id,true)+'</div></td>'):'')
+        + '</tr>';
+    });
+    html += '</tbody></table></div>';
+    html += '<div class="m1-foot"><span>Позиций: <b>'+data.warehouse.length+'</b></span><span>Материалы: <b>'+U.formatMoney(totMat)+'</b> · Продукция: <b>'+U.formatMoney(totProd)+'</b></span></div>';
+    panel.innerHTML = html;
+    panel.querySelectorAll('[data-act]').forEach(function(b){ b.addEventListener('click', function(){
+      var id=b.getAttribute('data-id'), item=data.warehouse.find(function(x){return x.id===id;});
+      if(b.getAttribute('data-act')==='edit') openItemDialog(item); else confirmDelete('позицию «'+item.name+'»', function(){ return delItem(id); });
+    });});
+  }
 
-$('m1-wh-save').addEventListener('click', async () => {
-  const btn = $('m1-wh-save');
-  btn.disabled = true;
-  btn.textContent = 'Сохраняем…';
-  try {
-    const newQty = parseDecimalInput($('m1-wh-f-qty').value) ?? 0;
-    const payload = {
-      article: $('m1-wh-f-article').value.trim() || null,
-      type: wh.typeValue,
-      name: $('m1-wh-f-name').value.trim(),
-      unit: $('m1-wh-f-unit').value.trim(),
-      quantity: newQty,
-      price: parseDecimalInput($('m1-wh-f-price').value),
-      category: $('m1-wh-f-category').value.trim() || null,
-      comment: $('m1-wh-f-comment').value.trim() || null
-    };
+  /* ----- ПОСТАВЩИКИ ----- */
+  function renderSuppliers(){
+    var panel = document.getElementById('m1p-suppliers');
+    var rows = data.suppliers.filter(function(i){ return match(i.name)||match(i.contact)||match(i.phone); });
+    if(!data.suppliers.length){ panel.innerHTML = empty('Нет поставщиков','Добавьте первого поставщика, чтобы оформлять заказы.'); return; }
+    var html='<div class="m1-tablewrap"><table class="m1-tbl"><thead><tr><th>Поставщик</th><th>Контакт</th><th>Телефон</th><th>Email</th>'+(canWrite()?'<th></th>':'')+'</tr></thead><tbody>';
+    rows.forEach(function(i){
+      html+='<tr><td><div class="nm">'+U.esc(i.name)+'</div>'+(i.comment?'<div class="sub">'+U.esc(i.comment)+'</div>':'')+'</td>'
+        +'<td>'+U.esc(i.contact||'—')+'</td><td>'+U.esc(i.phone||'—')+'</td><td>'+U.esc(i.email||'—')+'</td>'
+        +(canWrite()?('<td><div class="m1-acts">'+icBtn('edit','Изм.',i.id)+icBtn('del','Удал.',i.id,true)+'</div></td>'):'')+'</tr>';
+    });
+    html+='</tbody></table></div><div class="m1-foot"><span>Поставщиков: <b>'+data.suppliers.length+'</b></span></div>';
+    panel.innerHTML=html;
+    panel.querySelectorAll('[data-act]').forEach(function(b){ b.addEventListener('click', function(){
+      var id=b.getAttribute('data-id'), it=data.suppliers.find(function(x){return x.id===id;});
+      if(b.getAttribute('data-act')==='edit') openSupplierDialog(it); else confirmDelete('поставщика «'+it.name+'»', function(){ return delSupplier(id); });
+    });});
+  }
 
-    if (wh.editing) {
-      const { error } = await sb.from('warehouse_items').update(payload).eq('id', wh.editing);
-      if (error) throw error;
-      // Ручная корректировка количества → запись в журнал движений
-      const before = Number(wh.editingQtyBefore || 0);
-      const delta = newQty - before;
-      if (delta !== 0) {
-        await logManualAdjustment(wh.editing, delta, newQty, payload.name, payload.type, payload.unit);
-      }
-      toast('Позиция обновлена', 'success');
-    } else {
-      const { data: created, error } = await sb.from('warehouse_items')
-        .insert({ ...payload, group_id: groupId })
-        .select()
-        .single();
-      if (error) throw error;
-      // Стартовый остаток новой позиции (если задан) тоже фиксируем как корректировку
-      if (created && Number(newQty) !== 0) {
-        await logManualAdjustment(created.id, newQty, newQty, payload.name, payload.type, payload.unit, true);
-      }
-      toast('Позиция добавлена', 'success');
+  /* ----- ЗАКАЗЫ ----- */
+  function orderStatus(st){ var m={draft:['s-draft','Черновик'],placed:['s-placed','Размещён'],in_transit:['s-transit','В пути'],received:['s-received','Получен']}; var x=m[st]||['','—']; return '<span class="m1-chip '+x[0]+'">'+x[1]+'</span>'; }
+  function renderOrders(){
+    var panel=document.getElementById('m1p-orders');
+    var rows=data.orders.filter(function(o){ return match(o.order_number)||match(o.suppliers&&o.suppliers.name); });
+    if(!data.orders.length){ panel.innerHTML=empty('Нет заказов','Создайте заказ поставщику — после получения он оприходуется на склад.'); return; }
+    var html='<div class="m1-tablewrap"><table class="m1-tbl"><thead><tr><th>Заказ</th><th>Поставщик</th><th>Статус</th><th class="num">Позиций</th><th class="num">Сумма</th><th></th></tr></thead><tbody>';
+    rows.forEach(function(o){
+      var items=o.supply_order_items||[]; var sum=items.reduce(function(a,i){return a+num(i.quantity)*num(i.price);},0);
+      html+='<tr><td><div class="nm">'+U.esc(o.order_number||'—')+'</div><div class="sub">'+U.formatDate(o.created_at)+'</div></td>'
+        +'<td>'+U.esc((o.suppliers&&o.suppliers.name)||'—')+'</td>'
+        +'<td>'+orderStatus(o.status)+'</td>'
+        +'<td class="num">'+items.length+'</td>'
+        +'<td class="num">'+U.formatMoney(sum)+'</td>'
+        +'<td><div class="m1-acts">'+orderActions(o)+'</div></td></tr>';
+    });
+    html+='</tbody></table></div><div class="m1-foot"><span>Заказов: <b>'+data.orders.length+'</b></span></div>';
+    panel.innerHTML=html;
+    panel.querySelectorAll('[data-oact]').forEach(function(b){ b.addEventListener('click', function(){
+      var id=b.getAttribute('data-id'), o=data.orders.find(function(x){return x.id===id;}), a=b.getAttribute('data-oact');
+      if(a==='view') openOrderView(o);
+      else if(a==='place') doPlace(id);
+      else if(a==='receive') confirmDelete(null, function(){ return doReceive(id); }, {title:'Оприходовать заказ '+(o.order_number||'')+'?', text:'Позиции поступят на склад, движения запишутся в журнал.', ok:'Оприходовать', danger:false});
+      else if(a==='del') confirmDelete('черновик заказа '+(o.order_number||''), function(){ return delOrder(id); });
+    });});
+  }
+  function orderActions(o){
+    var s='';
+    s+=ic('view','Открыть',o.id,'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7S2 12 2 12z"/><circle cx="12" cy="12" r="3"/></svg>','oact');
+    if(canWrite()){
+      if(o.status==='draft'){ s+=ic('place','Разместить',o.id,'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="m22 2-7 20-4-9-9-4z"/></svg>','oact'); s+=ic('del','Удалить',o.id,'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>','oact',true); }
+      if(o.status==='placed'||o.status==='in_transit'){ s+=ic('receive','Оприходовать',o.id,'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M20 6 9 17l-5-5"/></svg>','oact'); }
     }
-    $('m1-wh-modal').classList.add('hidden');
-    await loadWarehouse();
-  } catch (e) {
-    toast('Ошибка: ' + e.message, 'error');
-  } finally {
-    btn.textContent = 'Сохранить';
-    validateWhForm();
+    return s;
   }
-});
 
-// Запись ручной корректировки количества в журнал движений
-async function logManualAdjustment(itemId, delta, balanceAfter, name, type, unit, isInitial = false) {
-  try {
-    await sb.from('stock_movements').insert({
-      group_id: groupId,
-      warehouse_item_id: itemId,
-      item_name: name || '—',
-      item_type: type || null,
-      unit: unit || null,
-      movement_type: 'adjustment',
-      delta: delta,
-      balance_after: balanceAfter,
-      source_type: 'manual',
-      source_id: null,
-      description: isInitial ? 'Начальный остаток при создании позиции' : 'Ручная корректировка количества',
-      user_id: state.authUser.id,
-      user_name: state.authUser.user_metadata?.name || state.authUser.email || null
+  /* ----- ЖУРНАЛ ----- */
+  function moveLabel(t){ return {supply_in:'Поступление',production_in:'Выпуск',sale_out:'Отгрузка',return_in:'Возврат',transfer_in:'Перемещение +',transfer_out:'Перемещение −',cross_sale_out:'Кросс-продажа'}[t]||t; }
+  function renderJournal(){
+    var panel=document.getElementById('m1p-journal');
+    var rows=data.journal.filter(function(m){ return match(m.item_name)||match(m.description); });
+    if(!data.journal.length){ panel.innerHTML=empty('Журнал пуст','Здесь появятся движения склада: поступления, выпуск, отгрузки, перемещения.'); return; }
+    var html='<div class="m1-tablewrap"><table class="m1-tbl"><thead><tr><th>Дата</th><th>Позиция</th><th>Операция</th><th class="num">Δ</th><th class="num">Остаток</th><th>Кто</th></tr></thead><tbody>';
+    rows.forEach(function(m){
+      var d=num(m.delta);
+      html+='<tr><td class="sub">'+U.formatDateTime(m.created_at)+'</td>'
+        +'<td><div class="nm">'+U.esc(m.item_name||'—')+'</div>'+(m.description?'<div class="sub">'+U.esc(m.description)+'</div>':'')+'</td>'
+        +'<td>'+U.esc(moveLabel(m.movement_type))+'</td>'
+        +'<td class="num '+(d>=0?'delta-pos':'delta-neg')+'">'+(d>=0?'+':'')+U.formatQuantity(d)+'</td>'
+        +'<td class="num">'+(m.balance_after!=null?U.formatQuantity(m.balance_after):'—')+'</td>'
+        +'<td class="sub">'+U.esc(m.user_name||'—')+'</td></tr>';
     });
-  } catch (e) {
-    // Журнал не должен ломать основное сохранение — только предупреждаем
-    console.warn('Не удалось записать движение в журнал:', e.message);
-  }
-}
-
-$('m1-wh-delete').addEventListener('click', async () => {
-  if (!wh.editing) return;
-  if (!confirm('Удалить позицию со склада?')) return;
-  try {
-    const { error } = await sb.from('warehouse_items').delete().eq('id', wh.editing);
-    if (error) throw error;
-    toast('Удалено', 'success');
-    $('m1-wh-modal').classList.add('hidden');
-    await loadWarehouse();
-  } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
-});
-
-// ================================================================
-// JOURNAL (движения склада)
-// ================================================================
-
-const jr = {
-  cached: [],
-  search: '',
-  typeFilter: 'all'
-};
-
-const MOVEMENT_LABEL = {
-  supply_in: 'Поступление',
-  production_in: 'Выпуск',
-  sale_out: 'Списание (продажа)',
-  return_in: 'Возврат',
-  adjustment: 'Корректировка',
-  other: 'Прочее'
-};
-
-$('m1-jr-search').addEventListener('input', (e) => { jr.search = e.target.value.trim().toLowerCase(); renderJournal(); });
-$('m1-jr-refresh').addEventListener('click', () => loadJournal());
-
-async function loadJournal() {
-  $('m1-jr-list').innerHTML = '<div class="flex items-center justify-center py-16"><div class="w-6 h-6 loader"></div></div>';
-  const { data, error } = await sb
-    .from('stock_movements')
-    .select('*')
-    .order('created_at', { ascending: false })
-    .limit(300);
-  if (error) {
-    $('m1-jr-list').innerHTML = `<div class="text-sm text-state-error p-6">${esc(error.message)}</div>`;
-    return;
-  }
-  jr.cached = data || [];
-  renderJournal();
-}
-
-function renderJournal() {
-  let list = jr.cached;
-  if (jr.typeFilter !== 'all') list = list.filter(x => x.movement_type === jr.typeFilter);
-  if (jr.search) list = list.filter(x =>
-    (x.item_name || '').toLowerCase().includes(jr.search) ||
-    (x.description || '').toLowerCase().includes(jr.search) ||
-    (x.user_name || '').toLowerCase().includes(jr.search)
-  );
-
-  if (list.length === 0) {
-    $('m1-jr-list').innerHTML = `
-      <div class="text-center py-16 text-sm text-fg-muted">
-        ${jr.search || jr.typeFilter !== 'all' ? 'Ничего не найдено' : 'Пока нет движений по складу.'}
-      </div>
-    `;
-    return;
+    html+='</tbody></table></div><div class="m1-foot"><span>Записей: <b>'+data.journal.length+'</b> (последние 300)</span></div>';
+    panel.innerHTML=html;
   }
 
-  const container = $('m1-jr-list');
-  container.innerHTML = '';
-  const frag = document.createDocumentFragment();
-  list.forEach(m => frag.appendChild(renderJournalRow(m)));
-  container.appendChild(frag);
-}
+  /* ----- общие мелочи ----- */
+  function num(v){ var n=typeof v==='number'?v:parseFloat(v); return isFinite(n)?n:0; }
+  function empty(t,d){ return '<div class="m1-empty"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.4"><rect x="3" y="7" width="18" height="13" rx="2"/><path d="M8 7V5a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg><div class="t">'+t+'</div><div class="d">'+d+'</div></div>'; }
+  function icBtn(act,title,id,danger){ return ic(act,title,id, act==='edit'?'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 0 1 3 3L7 19l-4 1 1-4z"/></svg>':'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path d="M3 6h18M8 6V4h8v2M6 6l1 14h10l1-14"/></svg>','act',danger); }
+  function ic(act,title,id,svg,attr,danger){ return '<button class="m1-ic'+(danger?' danger':'')+'" title="'+title+'" data-'+(attr||'act')+'="'+act+'" data-id="'+id+'">'+svg+'</button>'; }
 
-function renderJournalRow(m) {
-  const tpl = document.getElementById('m1-jr-row-tpl');
-  const node = tpl.content.firstElementChild.cloneNode(true);
-  const fld = (name) => node.querySelector(`[data-field="${name}"]`);
-
-  const mt = fld('mtype');
-  mt.textContent = MOVEMENT_LABEL[m.movement_type] || m.movement_type;
-  mt.classList.add('m1-badge-' + (MOVEMENT_LABEL[m.movement_type] ? m.movement_type : 'other'));
-
-  const item = fld('item');
-  item.textContent = m.item_name || '—';
-  item.title = m.item_name || '';
-
-  const delta = Number(m.delta || 0);
-  const d = fld('delta');
-  const sign = delta > 0 ? '+' : '';
-  d.textContent = `${sign}${formatNumber(delta)}${m.unit ? ' ' + m.unit : ''}`;
-  d.classList.add(delta >= 0 ? 'm1-jr-delta--in' : 'm1-jr-delta--out');
-
-  const bal = fld('balance');
-  bal.textContent = m.balance_after != null ? formatNumber(Number(m.balance_after)) : '—';
-
-  const desc = fld('desc');
-  desc.textContent = m.description || '';
-  desc.title = m.description || '';
-
-  fld('user').textContent = m.user_name || '';
-
-  fld('date').textContent = formatDateTime(new Date(m.created_at));
-
-  return node;
-}
-
-// ================================================================
-// ORDERS
-// ================================================================
-
-const ord = {
-  cached: [],
-  search: '',
-  statusFilter: 'all',
-  editing: null,
-  items: [],
-  attachments: [],
-  pendingFiles: [],
-  suppliersCache: [],
-  warehouseLookup: []
-};
-
-const STATUS_LABEL = { draft: 'В работе', placed: 'Заказ размещён', in_transit: 'Товар в пути', received: 'На складе' };
-const PAYMENT_LABEL = { unpaid: 'Не оплачено', paid: 'Оплачено' };
-
-function initCustomSelect(ids, onChange) {
-  const dd    = $(ids.dd);
-  const btn   = $(ids.btn);
-  const menu  = $(ids.menu);
-  const label = $(ids.label);
-  if (!dd || !btn || !menu) return { set() {} };
-
-  const open  = () => { dd.classList.add('is-open'); menu.classList.remove('hidden'); };
-  const close = () => { dd.classList.remove('is-open'); menu.classList.add('hidden'); };
-
-  function mark(value) {
-    menu.querySelectorAll('.m1-dd-opt').forEach(o =>
-      o.classList.toggle('is-selected', o.dataset.value === value));
+  /* ============================================================ ДИАЛОГИ ============================================================ */
+  function dialog(opts){
+    var ov=document.createElement('div'); ov.className='m1-overlay';
+    ov.innerHTML='<div class="m1-dialog'+(opts.wide?' wide':'')+'"><div class="m1-dhead"><h3>'+U.esc(opts.title)+'</h3><button class="m1-dclose">✕</button></div><div class="m1-dbody">'+opts.body+'</div><div class="m1-dfoot">'
+      +'<button class="m1-btn ghost" data-x="cancel">'+(opts.cancel||'Отмена')+'</button>'
+      +(opts.ok===false?'':'<button class="m1-btn" data-x="ok">'+(opts.ok||'Сохранить')+'</button>')+'</div></div>';
+    document.body.appendChild(ov);
+    function close(){ ov.remove(); }
+    ov.querySelector('.m1-dclose').onclick=close;
+    ov.querySelector('[data-x="cancel"]').onclick=close;
+    ov.addEventListener('mousedown', function(e){ if(e.target===ov) close(); });
+    var okb=ov.querySelector('[data-x="ok"]');
+    if(okb) okb.onclick=async function(){ okb.disabled=true; try{ var ok=await opts.onOk(ov); if(ok!==false) close(); } finally { if(okb) okb.disabled=false; } };
+    if(opts.onMount) opts.onMount(ov);
+    return ov;
   }
-  function set(value) {
-    const opt = menu.querySelector(`.m1-dd-opt[data-value="${value}"]`);
-    if (opt) label.textContent = opt.textContent;
-    mark(value);
+  function val(ov,sel){ var e=ov.querySelector(sel); return e?e.value.trim():''; }
+  function numVal(ov,sel){ var e=ov.querySelector(sel); return e?parseFloat(e.value):NaN; }
+
+  function unitSelectHTML(selId){
+    var us=supplyUnits(); var fixed=activeUnit();
+    if(fixed){ var u=us.find(function(x){return x.id===fixed;}); return '<input class="m1-input" value="'+U.esc(u?u.name:'склад')+'" disabled><input type="hidden" id="'+selId+'" value="'+fixed+'">'; }
+    var pre=defaultUnitId();
+    return '<select class="m1-select" id="'+selId+'">'+us.map(function(u){return '<option value="'+u.id+'"'+(u.id===pre?' selected':'')+'>'+U.esc(u.name)+(u.is_default?' (по умолч.)':'')+'</option>';}).join('')+'</select>';
   }
 
-  btn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    dd.classList.contains('is-open') ? close() : open();
-  });
-  menu.addEventListener('click', (e) => {
-    const opt = e.target.closest('.m1-dd-opt');
-    if (!opt) return;
-    set(opt.dataset.value);
-    close();
-    onChange?.(opt.dataset.value);
-  });
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('#' + ids.dd)) close();
-  });
-
-  return { set };
-}
-
-function parseDecimalInput(str) {
-  if (str == null) return null;
-  const cleaned = String(str).replace(',', '.').replace(/[^\d.]/g, '');
-  if (cleaned === '' || cleaned === '.') return null;
-  const num = parseFloat(cleaned);
-  return Number.isFinite(num) ? num : null;
-}
-function formatDecimal2(num) {
-  if (num == null || num === '') return '';
-  return Number(num).toFixed(2).replace('.', ',');
-}
-
-$('m1-ord-search').addEventListener('input', (e) => { ord.search = e.target.value.trim().toLowerCase(); renderOrders(); });
-initCustomSelect(
-  { dd: 'm1-ord-status-dd', btn: 'm1-ord-status-btn', menu: 'm1-ord-status-menu', label: 'm1-ord-status-label' },
-  (value) => { ord.statusFilter = value; renderOrders(); }
-);
-// Фильтр типа движения в журнале
-initCustomSelect(
-  { dd: 'm1-jr-type-dd', btn: 'm1-jr-type-btn', menu: 'm1-jr-type-menu', label: 'm1-jr-type-label' },
-  (value) => { jr.typeFilter = value; renderJournal(); }
-);
-const whTypeSelect = initCustomSelect(
-  { dd: 'm1-wh-type-dd', btn: 'm1-wh-type-btn', menu: 'm1-wh-type-menu', label: 'm1-wh-type-label' },
-  (value) => { wh.typeValue = value; }
-);
-const ordPaymentSelect = initCustomSelect(
-  { dd: 'm1-ord-payment-dd', btn: 'm1-ord-payment-btn', menu: 'm1-ord-payment-menu', label: 'm1-ord-payment-label' },
-  (value) => { ord.paymentValue = value; }
-);
-const ordStatusSelect = initCustomSelect(
-  { dd: 'm1-ord-fstatus-dd', btn: 'm1-ord-fstatus-btn', menu: 'm1-ord-fstatus-menu', label: 'm1-ord-fstatus-label' },
-  (value) => { ord.statusValue = value; renderOrderStatusBadges(value); }
-);
-
-async function loadSuppliersCache() {
-  const { data } = await sb.from('suppliers').select('id, name').order('name');
-  ord.suppliersCache = data || [];
-}
-
-async function loadWarehouseLookup() {
-  const { data } = await sb.from('warehouse_items').select('id, article, name, unit, price').order('name');
-  ord.warehouseLookup = data || [];
-  $('m1-item-article-dl').innerHTML = ord.warehouseLookup
-    .filter(w => w.article)
-    .map(w => `<option value="${esc(w.article)}"></option>`).join('');
-  $('m1-item-name-dl').innerHTML = ord.warehouseLookup
-    .map(w => `<option value="${esc(w.name)}"></option>`).join('');
-}
-
-(function initSupplierCombo() {
-  const input = $('m1-ord-f-supplier');
-  const menu  = $('m1-supplier-menu');
-  if (!input || !menu) return;
-
-  let activeIdx = -1;
-
-  function renderMenu(filter = '') {
-    const q = filter.trim().toLowerCase();
-    let list = ord.suppliersCache;
-    if (q) list = list.filter(s => (s.name || '').toLowerCase().includes(q));
-
-    menu.innerHTML = list.length === 0
-      ? `<div class="m1-combo-opt m1-combo-opt--empty">Поставщики не найдены</div>`
-      : list.map(s => `<div class="m1-combo-opt" data-value="${esc(s.name)}">${esc(s.name)}</div>`).join('');
-    activeIdx = -1;
+  /* позиция склада */
+  function openItemDialog(item){
+    var isEdit=!!item;
+    var body=''
+      +'<div class="m1-field"><label>Наименование *</label><input class="m1-input" id="f-name" value="'+U.esc(isEdit?item.name:'')+'"></div>'
+      +'<div class="m1-row2"><div class="m1-field"><label>Артикул</label><input class="m1-input" id="f-art" value="'+U.esc(isEdit?(item.article||''):'')+'"></div>'
+      +'<div class="m1-field"><label>Ед. изм.</label><input class="m1-input" id="f-unit" value="'+U.esc(isEdit?(item.unit||'шт'):'шт')+'"></div></div>'
+      +'<div class="m1-row2"><div class="m1-field"><label>Остаток</label><input class="m1-input" id="f-qty" type="number" step="any" value="'+(isEdit?num(item.quantity):0)+'"></div>'
+      +'<div class="m1-field"><label>Цена, ₽</label><input class="m1-input" id="f-price" type="number" step="any" value="'+(isEdit&&item.price!=null?num(item.price):'')+'"></div></div>'
+      +'<div class="m1-field"><label>Тип</label><div class="m1-seg" id="f-type"><button type="button" data-v="material" class="'+(!isEdit||item.type!=='product'?'on':'')+'">Материал</button><button type="button" data-v="product" class="'+(isEdit&&item.type==='product'?'on':'')+'">Продукт</button></div></div>'
+      +(isEdit?'':'<div class="m1-field"><label>Склад</label>'+unitSelectHTML('f-unitid')+'</div>')
+      +'<div class="m1-field"><label>Комментарий</label><textarea class="m1-textarea" id="f-comment">'+U.esc(isEdit?(item.comment||''):'')+'</textarea></div>';
+    dialog({ title:isEdit?'Позиция склада':'Новая позиция', body:body,
+      onMount:function(ov){ ov.querySelectorAll('#f-type button').forEach(function(b){ b.onclick=function(){ ov.querySelectorAll('#f-type button').forEach(function(x){x.classList.remove('on');}); b.classList.add('on'); }; }); },
+      onOk:async function(ov){
+        var name=val(ov,'#f-name'); if(!name){ U.toast('Укажите наименование'); return false; }
+        var rec={ name:name, article:val(ov,'#f-art')||null, unit:val(ov,'#f-unit')||'шт', quantity:isFinite(numVal(ov,'#f-qty'))?numVal(ov,'#f-qty'):0, price:isFinite(numVal(ov,'#f-price'))?numVal(ov,'#f-price'):null, type:ov.querySelector('#f-type .on').getAttribute('data-v'), comment:val(ov,'#f-comment')||null };
+        var res;
+        if(isEdit){ res=await sb.from('warehouse_items').update(rec).eq('id',item.id); }
+        else { rec.group_id=groupId(); rec.unit_id=(ov.querySelector('#f-unitid')||{}).value||resolveCreateUnit(); res=await sb.from('warehouse_items').insert(rec); }
+        if(res.error){ U.toast('Ошибка: '+res.error.message); return false; }
+        U.toast(isEdit?'Сохранено':'Позиция добавлена'); await loadTab('warehouse');
+      }});
   }
+  async function delItem(id){ var r=await sb.from('warehouse_items').delete().eq('id',id); if(r.error){ U.toast('Нельзя удалить: используется в рецептах/документах'); return false; } U.toast('Удалено'); await loadTab('warehouse'); }
 
-  const open  = () => { renderMenu(input.value); menu.classList.remove('hidden'); };
-  const close = () => menu.classList.add('hidden');
-
-  input.addEventListener('focus', open);
-  input.addEventListener('input', open);
-
-  menu.addEventListener('mousedown', (e) => {
-    const opt = e.target.closest('.m1-combo-opt[data-value]');
-    if (!opt) return;
-    e.preventDefault();
-    input.value = opt.dataset.value;
-    close();
-    input.dispatchEvent(new Event('change'));
-  });
-
-  input.addEventListener('keydown', (e) => {
-    const opts = Array.from(menu.querySelectorAll('.m1-combo-opt[data-value]'));
-    if (e.key === 'Escape') { close(); return; }
-    if (e.key === 'ArrowDown') {
-      e.preventDefault();
-      if (menu.classList.contains('hidden')) return open();
-      activeIdx = Math.min(activeIdx + 1, opts.length - 1);
-    } else if (e.key === 'ArrowUp') {
-      e.preventDefault();
-      activeIdx = Math.max(activeIdx - 1, 0);
-    } else if (e.key === 'Enter') {
-      if (activeIdx >= 0 && opts[activeIdx]) {
-        e.preventDefault();
-        input.value = opts[activeIdx].dataset.value;
-        close();
-      }
-      return;
-    } else { return; }
-    opts.forEach((o, i) => o.classList.toggle('active', i === activeIdx));
-    opts[activeIdx]?.scrollIntoView({ block: 'nearest' });
-  });
-
-  document.addEventListener('click', (e) => {
-    if (!e.target.closest('#m1-supplier-combo')) close();
-  });
-})();
-
-async function loadOrders() {
-  await loadSuppliersCache();
-  await loadWarehouseLookup();
-
-  const { data, error } = await sb
-    .from('supply_orders')
-    .select(`
-      id, order_number, status, payment_status, placed_at, received_at, created_at, updated_at,
-      supplier_id,
-      suppliers ( id, name ),
-      supply_order_items ( id, warehouse_item_id, name, article, unit, quantity, price )
-    `)
-    .order('created_at', { ascending: false });
-
-  if (error) {
-    $('m1-ord-list').innerHTML = `<div class="text-sm text-state-error p-6">${esc(error.message)}</div>`;
-    return;
+  /* поставщик */
+  function openSupplierDialog(it){
+    var e=!!it;
+    var body=''
+      +'<div class="m1-field"><label>Название *</label><input class="m1-input" id="f-name" value="'+U.esc(e?it.name:'')+'"></div>'
+      +'<div class="m1-row2"><div class="m1-field"><label>Контактное лицо</label><input class="m1-input" id="f-contact" value="'+U.esc(e?(it.contact||''):'')+'"></div>'
+      +'<div class="m1-field"><label>Телефон</label><input class="m1-input" id="f-phone" value="'+U.esc(e?(it.phone||''):'')+'"></div></div>'
+      +'<div class="m1-field"><label>Email</label><input class="m1-input" id="f-email" value="'+U.esc(e?(it.email||''):'')+'"></div>'
+      +(e?'':'<div class="m1-field"><label>Склад (привязка)</label>'+unitSelectHTML('f-unitid')+'</div>')
+      +'<div class="m1-field"><label>Комментарий</label><textarea class="m1-textarea" id="f-comment">'+U.esc(e?(it.comment||''):'')+'</textarea></div>';
+    dialog({ title:e?'Поставщик':'Новый поставщик', body:body, onOk:async function(ov){
+      var name=val(ov,'#f-name'); if(!name){ U.toast('Укажите название'); return false; }
+      var rec={ name:name, contact:val(ov,'#f-contact')||null, phone:val(ov,'#f-phone')||null, email:val(ov,'#f-email')||null, comment:val(ov,'#f-comment')||null };
+      var res;
+      if(e){ res=await sb.from('suppliers').update(rec).eq('id',it.id); }
+      else { rec.group_id=groupId(); rec.unit_id=(ov.querySelector('#f-unitid')||{}).value||resolveCreateUnit(); res=await sb.from('suppliers').insert(rec); }
+      if(res.error){ U.toast('Ошибка: '+res.error.message); return false; }
+      U.toast(e?'Сохранено':'Поставщик добавлен'); await loadTab('suppliers');
+    }});
   }
-  ord.cached = data || [];
-  renderOrders();
-}
+  async function delSupplier(id){ var r=await sb.from('suppliers').delete().eq('id',id); if(r.error){ U.toast('Нельзя удалить: есть заказы'); return false; } U.toast('Удалено'); await loadTab('suppliers'); }
 
-function orderTotal(o) {
-  return (o.supply_order_items || []).reduce((sum, it) => sum + Number(it.quantity || 0) * Number(it.price || 0), 0);
-}
-
-function renderOrders() {
-  let list = ord.cached;
-  if (ord.statusFilter !== 'all') list = list.filter(x => x.status === ord.statusFilter);
-  if (ord.search) list = list.filter(x =>
-    (x.order_number || '').toLowerCase().includes(ord.search) ||
-    (x.suppliers?.name || '').toLowerCase().includes(ord.search)
-  );
-
-  if (list.length === 0) {
-    $('m1-ord-list').innerHTML = `
-      <div class="text-center py-16 text-sm text-fg-muted">
-        ${ord.search || ord.statusFilter !== 'all' ? 'Ничего не найдено' : 'Пока нет заказов. Создайте первый.'}
-      </div>
-    `;
-    return;
-  }
-
-  const container = $('m1-ord-list');
-  container.innerHTML = '';
-  const frag = document.createDocumentFragment();
-  list.forEach(o => frag.appendChild(renderOrderRow(o)));
-  container.appendChild(frag);
-}
-
-function renderOrderRow(o) {
-  const tpl = document.getElementById('m1-ord-row-tpl');
-  const node = tpl.content.firstElementChild.cloneNode(true);
-  node.dataset.ordId = o.id;
-
-  const fld = (name) => node.querySelector(`[data-field="${name}"]`);
-
-  fld('number').textContent = o.order_number || '—';
-
-  const st = fld('status');
-  st.textContent = STATUS_LABEL[o.status] || o.status;
-  st.classList.add('m1-badge-' + o.status);
-
-  const pm = fld('payment');
-  pm.textContent = PAYMENT_LABEL[o.payment_status] || o.payment_status;
-  pm.classList.add('m1-badge-' + o.payment_status);
-
-  const supplierName = o.suppliers?.name || 'Поставщик не указан';
-  const sp = fld('supplier');
-  sp.textContent = supplierName;
-  sp.title = supplierName;
-
-  const itemsCount = o.supply_order_items?.length || 0;
-  fld('items').textContent = `${itemsCount} поз.`;
-
-  fld('total').textContent = formatMoney(orderTotal(o));
-
-  fld('date').textContent = o.placed_at
-    ? `Размещён ${formatDate(new Date(o.placed_at))}`
-    : `Создан ${formatDate(new Date(o.created_at))}`;
-
-  return node;
-}
-
-async function openOrderEditor(id) {
-  if (!canWrite) return;
-  ord.editing = id;
-  ord.statusValue = 'draft';
-  ord.items = [];
-  ord.attachments = [];
-  ord.pendingFiles = [];
-
-  const order = id ? ord.cached.find(x => x.id === id) : null;
-  $('m1-ord-modal-title').textContent = order ? `Заказ ${order.order_number}` : 'Новый заказ';
-  $('m1-ord-modal-sub').textContent = order
-    ? `Создан ${formatDateTime(new Date(order.created_at))}${order.updated_at && order.updated_at !== order.created_at ? ' · изменён ' + formatDateTime(new Date(order.updated_at)) : ''}`
-    : '';
-
-  $('m1-ord-f-supplier').value = order?.suppliers?.name || '';
-  ord.paymentValue = order?.payment_status || 'unpaid';
-  ordPaymentSelect.set(ord.paymentValue);
-
-  if (order) {
-    $('m1-ord-status-row').classList.remove('hidden');
-    ord.statusValue = order.status;
-    ordStatusSelect.set(order.status);
-    renderOrderStatusBadges(order.status);
-    ord.items = [...(order.supply_order_items || [])];
-    await loadAttachments(id);
-    $('m1-ord-delete').classList.remove('hidden');
-  } else {
-    $('m1-ord-status-row').classList.add('hidden');
-    $('m1-ord-delete').classList.add('hidden');
-  }
-
-  renderOrderItems();
-  renderAttachments();
-
-  $('m1-ord-modal').classList.remove('hidden');
-}
-
-document.querySelectorAll('.m1-ord-close').forEach(b => b.addEventListener('click', () => $('m1-ord-modal').classList.add('hidden')));
-$('m1-ord-new').addEventListener('click', () => openOrderEditor(null));
-
-function renderOrderStatusBadges(current) {
-  const flow = ['draft','placed','in_transit','received'];
-  const idx = flow.indexOf(current);
-  $('m1-ord-status-badges').innerHTML = flow.map((s, i) => `
-    <span class="m1-badge ${i <= idx ? 'm1-badge-' + s : ''}" style="${i > idx ? 'background:#F5F5F5;color:#A3A3A3;' : ''}">${esc(STATUS_LABEL[s])}</span>
-    ${i < flow.length - 1 ? '<span class="text-fg-muted text-xs">→</span>' : ''}
-  `).join('');
-}
-
-function renderOrderItems() {
-  const el = $('m1-ord-items');
-  if (ord.items.length === 0) {
-    el.innerHTML = '<div class="px-4 py-3 text-xs text-fg-muted">Добавьте позиции заказа</div>';
-    updateOrderTotal();
-    return;
-  }
-
-  el.innerHTML = ord.items.map((it, i) => {
-    const sum = Number(it.quantity || 0) * Number(it.price || 0);
-    return `
-    <div class="m1-oi-row" data-item-index="${i}">
-      <input type="text" list="m1-item-article-dl" placeholder="Артикул" maxlength="100" autocomplete="off"
-        class="m1-oi-input" data-field="article" value="${esc(it.article || '')}">
-      <input type="text" list="m1-item-name-dl" placeholder="Наименование" maxlength="300" autocomplete="off"
-        class="m1-oi-input" data-field="name" value="${esc(it.name || '')}">
-      <input type="text" inputmode="decimal" placeholder="Кол-во"
-        class="m1-oi-input m1-oi-input--center" data-field="quantity" value="${it.quantity != null ? formatDecimal2(it.quantity) : ''}">
-      <input type="text" placeholder="ед." maxlength="20"
-        class="m1-oi-input m1-oi-input--center" data-field="unit" value="${esc(it.unit || '')}">
-      <input type="text" inputmode="decimal" placeholder="Цена"
-        class="m1-oi-input m1-oi-input--right" data-field="price" value="${it.price != null ? formatDecimal2(it.price) : ''}">
-      <input type="text" tabindex="-1" readonly
-        class="m1-oi-input m1-oi-input--right m1-oi-input--readonly" data-field="sum" value="${formatDecimal2(sum)}">
-      <button class="m1-oi-remove" data-remove-item title="Удалить позицию">
-        <svg class="w-4 h-4 text-state-error" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M18 6 6 18M6 6l12 12"/></svg>
-      </button>
-    </div>
-    `;
-  }).join('');
-
-  el.querySelectorAll('[data-item-index]').forEach(row => {
-    const idx = Number(row.dataset.itemIndex);
-    const get = (f) => row.querySelector(`[data-field="${f}"]`);
-
-    const recalcSum = () => {
-      const sum = Number(ord.items[idx].quantity || 0) * Number(ord.items[idx].price || 0);
-      get('sum').value = formatDecimal2(sum);
-      updateOrderTotal();
-    };
-
-    get('article').addEventListener('input', (e) => {
-      ord.items[idx].article = e.target.value;
-      autofillFromLookup(idx, row, 'article');
-    });
-
-    get('name').addEventListener('input', (e) => {
-      ord.items[idx].name = e.target.value;
-      autofillFromLookup(idx, row, 'name');
-    });
-
-    get('unit').addEventListener('input', (e) => { ord.items[idx].unit = e.target.value; });
-
-    ['quantity', 'price'].forEach(field => {
-      const input = get(field);
-      input.addEventListener('input', (e) => {
-        if (e.target.value.includes('.')) {
-          const pos = e.target.selectionStart;
-          e.target.value = e.target.value.replace(/\./g, ',');
-          try { e.target.setSelectionRange(pos, pos); } catch (_) {}
+  /* создание заказа */
+  function openOrderDialog(){
+    if(!data.suppliers.length){ /* подгрузим поставщиков для выпадающего списка */ }
+    var sup = data.suppliers;
+    var supOptions = sup.length ? sup.map(function(s){return '<option value="'+s.id+'">'+U.esc(s.name)+'</option>';}).join('') : '';
+    var whOptions = data.warehouse.map(function(w){return '<option value="'+w.id+'" data-unit="'+U.esc(w.unit||'')+'" data-price="'+(w.price||'')+'">'+U.esc(w.name)+'</option>';}).join('');
+    var body=''
+      +'<div class="m1-row2"><div class="m1-field"><label>Поставщик</label><select class="m1-select" id="f-sup">'+(supOptions||'<option value="">— нет поставщиков —</option>')+'</select></div>'
+      +'<div class="m1-field"><label>Склад поступления</label>'+unitSelectHTML('f-unitid')+'</div></div>'
+      +'<div class="m1-field"><label>Позиции</label><div class="m1-li-head"><span>Позиция</span><span>Кол-во</span><span>Цена</span><span></span></div><div id="f-lines"></div>'
+      +'<button class="m1-btn ghost sm" id="f-addline" style="margin-top:8px;">+ строка</button></div>'
+      +'<div class="m1-hint">Можно выбрать позицию склада или ввести новую вручную — она создастся на складе при оприходовании.</div>';
+    dialog({ title:'Новый заказ поставщику', wide:true, ok:'Создать черновик', body:body,
+      onMount:function(ov){
+        var lines=ov.querySelector('#f-lines');
+        function addLine(){
+          var row=document.createElement('div'); row.className='m1-li';
+          row.innerHTML='<input class="m1-input li-name" list="f-wh" placeholder="Наименование">'
+            +'<input class="m1-input li-qty" type="number" step="any" placeholder="0">'
+            +'<input class="m1-input li-price" type="number" step="any" placeholder="0">'
+            +'<button class="m1-li-del" title="Удалить">✕</button>';
+          row.querySelector('.m1-li-del').onclick=function(){ row.remove(); };
+          // автоподстановка цены/ед. при выборе из списка
+          row.querySelector('.li-name').addEventListener('change', function(e){
+            var opt=Array.prototype.find.call(ov.querySelectorAll('#f-wh option'), function(o){return o.value===e.target.value;});
+            if(opt && !row.querySelector('.li-price').value){ var p=opt.getAttribute('data-price'); if(p) row.querySelector('.li-price').value=p; }
+          });
+          lines.appendChild(row);
         }
-        ord.items[idx][field] = parseDecimalInput(e.target.value);
-        recalcSum();
-      });
-      input.addEventListener('blur', (e) => {
-        const n = parseDecimalInput(e.target.value);
-        ord.items[idx][field] = n;
-        e.target.value = n == null ? '' : formatDecimal2(n);
-        recalcSum();
-      });
-    });
-
-    row.querySelector('[data-remove-item]').addEventListener('click', () => {
-      ord.items.splice(idx, 1);
-      renderOrderItems();
-    });
-  });
-
-  updateOrderTotal();
-}
-
-function autofillFromLookup(idx, row, byField) {
-  const val = (ord.items[idx][byField] || '').trim().toLowerCase();
-  if (!val) return;
-  const match = ord.warehouseLookup.find(w =>
-    byField === 'article'
-      ? (w.article || '').toLowerCase() === val
-      : (w.name || '').toLowerCase() === val
-  );
-  if (!match) return;
-
-  if (byField === 'article') {
-    ord.items[idx].name = match.name;
-    row.querySelector('[data-field="name"]').value = match.name || '';
-  } else {
-    ord.items[idx].article = match.article;
-    row.querySelector('[data-field="article"]').value = match.article || '';
+        var dl=document.createElement('datalist'); dl.id='f-wh'; dl.innerHTML=whOptions; ov.querySelector('.m1-dbody').appendChild(dl);
+        ov.querySelector('#f-addline').onclick=addLine; addLine();
+      },
+      onOk:async function(ov){
+        var supId=val(ov,'#f-sup')||null;
+        var unitId=(ov.querySelector('#f-unitid')||{}).value||resolveCreateUnit();
+        var rows=Array.prototype.map.call(ov.querySelectorAll('#f-lines .m1-li'), function(r){
+          var name=r.querySelector('.li-name').value.trim(); var qty=parseFloat(r.querySelector('.li-qty').value); var price=parseFloat(r.querySelector('.li-price').value);
+          return { name:name, qty:isFinite(qty)?qty:0, price:isFinite(price)?price:null };
+        }).filter(function(x){ return x.name && x.qty>0; });
+        if(!rows.length){ U.toast('Добавьте хотя бы одну позицию'); return false; }
+        // заказ
+        var ins=await sb.from('supply_orders').insert({ group_id:groupId(), supplier_id:supId, unit_id:unitId, status:'draft' }).select().single();
+        if(ins.error){ U.toast('Ошибка: '+ins.error.message); return false; }
+        var orderId=ins.data.id;
+        // позиции: если имя совпадает с существующей позицией склада того же склада — привяжем
+        var byName={}; data.warehouse.forEach(function(w){ if(w.unit_id===unitId) byName[w.name.toLowerCase()]=w.id; });
+        var items=rows.map(function(x){ var wid=byName[x.name.toLowerCase()]||null; return { order_id:orderId, warehouse_item_id:wid, name:wid?null:x.name, unit:wid?null:'шт', quantity:x.qty, price:x.price }; });
+        var insItems=await sb.from('supply_order_items').insert(items);
+        if(insItems.error){ U.toast('Заказ создан, но позиции с ошибкой: '+insItems.error.message); }
+        else U.toast('Черновик заказа создан');
+        await loadTab('orders');
+      }});
   }
-  ord.items[idx].unit = match.unit;
-  row.querySelector('[data-field="unit"]').value = match.unit || '';
-
-  if (ord.items[idx].price == null) {
-    ord.items[idx].price = match.price;
-    row.querySelector('[data-field="price"]').value = match.price != null ? formatDecimal2(match.price) : '';
+  function openOrderView(o){
+    var items=o.supply_order_items||[];
+    var rowsHtml=items.length?('<div class="m1-tablewrap"><table class="m1-tbl"><thead><tr><th>Позиция</th><th class="num">Кол-во</th><th class="num">Цена</th><th class="num">Сумма</th></tr></thead><tbody>'
+      +items.map(function(i){ var nm=i.name||(data.warehouse.find(function(w){return w.id===i.warehouse_item_id;})||{}).name||'позиция'; return '<tr><td>'+U.esc(nm)+'</td><td class="num">'+U.formatQuantity(i.quantity)+'</td><td class="num">'+(i.price!=null?U.formatMoney(i.price):'—')+'</td><td class="num">'+U.formatMoney(num(i.quantity)*num(i.price))+'</td></tr>'; }).join('')
+      +'</tbody></table></div>'):'<div class="m1-hint">Без позиций.</div>';
+    dialog({ title:'Заказ '+(o.order_number||''), wide:true, ok:false, cancel:'Закрыть',
+      body:'<div class="m1-field"><div class="m1-hint">Поставщик: <b style="color:var(--text)">'+U.esc((o.suppliers&&o.suppliers.name)||'—')+'</b> · Статус: '+orderStatus(o.status)+' · Создан: '+U.formatDate(o.created_at)+'</div></div>'+rowsHtml,
+      onOk:function(){} });
   }
-  ord.items[idx].warehouse_item_id = match.id;
+  async function doPlace(id){ var r=await sb.from('supply_orders').update({status:'placed', placed_at:new Date().toISOString()}).eq('id',id); if(r.error){ U.toast('Ошибка: '+r.error.message); return; } U.toast('Заказ размещён'); await loadTab('orders'); }
+  async function doReceive(id){ var r=await RIVA.rpc('receive_supply_order',{p_order_id:id}); if(!(r&&r.ok)){ U.toast('Ошибка: '+((r&&r.error)||'')); return false; } U.toast('Заказ оприходован на склад'); await loadTab('orders'); }
+  async function delOrder(id){ var r=await sb.from('supply_orders').delete().eq('id',id); if(r.error){ U.toast('Ошибка: '+r.error.message); return false; } U.toast('Заказ удалён'); await loadTab('orders'); }
 
-  const sum = Number(ord.items[idx].quantity || 0) * Number(ord.items[idx].price || 0);
-  row.querySelector('[data-field="sum"]').value = formatDecimal2(sum);
-  updateOrderTotal();
-}
-
-function updateOrderTotal() {
-  const total = ord.items.reduce((s, it) => s + Number(it.quantity || 0) * Number(it.price || 0), 0);
-  $('m1-ord-total').textContent = 'Итого: ' + formatMoney(total);
-}
-
-$('m1-ord-add-item').addEventListener('click', () => {
-  ord.items.push({ name: '', article: null, unit: 'шт', quantity: null, price: null, warehouse_item_id: null });
-  renderOrderItems();
-});
-
-async function loadAttachments(orderId) {
-  const { data } = await sb.from('attachments')
-    .select('*')
-    .eq('entity_type', 'supply_order')
-    .eq('entity_id', orderId)
-    .order('uploaded_at', { ascending: false });
-  ord.attachments = data || [];
-}
-
-function renderAttachments() {
-  const el = $('m1-ord-attachments');
-  const all = [...ord.attachments];
-  if (all.length === 0) {
-    el.innerHTML = '<div class="px-4 py-3 text-xs text-fg-muted">Нет вложений</div>';
-    return;
-  }
-  el.innerHTML = all.map(a => `
-    <div class="px-4 py-3 flex items-center gap-3">
-      <svg class="w-5 h-5 text-fg-muted flex-shrink-0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
-        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/>
-        <polyline points="14 2 14 8 20 8"/>
-      </svg>
-      <div class="min-w-0 flex-1">
-        <div class="text-sm truncate">${esc(a.file_name)}</div>
-        <div class="text-xs text-fg-muted">${esc(humanFileSize(a.file_size))} · ${esc(formatDate(new Date(a.uploaded_at)))}</div>
-      </div>
-      <a href="#" class="text-xs text-fg-muted hover:text-fg" data-download="${esc(a.storage_path)}" data-filename="${esc(a.file_name)}">Скачать</a>
-      <button class="text-xs text-state-error hover:underline" data-del-att="${esc(a.id)}" data-path="${esc(a.storage_path)}">Удалить</button>
-    </div>
-  `).join('');
-
-  el.querySelectorAll('[data-download]').forEach(a => {
-    a.addEventListener('click', async (e) => {
-      e.preventDefault();
-      try {
-        const { data, error } = await sb.storage.from('attachments').createSignedUrl(a.dataset.download, 60);
-        if (error) throw error;
-        window.open(data.signedUrl, '_blank');
-      } catch (err) { toast('Ошибка: ' + err.message, 'error'); }
-    });
-  });
-
-  el.querySelectorAll('[data-del-att]').forEach(b => {
-    b.addEventListener('click', async () => {
-      if (!confirm('Удалить вложение?')) return;
-      try {
-        await sb.storage.from('attachments').remove([b.dataset.path]);
-        await sb.from('attachments').delete().eq('id', b.dataset.delAtt);
-        ord.attachments = ord.attachments.filter(x => x.id !== b.dataset.delAtt);
-        renderAttachments();
-        toast('Вложение удалено', 'success');
-      } catch (err) { toast('Ошибка: ' + err.message, 'error'); }
-    });
-  });
-}
-
-$('m1-ord-file-input').addEventListener('change', async (e) => {
-  const files = Array.from(e.target.files || []);
-  e.target.value = '';
-  if (files.length === 0) return;
-
-  if (!ord.editing) {
-    toast('Сначала сохраните заказ, затем прикрепите файлы', 'warning');
-    return;
+  /* перемещение между складами */
+  function openTransfer(){
+    var us=supplyUnits(); if(us.length<2){ U.toast('Нужно минимум два склада'); return; }
+    var fixed=activeUnit();
+    var srcId=fixed||defaultUnitId();
+    function itemsOf(unit){ return data.warehouse.filter(function(w){ return w.unit_id===unit && num(w.quantity)>0; }); }
+    var srcSelHTML = fixed
+      ? '<input class="m1-input" value="'+U.esc((us.find(function(u){return u.id===fixed;})||{}).name||'')+'" disabled><input type="hidden" id="t-src" value="'+fixed+'">'
+      : '<select class="m1-select" id="t-src">'+us.map(function(u){return '<option value="'+u.id+'"'+(u.id===srcId?' selected':'')+'>'+U.esc(u.name)+'</option>';}).join('')+'</select>';
+    var body=''
+      +'<div class="m1-row2"><div class="m1-field"><label>Со склада</label>'+srcSelHTML+'</div>'
+      +'<div class="m1-field"><label>На склад</label><select class="m1-select" id="t-dst"></select></div></div>'
+      +'<div class="m1-field"><label>Позиция</label><select class="m1-select" id="t-item"></select></div>'
+      +'<div class="m1-field"><label>Количество</label><input class="m1-input" id="t-qty" type="number" step="any" placeholder="0"></div>'
+      +'<div class="m1-field"><label>Комментарий</label><input class="m1-input" id="t-comment" placeholder="необязательно"></div>'
+      +'<div class="m1-hint">Операция запишет две проводки: списание со склада-источника и поступление на склад-получатель.</div>';
+    dialog({ title:'Перемещение между складами', ok:'Переместить', body:body,
+      onMount:function(ov){
+        function fillDst(){ var src=ov.querySelector('#t-src').value; ov.querySelector('#t-dst').innerHTML=us.filter(function(u){return u.id!==src;}).map(function(u){return '<option value="'+u.id+'">'+U.esc(u.name)+'</option>';}).join(''); }
+        function fillItems(){ var src=ov.querySelector('#t-src').value; var its=itemsOf(src); ov.querySelector('#t-item').innerHTML=its.length?its.map(function(w){return '<option value="'+w.id+'">'+U.esc(w.name)+' — '+U.formatQuantity(w.quantity)+' '+U.esc(w.unit||'')+'</option>';}).join(''):'<option value="">нет позиций с остатком</option>'; }
+        var srcEl=ov.querySelector('#t-src'); if(srcEl.tagName==='SELECT') srcEl.addEventListener('change', function(){ fillDst(); fillItems(); });
+        fillDst(); fillItems();
+      },
+      onOk:async function(ov){
+        var src=ov.querySelector('#t-src').value, dst=ov.querySelector('#t-dst').value, itemId=ov.querySelector('#t-item').value, qty=parseFloat(ov.querySelector('#t-qty').value);
+        if(!itemId){ U.toast('Нет позиции для перемещения'); return false; }
+        if(!(qty>0)){ U.toast('Укажите количество'); return false; }
+        var r=await RIVA.rpc('transfer_between_units',{ p_from_unit:src, p_to_unit:dst, p_item_id:itemId, p_quantity:qty, p_comment:val(ov,'#t-comment')||null });
+        if(!(r&&r.ok)){ U.toast('Ошибка: '+((r&&r.error)||'')); return false; }
+        U.toast('Перемещение выполнено'); await loadTab('warehouse');
+      }});
   }
 
-  const maxSize = 49 * 1024 * 1024;
-  for (const f of files) {
-    if (f.size > maxSize) {
-      toast(`"${f.name}" больше 49 МБ, пропущен`, 'error');
-      continue;
-    }
-    try {
-      const path = `${groupId}/supply_order/${ord.editing}/${Date.now()}_${f.name}`;
-      const { error: upErr } = await sb.storage.from('attachments').upload(path, f, { contentType: f.type || 'application/octet-stream' });
-      if (upErr) throw upErr;
-
-      const { data: row, error: insErr } = await sb.from('attachments').insert({
-        group_id: groupId,
-        entity_type: 'supply_order',
-        entity_id: ord.editing,
-        file_name: f.name,
-        file_size: f.size,
-        storage_path: path,
-        uploaded_by: state.authUser.id
-      }).select().single();
-      if (insErr) throw insErr;
-
-      ord.attachments.unshift(row);
-      renderAttachments();
-      toast(`"${f.name}" загружен`, 'success');
-    } catch (err) { toast(`Ошибка загрузки "${f.name}": ` + err.message, 'error'); }
+  /* подтверждение удаления / действия */
+  function confirmDelete(what, fn, custom){
+    var o = custom || { title:'Удалить '+what+'?', text:'Действие необратимо.', ok:'Удалить', danger:true };
+    var ov=dialog({ title:o.title, ok:o.ok, body:'<p style="color:var(--text-2);font-size:.92rem;line-height:1.5;">'+U.esc(o.text)+'</p>', onOk:async function(){ return await fn(); } });
+    if(o.danger!==false){ var b=ov.querySelector('[data-x="ok"]'); if(b){ b.style.background='var(--st-cancelled)'; b.style.color='#fff'; b.style.boxShadow='none'; } }
   }
-});
 
-$('m1-ord-save').addEventListener('click', async () => {
-  const btn = $('m1-ord-save');
-  btn.disabled = true;
-  btn.textContent = 'Сохраняем…';
-  try {
-    const supplierName = $('m1-ord-f-supplier').value.trim();
-    let supplierId = null;
-    if (supplierName) {
-      const match = ord.suppliersCache.find(s => s.name.toLowerCase() === supplierName.toLowerCase());
-      if (match) supplierId = match.id;
-      else {
-        const { data: newSup, error: supErr } = await sb.from('suppliers').insert({
-          group_id: groupId, name: supplierName
-        }).select().single();
-        if (supErr) throw supErr;
-        supplierId = newSup.id;
-        ord.suppliersCache.push({ id: newSup.id, name: newSup.name });
-      }
-    }
+  /* ============================================================ СОБЫТИЯ + СТАРТ ============================================================ */
+  function onView(e){ if(!alive()){ document.removeEventListener('riva:view', onView); return; } var t=tabFromLabel(e.detail&&e.detail.tab); if(t!==curTab) showTab(t); }
+  function onUnits(e){ if(!alive()){ document.removeEventListener('riva:units-changed', onUnits); return; } renderTools(); loadTab(curTab); }
+  document.addEventListener('riva:view', onView);
+  document.addEventListener('riva:units-changed', onUnits);
 
-    const payment = ord.paymentValue;
-    const desiredStatus = ord.editing ? ord.statusValue : 'draft';
-    const safeStatus = desiredStatus === 'received' ? null : desiredStatus;
-
-    let orderId = ord.editing;
-    const wasReceived = ord.editing ? ord.cached.find(o => o.id === ord.editing)?.status === 'received' : false;
-
-    if (ord.editing) {
-      const patch = { supplier_id: supplierId, payment_status: payment };
-      if (safeStatus !== null) {
-        patch.status = safeStatus;
-        if (safeStatus === 'placed') patch.placed_at = new Date().toISOString();
-      }
-      const { error } = await sb.from('supply_orders').update(patch).eq('id', ord.editing);
-      if (error) throw error;
-    } else {
-      const { data: newOrd, error } = await sb.from('supply_orders').insert({
-        group_id: groupId, supplier_id: supplierId, status: 'draft', payment_status: payment
-      }).select().single();
-      if (error) throw error;
-      orderId = newOrd.id;
-    }
-
-    await sb.from('supply_order_items').delete().eq('order_id', orderId);
-    const itemsPayload = ord.items
-      .filter(it => (it.name || '').trim())
-      .map(it => ({
-        order_id: orderId,
-        warehouse_item_id: it.warehouse_item_id || null,
-        name: it.name.trim(),
-        article: it.article || null,
-        unit: it.unit || null,
-        quantity: it.quantity === null || it.quantity === '' ? null : Number(it.quantity),
-        price: it.price === null || it.price === '' ? null : Number(it.price)
-      }));
-    if (itemsPayload.length) {
-      const { error: iErr } = await sb.from('supply_order_items').insert(itemsPayload);
-      if (iErr) throw iErr;
-    }
-
-    if (desiredStatus === 'received' && !wasReceived) {
-      if (itemsPayload.length === 0) {
-        toast('Нельзя оприходовать пустой заказ', 'warning');
-      } else {
-        const { data, error } = await sb.rpc('receive_supply_order', { p_order_id: orderId });
-        if (error) throw error;
-        if (!data?.ok) throw new Error(data?.error || 'Не удалось оприходовать');
-        toast('Заказ оприходован на склад', 'success');
-      }
-    } else {
-      toast('Заказ сохранён', 'success');
-    }
-
-    $('m1-ord-modal').classList.add('hidden');
-    await loadOrders();
-  } catch (e) {
-    toast('Ошибка: ' + e.message, 'error');
-  } finally {
-    btn.textContent = 'Сохранить';
-    btn.disabled = false;
-  }
-});
-
-$('m1-ord-delete').addEventListener('click', async () => {
-  if (!ord.editing) return;
-  if (!confirm('Удалить заказ? Все позиции и вложения будут удалены.')) return;
-  try {
-    if (ord.attachments.length) {
-      await sb.storage.from('attachments').remove(ord.attachments.map(a => a.storage_path));
-    }
-    await sb.from('attachments').delete().eq('entity_type', 'supply_order').eq('entity_id', ord.editing);
-    const { error } = await sb.from('supply_orders').delete().eq('id', ord.editing);
-    if (error) throw error;
-    toast('Заказ удалён', 'success');
-    $('m1-ord-modal').classList.add('hidden');
-    await loadOrders();
-  } catch (e) { toast('Ошибка: ' + e.message, 'error'); }
-});
-
-// ---- helpers ----
-function pluralize(n, forms) {
-  const mod100 = Math.abs(n) % 100;
-  const mod10 = mod100 % 10;
-  if (mod100 >= 11 && mod100 <= 19) return forms[2];
-  if (mod10 === 1) return forms[0];
-  if (mod10 >= 2 && mod10 <= 4) return forms[1];
-  return forms[2];
-}
-
-function humanFileSize(bytes) {
-  if (!bytes && bytes !== 0) return '';
-  const units = ['Б','КБ','МБ','ГБ'];
-  let i = 0; let n = Number(bytes);
-  while (n >= 1024 && i < units.length - 1) { n /= 1024; i++; }
-  return `${n.toFixed(i === 0 ? 0 : 1)} ${units[i]}`;
-}
-
-// ---- init ----
-switchTab('warehouse');
+  // старт: вкладка из текущего view
+  showTab(tabFromLabel(RIVA.state.view && RIVA.state.view.tab));
+})();
 </script>
