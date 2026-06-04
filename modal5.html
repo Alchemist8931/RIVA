@@ -188,8 +188,8 @@
   }
   function field(id,label,val,ph,disabled){ return '<div class="m5-field"><label>'+label+'</label><input class="m5-input" id="'+id+'" value="'+U.esc(val||'')+'" placeholder="'+(ph||'')+'"'+(disabled?' disabled':'')+'></div>'; }
   function renderGroup(panel, g){
-    var canEdit=isAdmin();
-    var d=g.details||{}; // company_details (jsonb) если есть
+    var canEdit=isOwner();
+    var d=g.company_details||{};
     function gv(k){ return g[k]!=null?g[k]:(d[k]!=null?d[k]:''); }
     var req=''
       +'<div class="m5-row2">'+field('g-name','Название группы', g.name, 'Моя мастерская', !canEdit)+field('g-legal','Юр. название', gv('legal_name'), 'ООО «…»', !canEdit)+'</div>'
@@ -218,20 +218,10 @@
       var name=val(panel,'#g-name');
       // 1) пробуем RPC update_group_details, 2) фолбэк на прямой update
       var ok=false, err='';
-      try{
-        var rpc=await RIVA.rpc('update_group_details', { p_name:name, p_details:details });
-        if(rpc && rpc.ok){ ok=true; } else if(rpc && rpc.error && rpc.error!=='function not found'){ err=rpc.error; }
-      }catch(e){}
-      if(!ok){
-        // фолбэк: прямой апдейт (RLS разрешит только admin/owner)
-        var payload={ name:name }; payload.details=details;
-        var up=await sb.from('groups').update(payload).eq('id',groupId());
-        if(up.error){
-          // возможно нет колонки details — пробуем хотя бы имя
-          var up2=await sb.from('groups').update({ name:name }).eq('id',groupId());
-          if(up2.error){ err=up2.error.message; } else { ok=true; err='Сохранено только название (нет поля реквизитов в БД)'; }
-        } else ok=true;
-      }
+      var rpc=await RIVA.rpc('update_group_details', { p_name:name, p_company_details:details });
+      if(rpc && rpc.ok){ ok=true; }
+      else if(rpc && rpc.error==='NOT_OWNER'){ err='Реквизиты может менять только владелец группы'; }
+      else { err=(rpc && rpc.error) || 'не удалось сохранить'; }
       save.disabled=false;
       if(ok){ U.toast(err||'Реквизиты сохранены'); // обновить имя группы в шапке
         if(RIVA.state.currentGroup) RIVA.state.currentGroup.group_name=name;
